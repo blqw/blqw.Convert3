@@ -26,10 +26,9 @@ namespace blqw.Convert3Component
         /// </summary>
         [Export("GetConverter")]
         [ExportMetadata("Priority", 100)]
-        public static TypeConverter GetConverter(Type convertType, bool throwError)
+        public static IFormatterConverter GetConverter(Type convertType, bool throwError)
         {
-
-            return new Converter(convertType, throwError);
+            return new DirectConverter(convertType, throwError);
         }
 
         /// <summary> 获取动态类型

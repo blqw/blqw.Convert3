@@ -9,6 +9,9 @@ using blqw;
 
 namespace blqw.Convert3Component
 {
+    /// <summary>
+    /// 对象转换器
+    /// </summary>
     [Export(typeof(IFormatterConverter))]
     [ExportMetadata("Priority", 100)]
     class ObjectConverter : IFormatterConverter
@@ -156,6 +159,69 @@ namespace blqw.Convert3Component
         }
 
         #endregion
-
     }
+
+    /// <summary>
+    /// 定向转换器
+    /// </summary>
+    class DirectConverter : ObjectConverter
+    {
+        Type _OutputType;
+        bool _ThrowError;
+        IConvertor _Convertor;
+
+        public DirectConverter(Type outputType, bool throwError)
+        {
+            _OutputType = outputType;
+            _ThrowError = throwError;
+            _Convertor = Convert3.GetConvertor(outputType);
+        }
+
+        public override object Convert(object input, Type type)
+        {
+            using (ErrorContext.Callin())
+            {
+                object output;
+                if (_Convertor.Try(input, type, out output))
+                {
+                    return output;
+                }
+                if (_ThrowError)
+                {
+                    if (type == null || type.IsAssignableFrom(_OutputType))
+                    {
+                        Convert3.ThrowError(input, type);
+                    }
+                    throw new InvalidCastException("转换器只能转换 " + CType.GetDisplayName(_OutputType) + " 类型或其子类");
+                }
+                return Convert3.GetDefaultValue(type ?? _OutputType);
+            }
+        }
+
+        public override T Convert<T>(object input)
+        {
+            using (ErrorContext.Callin())
+            {
+                var conv = _Convertor as IConvertor<T>;
+                if (conv != null)
+                {
+                    T output;
+                    if (conv.Try(input, null, out output))
+                    {
+                        return output;
+                    }
+                    if (_ThrowError)
+                    {
+                        Convert3.ThrowError(input, typeof(T));
+                    }
+                }
+                else if (_ThrowError)
+                {
+                    throw new InvalidCastException("转换器只能转换 " + CType.GetDisplayName(_OutputType) + " 类型或其子类");
+                }
+                return default(T);
+            }
+        }
+    }
+
 }

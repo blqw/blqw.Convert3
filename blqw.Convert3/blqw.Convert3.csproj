@@ -50,7 +50,6 @@
     <Compile Include="Cache\TypeCacheItem.cs" />
     <Compile Include="Convert3.cs" />
     <Compile Include="Convert3_NumberToUpper.cs" />
-    <Compile Include="Converter.cs" />
     <Compile Include="Converts\CArray.cs" />
     <Compile Include="Converts\CBoolean.cs" />
     <Compile Include="Converts\CByte.cs" />
