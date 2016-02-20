@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B8EF5156-6262-4D04-A17B-FA06253C4011}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>blqw</RootNamespace>
+    <AssemblyName>blqw.Convert3</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cache\PropertyHandler.cs" />
+    <Compile Include="Cache\PublicPropertyCache.cs" />
+    <Compile Include="Cache\TypeCache.cs" />
+    <Compile Include="Cache\TypeCacheItem.cs" />
+    <Compile Include="Convert3.cs" />
+    <Compile Include="Convert3_NumberToUpper.cs" />
+    <Compile Include="Converter.cs" />
+    <Compile Include="Converts\CArray.cs" />
+    <Compile Include="Converts\CBoolean.cs" />
+    <Compile Include="Converts\CByte.cs" />
+    <Compile Include="Converts\CBytes.cs" />
+    <Compile Include="Converts\CChar.cs" />
+    <Compile Include="Converts\CDataTable.cs" />
+    <Compile Include="Converts\CDateTime.cs" />
+    <Compile Include="Converts\CDecimal.cs" />
+    <Compile Include="Converts\CDouble.cs" />
+    <Compile Include="Converts\CEnum.cs" />
+    <Compile Include="Converts\CGuid.cs" />
+    <Compile Include="Converts\CIDictionary.cs" />
+    <Compile Include="Converts\CIDictionaryT.cs" />
+    <Compile Include="Converts\CIList.cs" />
+    <Compile Include="Converts\CIListT.cs" />
+    <Compile Include="Converts\CInt16.cs" />
+    <Compile Include="Converts\CInt32.cs" />
+    <Compile Include="Converts\CInt64.cs" />
+    <Compile Include="Converts\CIntPtr.cs" />
+    <Compile Include="Converts\CNameValueCollection.cs" />
+    <Compile Include="Converts\CNullable.cs" />
+    <Compile Include="Converts\CObject.cs" />
+    <Compile Include="Converts\CSByte.cs" />
+    <Compile Include="Converts\CSingle.cs" />
+    <Compile Include="Converts\CString.cs" />
+    <Compile Include="Converts\CTimeSpan.cs" />
+    <Compile Include="Converts\CType.cs" />
+    <Compile Include="Converts\CUInt16.cs" />
+    <Compile Include="Converts\CUInt32.cs" />
+    <Compile Include="Converts\CUInt64.cs" />
+    <Compile Include="Converts\CUIntPtr.cs" />
+    <Compile Include="Converts\CUri.cs" />
+    <Compile Include="Dynamic\DynamicDataRow.cs" />
+    <Compile Include="Dynamic\DynamicDictionary.cs" />
+    <Compile Include="Dynamic\DynamicEntity.cs" />
+    <Compile Include="Dynamic\DynamicList.cs" />
+    <Compile Include="Dynamic\DynamicNameValueCollection.cs" />
+    <Compile Include="Dynamic\DynamicSystemObject.cs" />
+    <Compile Include="ErrorContext.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="IConvertor.cs" />
+    <Compile Include="IIgnoreInherit.cs" />
+    <Compile Include="IOC\Component.cs" />
+    <Compile Include="IOC\Converter.cs" />
+    <Compile Include="IOC\ExportComponent.cs" />
+    <Compile Include="IOC\JsonConverter.cs" />
+    <Compile Include="IOC\MEF.cs" />
+    <Compile Include="Json\CJsonObject.cs" />
+    <Compile Include="Pinyin\ConvertPinyin.cs" />
+    <Compile Include="Pinyin\PinyinMode.cs" />
+    <Compile Include="PrivateConverts\AdvancedConvertor.cs" />
+    <Compile Include="PrivateConverts\BaseConvertor.cs" />
+    <Compile Include="PrivateConverts\GenericConvertorFactory.cs" />
+    <Compile Include="PrivateConverts\LiskovConvertor.cs" />
+    <Compile Include="PrivateConverts\SystemTypeConvertor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
