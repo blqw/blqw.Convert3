@@ -1,5 +1,7 @@
-﻿using System;
+﻿using blqw.Convert3Component;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -12,8 +14,28 @@ namespace blqw
     /// </summary>
     class PropertyHandler
     {
+        public static bool IsInitialized { get; } = Initialize();
+
+        private static bool Initialize()
+        {
+            MEFPart.Import(typeof(PropertyHandler));
+            return true;
+        }
+
+        [Import("CreateGetter")]
+        public static Func<MemberInfo, Func<object, object>> GetGeter;
+
+        [Import("CreateSetter")]
+        public static Func<MemberInfo, Action<object, object>> GetSeter;
+
         public PropertyHandler(PropertyInfo property)
         {
+            if (GetGeter != null && GetSeter != null)
+            {
+                Get = GetGeter(property);
+                Set = GetSeter(property);
+                return;
+            }
             var o = Expression.Parameter(typeof(object), "o");
             var cast = Expression.Convert(o, property.DeclaringType);
             var p = Expression.Property(cast, property);

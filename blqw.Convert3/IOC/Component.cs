@@ -14,7 +14,7 @@ namespace blqw.Convert3Component
 
         private static bool Initialize()
         {
-            MEF.Import(typeof(Component));
+            MEFPart.Import(typeof(Component));
             return true;
         }
         
