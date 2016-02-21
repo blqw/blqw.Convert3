@@ -121,8 +121,8 @@ namespace blqw
         /// <param name="type">输出类型</param>
         internal static void ThrowError(object input, Type type)
         {
-            var name = CType.GetDisplayName(type);
-            throw ErrorContext.Error ?? new InvalidCastException(name + " 类型转换失败");
+            throw ErrorContext.Error 
+                ?? new InvalidCastException(CType.GetDisplayName(type) + " 类型转换失败");
         }
 
         #endregion

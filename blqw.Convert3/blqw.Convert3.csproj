@@ -95,7 +95,6 @@
     <Compile Include="IOC\Component.cs" />
     <Compile Include="IOC\Converter.cs" />
     <Compile Include="IOC\ExportComponent.cs" />
-    <Compile Include="IOC\JsonConverter.cs" />
     <Compile Include="IOC\MEFPart.cs" />
     <Compile Include="Json\CJsonObject.cs" />
     <Compile Include="Pinyin\ConvertPinyin.cs" />
