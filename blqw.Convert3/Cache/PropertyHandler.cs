@@ -30,6 +30,8 @@ namespace blqw
 
         public PropertyHandler(PropertyInfo property)
         {
+            Property = property;
+            Name = property.Name;
             if (GetGeter != null && GetSeter != null)
             {
                 Get = GetGeter(property);
@@ -39,8 +41,6 @@ namespace blqw
             var o = Expression.Parameter(typeof(object), "o");
             var cast = Expression.Convert(o, property.DeclaringType);
             var p = Expression.Property(cast, property);
-            Property = property;
-            Name = property.Name;
             if (property.CanRead)
             {
                 var ret = Expression.Convert(p, typeof(object));
