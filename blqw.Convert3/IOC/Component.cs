@@ -11,14 +11,10 @@ namespace blqw.Convert3Component
 {
     class Component
     {
-        private static bool IsInitialized { get; } = Initialize();
-
-        private static bool Initialize()
+        static Component()
         {
             MEFPart.Import(typeof(Component));
-            return true;
         }
-
 
         static readonly JavaScriptSerializer JSON = new JavaScriptSerializer();
         /// <summary> 用于将Json字符串转为实体对象的方法
