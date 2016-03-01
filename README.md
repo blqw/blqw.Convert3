@@ -1,33 +1,34 @@
 # blqw.Convert3
 全能转换器
 
+>从一个任意类型的对象转为另一个任意类型的对象  
+>从未如此简单  
 ```csharp
+object.To<Type>();
+object.To<Type>(defaultValue);
 ```
-
-## 特色  
-千万变化 一招搞定
 
 ## 代码示例
-```
+```csharp
+//最基本
+"1".To<int>();
+"a".To<int>(0); //转换失败返回默认值
+"是".To<bool>(); //支持 "是/否" "真/假" "对/错" "t/f" "true/false" 等
+
+//进阶
 "1,2,3,4,5,6".To<int[]>();
-var table = new DataTable();
-table.Columns.Add("id", typeof(int));
-table.Columns.Add("Name", typeof(string));
-table.Columns.Add("Sex", typeof(bool));
-table.Rows.Add(1, "blqw1", true);
-table.Rows.Add(2, "blqw2", false);
-table.Rows.Add(3, "blqw3", true);
-table.Rows.Add(4, "blqw4", false);
+"{\"id\":\"name\":\"blqw\"}".To<User>();
+Dictionary.To<Entity>(); //键值对转实体
+DataRow.To<Entity>(); //数据行转实体
+DataTable.To<List<Entity>>; //数据表转实体集合
 
-var list1 = table.To<List<NameValueCollection>>();
-var list2 = table.To<List<User>>();
-var list3 = table.To<List<Dictionary<string, object>>>();
-var list4 = table.To<List<Hashtable>>();
+//更复杂
+DataTable.To<List<NameValueCollection>>(); 
+List<Dictionary<string, object>>.To<DataTable>(); 
+new { ID=1, Name="blqw"}.To<User>(); //匿名类转换
 
-var tb1 = list1.To<DataTable>();
-var tb2 = list2.To<DataTable>();
-var tb3 = list3.To<DataTable>();
-var tb4 = list4.To<DataTable>();
+//变态嵌套
+Dictionary<Guid, Dictionary<int, User>>.To<Dictionary<string, Dictionary<DateTime, NameValueCollection>>>(); //不能理解就算了
 ```
 
 ## 更新说明  
