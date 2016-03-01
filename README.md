@@ -4,16 +4,17 @@
 >从一个任意类型的对象转为另一个任意类型的对象  
 >从未如此简单  
 ```csharp
-object.To<Type>();
-object.To<Type>(defaultValue);
+object.To<Type>();  //转换失败抛出异常
+object.To<Type>(defaultValue); //转换失败返回默认值
 ```
 
 ## 代码示例
 ```csharp
 //最基本
 "1".To<int>();
-"a".To<int>(0); //转换失败返回默认值
+"a".To<int>(0); //转换失败返回 0
 "是".To<bool>(); //支持 "是/否" "真/假" "对/错" "t/f" "true/false" 等
+byte[].To<Guid>();
 
 //进阶
 "1,2,3,4,5,6".To<int[]>();
