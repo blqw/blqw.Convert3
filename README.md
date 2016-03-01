@@ -9,6 +9,7 @@ object.To<Type>(defaultValue); //转换失败返回默认值
 ```
 
 ## 代码示例
+更多实例代码:[demo](https://github.com/blqw/blqw.Convert3/blob/master/Demo/Program.cs),[单元测试1](https://github.com/blqw/blqw.Convert3/blob/master/UnitTest/%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95.cs)  
 ```csharp
 //最基本
 "1".To<int>();
