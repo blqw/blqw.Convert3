@@ -35,7 +35,8 @@ Dictionary<Guid, Dictionary<int, User>>.To<Dictionary<string, Dictionary<DateTim
 
 ## 更新说明  
 #### 2016.03.16
-* 修复ioc插件bug
+* 修复ioc插件bug  
+  
 #### 2016.02.23  
 * 修复bug  
 
