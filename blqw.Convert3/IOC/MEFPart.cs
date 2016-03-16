@@ -25,7 +25,7 @@ namespace blqw.Convert3Component
         /// <summary>
         /// 字符串锁
         /// </summary>
-        const string _Lock = "O[ON}:z05i$*H75O[bJdnedei#('i_i^";
+        const string _Lock = "O[ON}:z05i$*H75O[bJdnedei#('i_i^v2";
 
         /// <summary> 
         /// 是否已初始化完成
