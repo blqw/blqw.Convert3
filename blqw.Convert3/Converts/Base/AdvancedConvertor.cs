@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    /// <summary> 高级转换器,提供高级类型的转换器基类
+    /// <summary> 
+    /// 高级转换器,提供高级类型的转换器基类
     /// <para>高级类型的定义: T 接口,抽象类,或可以被继承的类型,
     /// outputType 不一定完全等于 typeof(T)</para>
     /// </summary>

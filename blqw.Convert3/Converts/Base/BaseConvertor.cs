@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    /// <summary> 基本转换器,提供基本类型的转换器基类
+    /// <summary> 
+    /// 基本转换器,提供基本类型的转换器基类
     /// <para>基本类型的定义: T 是密封类或结构体,不会有被继承的情况</para>
     /// </summary>
     /// <typeparam name="T">基本类型泛型</typeparam>
     public abstract class BaseConvertor<T> : IConvertor<T>
     {
-        private readonly static Type _type = typeof(T);
+        private readonly static Type _outputType = typeof(T);
 
         /// <summary> 转换器优先级,默认0
         /// </summary>
@@ -20,7 +21,7 @@ namespace blqw
 
         /// <summary> 转换器的输出类型
         /// </summary>
-        public Type OutputType { get { return _type; } }
+        public Type OutputType { get { return _outputType; } }
 
         /// <summary> 尝试转换,返回转换是否成功
         /// </summary>

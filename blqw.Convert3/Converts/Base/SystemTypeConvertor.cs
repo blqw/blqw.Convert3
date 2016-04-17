@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    /// <summary> 系统类型转换器,额外处理 DataRow,DataRowView,DataReader
+    /// <summary> 
+    /// 系统类型转换器,额外处理 DataRow,DataRowView,DataReader
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class SystemTypeConvertor<T> : IConvertor<T>
