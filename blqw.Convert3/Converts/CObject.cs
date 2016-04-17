@@ -184,7 +184,7 @@ namespace blqw
 
             private NotImplementedException WriteFail(PropertyInfo p)
             {
-                return new NotImplementedException(CType.GetDisplayName(p.ReflectedType) + "." + p.Name + " 赋值失败");
+                return new NotImplementedException(CType.GetFriendlyName(p.ReflectedType) + "." + p.Name + " 赋值失败");
             }
         }
 
@@ -217,7 +217,7 @@ namespace blqw
             catch (TargetInvocationException ex)
             {
                 ErrorContext.Error = ex;
-                Trace.TraceInformation(CType.GetDisplayName(outputType) + ",初始化失败:" + ex.Message);
+                Trace.TraceInformation(CType.GetFriendlyName(outputType) + ",初始化失败:" + ex.Message);
             }
             catch (Exception ex)
             {

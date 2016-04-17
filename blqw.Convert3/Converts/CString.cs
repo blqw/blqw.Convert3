@@ -49,7 +49,7 @@ namespace blqw
             var type = input as Type;
             if (type != null)
             {
-                result = CType.GetDisplayName(type); 
+                result = CType.GetFriendlyName(type); 
                 return true;
             }
 

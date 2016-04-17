@@ -192,7 +192,7 @@ namespace blqw.Convert3Component
                     {
                         Convert3.ThrowError(input, type);
                     }
-                    throw new InvalidCastException("转换器只能转换 " + CType.GetDisplayName(_OutputType) + " 类型或其子类");
+                    throw new InvalidCastException("转换器只能转换 " + CType.GetFriendlyName(_OutputType) + " 类型或其子类");
                 }
                 return Convert3.GetDefaultValue(type ?? _OutputType);
             }
@@ -217,7 +217,7 @@ namespace blqw.Convert3Component
                 }
                 else if (_ThrowError)
                 {
-                    throw new InvalidCastException("转换器只能转换 " + CType.GetDisplayName(_OutputType) + " 类型或其子类");
+                    throw new InvalidCastException("转换器只能转换 " + CType.GetFriendlyName(_OutputType) + " 类型或其子类");
                 }
                 return default(T);
             }

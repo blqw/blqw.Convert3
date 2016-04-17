@@ -122,7 +122,7 @@ namespace blqw
         internal static void ThrowError(object input, Type type)
         {
             throw ErrorContext.Error 
-                ?? new InvalidCastException(CType.GetDisplayName(type) + " 类型转换失败");
+                ?? new InvalidCastException(CType.GetFriendlyName(type) + " 类型转换失败");
         }
 
         #endregion

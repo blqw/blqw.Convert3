@@ -9,6 +9,7 @@ namespace blqw
     /// <summary>
     /// 异常上下文
     /// </summary>
+    [Obsolete("", false)]
     static class ErrorContext
     {
         /// <summary>
@@ -64,7 +65,7 @@ namespace blqw
             {
                 return;
             }
-            Error = new NotImplementedException("没有找到指定类型的转换器:" + CType.GetDisplayName(type));
+            Error = new NotImplementedException("没有找到指定类型的转换器:" + CType.GetFriendlyName(type));
         }
 
         /// <summary>
@@ -82,9 +83,9 @@ namespace blqw
             {
                 throw new ArgumentNullException(nameof(type));
             }
-            string x = CType.GetDisplayName(type);
+            string x = CType.GetFriendlyName(type);
             x = "类型 `" + x + "`";
-            var name = CType.GetDisplayName(toType);
+            var name = CType.GetFriendlyName(toType);
             Error = new InvalidCastException(string.Concat(x, " 无法转为 ", name));
         }
 
@@ -110,13 +111,13 @@ namespace blqw
             }
             else
             {
-                x = CType.GetDisplayName(value.GetType());
+                x = CType.GetFriendlyName(value.GetType());
                 using (Freeze())
                 {
                     x = "类型 `" + x + "` 值: " + Convert3.To<string>(value);
                 }
             }
-            var name = CType.GetDisplayName(toType);
+            var name = CType.GetFriendlyName(toType);
             Error = new InvalidCastException(string.Concat(x, " 无法转为 ", name));
         }
 

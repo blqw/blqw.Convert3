@@ -88,8 +88,8 @@
     <Compile Include="Dynamic\DynamicList.cs" />
     <Compile Include="Dynamic\DynamicNameValueCollection.cs" />
     <Compile Include="Dynamic\DynamicSystemObject.cs" />
+    <Compile Include="Error.cs" />
     <Compile Include="ErrorContext.cs" />
-    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Converts\Interface\IConvertor.cs" />
     <Compile Include="IIgnoreInherit.cs" />
     <Compile Include="IOC\Component.cs" />

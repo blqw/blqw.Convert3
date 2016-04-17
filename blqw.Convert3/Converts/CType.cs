@@ -30,7 +30,7 @@ namespace blqw
             _keywords["uint"] = "System.UInt32";
             _keywords["ulong"] = "System.UInt64";
             _keywords["Guid"] = "System.Guid";
-            
+
         }
 
         private static readonly NameValueCollection _keywords;
@@ -52,8 +52,9 @@ namespace blqw
 
         ///<summary> 获取类型名称的友好展现形式
         /// </summary>
-        public static string GetDisplayName(Type t)
+        public static string GetFriendlyName(Type t)
         {
+            if (t == null) return "`null`";
             var s = _typeNames[t.GetHashCode().ToString()];
             if (s != null)
             {
@@ -64,7 +65,7 @@ namespace blqw
                 var t2 = Nullable.GetUnderlyingType(t);
                 if (t2 != null)
                 {
-                    return _typeNames[t.GetHashCode().ToString()] = GetDisplayName(t2) + "?";
+                    return _typeNames[t.GetHashCode().ToString()] = GetFriendlyName(t2) + "?";
 
                 }
                 if (t.IsGenericType)
@@ -81,7 +82,7 @@ namespace blqw
                         generic = new string[infos.Length];
                         for (int i = 0; i < infos.Length; i++)
                         {
-                            generic[i] = GetDisplayName(infos[i]);
+                            generic[i] = GetFriendlyName(infos[i]);
                         }
                     }
                     return _typeNames[t.GetHashCode().ToString()] = GetSimpleName(t) + "<" + string.Join(", ", generic) + ">";

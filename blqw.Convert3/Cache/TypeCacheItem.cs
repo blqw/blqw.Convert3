@@ -23,7 +23,7 @@ namespace blqw
         {
             Convertor = conv;
             Type = outputType;
-            TypeName = CType.GetDisplayName(outputType);
+            TypeName = CType.GetFriendlyName(outputType);
             if (Type.IsValueType
                 && Type.IsGenericTypeDefinition == false
                 && Nullable.GetUnderlyingType(Type) == null)
