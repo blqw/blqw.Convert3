@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CIDictionary<K, V> : AdvancedConvertor<IDictionary<K, V>>
     {
         static Type _keyType = typeof(K);

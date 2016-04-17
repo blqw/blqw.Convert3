@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CDouble : SystemTypeConvertor<Double>
     {
         protected override bool Try(object input, out double result)

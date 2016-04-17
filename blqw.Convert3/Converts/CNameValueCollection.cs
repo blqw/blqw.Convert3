@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     class CNameValueCollection : AdvancedConvertor<NameValueCollection>
     {
         static IConvertor<string> _stringConvertor;

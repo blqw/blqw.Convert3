@@ -8,6 +8,7 @@ using blqw.Convert3Component;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CString : SystemTypeConvertor<string>, IConvertor<string>
     {
         protected override bool Try(object input, out string result)

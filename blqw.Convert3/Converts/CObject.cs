@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CObject : AdvancedConvertor<object>, IIgnoreInherit
     {
         protected override bool Try(object input, Type outputType, out object result)

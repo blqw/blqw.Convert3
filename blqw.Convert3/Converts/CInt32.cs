@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CInt32 : SystemTypeConvertor<int>
     {
         protected override bool Try(object input, out int result)

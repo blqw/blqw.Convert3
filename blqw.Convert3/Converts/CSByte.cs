@@ -9,6 +9,7 @@ namespace blqw
 {
     public class CSByte : SystemTypeConvertor<SByte>
     {
+        [System.ComponentModel.Composition.Export(typeof(IConvertor))]
         protected override bool Try(object input, out sbyte result)
         {
             var conv = input as IConvertible;

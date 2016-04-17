@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CBytes : SystemTypeConvertor<Byte[]>
     {
         protected override bool Try(object input, out byte[] result)

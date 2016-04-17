@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CIDictionary : AdvancedConvertor<IDictionary>
     {
         protected override bool Try(object input, Type outputType, out IDictionary result)

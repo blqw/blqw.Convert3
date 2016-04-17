@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     sealed class CNullable<T> : SystemTypeConvertor<T?>
         where T : struct
     {

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CSingle : SystemTypeConvertor<Single>
     {
         protected override bool Try(object input, out float result)

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CInt16 : SystemTypeConvertor<Int16>
     {
         protected override bool Try(object input, out short result)

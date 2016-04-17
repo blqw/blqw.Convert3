@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CUInt64 : SystemTypeConvertor<UInt64>
     {
         protected override bool Try(object input, out ulong result)

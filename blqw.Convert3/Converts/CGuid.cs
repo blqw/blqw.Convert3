@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CGuid : SystemTypeConvertor<Guid>
     {
         protected override bool Try(object input, out Guid result)

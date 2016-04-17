@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CEnum : AdvancedConvertor<Enum>
     {
         protected override bool Try(object input, Type enumType, out Enum result)

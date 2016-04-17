@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
+    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CDecimal : SystemTypeConvertor<Decimal>
     {
         protected override bool Try(object input, out decimal result)
