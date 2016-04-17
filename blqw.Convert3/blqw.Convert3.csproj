@@ -62,15 +62,15 @@
     <Compile Include="Converts\CEnum.cs" />
     <Compile Include="Converts\CGuid.cs" />
     <Compile Include="Converts\CIDictionary.cs" />
-    <Compile Include="Converts\CIDictionaryT.cs" />
+    <Compile Include="Converts\Generic\CIDictionaryT.cs" />
     <Compile Include="Converts\CIList.cs" />
-    <Compile Include="Converts\CIListT.cs" />
+    <Compile Include="Converts\Generic\CIListT.cs" />
     <Compile Include="Converts\CInt16.cs" />
     <Compile Include="Converts\CInt32.cs" />
     <Compile Include="Converts\CInt64.cs" />
     <Compile Include="Converts\CIntPtr.cs" />
     <Compile Include="Converts\CNameValueCollection.cs" />
-    <Compile Include="Converts\CNullable.cs" />
+    <Compile Include="Converts\Generic\CNullable.cs" />
     <Compile Include="Converts\CObject.cs" />
     <Compile Include="Converts\CSByte.cs" />
     <Compile Include="Converts\CSingle.cs" />
@@ -90,7 +90,7 @@
     <Compile Include="Dynamic\DynamicSystemObject.cs" />
     <Compile Include="ErrorContext.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="IConvertor.cs" />
+    <Compile Include="Converts\Interface\IConvertor.cs" />
     <Compile Include="IIgnoreInherit.cs" />
     <Compile Include="IOC\Component.cs" />
     <Compile Include="IOC\Converter.cs" />
@@ -99,11 +99,11 @@
     <Compile Include="Json\CJsonObject.cs" />
     <Compile Include="Pinyin\ConvertPinyin.cs" />
     <Compile Include="Pinyin\PinyinMode.cs" />
-    <Compile Include="PrivateConverts\AdvancedConvertor.cs" />
-    <Compile Include="PrivateConverts\BaseConvertor.cs" />
-    <Compile Include="PrivateConverts\GenericConvertorFactory.cs" />
-    <Compile Include="PrivateConverts\LiskovConvertor.cs" />
-    <Compile Include="PrivateConverts\SystemTypeConvertor.cs" />
+    <Compile Include="Converts\Base\AdvancedConvertor.cs" />
+    <Compile Include="Converts\Base\BaseConvertor.cs" />
+    <Compile Include="Converts\Base\GenericConvertorFactory.cs" />
+    <Compile Include="Converts\Base\LiskovConvertor.cs" />
+    <Compile Include="Converts\Base\SystemTypeConvertor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
