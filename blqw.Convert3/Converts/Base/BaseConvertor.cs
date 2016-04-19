@@ -15,6 +15,12 @@ namespace blqw
     {
         private readonly static Type _outputType = typeof(T);
 
+        IConvertor<T> This;
+        public BaseConvertor()
+        {
+            This = this;
+        }
+
         /// <summary> 转换器优先级,默认0
         /// </summary>
         public virtual uint Priority { get { return 0; } }
@@ -22,120 +28,113 @@ namespace blqw
         /// <summary> 转换器的输出类型
         /// </summary>
         public Type OutputType { get { return _outputType; } }
-
-        /// <summary> 尝试转换,返回转换是否成功
-        /// </summary>
-        /// <param name="input">输入对象</param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为default(T)</param>
-        protected abstract bool Try(object input, out T result);
-
-        /// <summary> 尝试转换,返回转换是否成功
-        /// </summary>
-        /// <param name="input">输入对象</param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为default(T)</param>
-        protected abstract bool Try(string input, out T result);
-
-        #region 实现接口
-
-        bool IConvertor.Try(object input, Type outputType, out object result)
-        {
-            T r;
-            if (((IConvertor<T>)this).Try(input, outputType, out r))
-            {
-                result = r;
-                return true;
-            }
-            result = null;
-            return false;
-        }
-
-        bool IConvertor.Try(string input, Type outputType, out object result)
-        {
-            T r;
-            if (((IConvertor<T>)this).Try(input, outputType, out r))
-            {
-                result = r;
-                return true;
-            }
-            result = null;
-            return false;
-        }
-
-        bool IConvertor<T>.Try(object input, Type outputType, out T result)
-        {
-            var str = input as string;
-            if (str != null)
-            {
-                return ((IConvertor<T>)this).Try(str, outputType, out result);
-            }
-            using (ErrorContext.Callin())
-            {
-                if (input == null)
-                {
-                    result = default(T);
-                    if (outputType.IsClass
-                        || Nullable.GetUnderlyingType(outputType) != null)
-                    {
-                        return true;
-                    }
-                    ErrorContext.CastFail(input, outputType);
-                    return false;
-                }
-                if (input is T)
-                {
-                    result = (T)input;
-                    return true;
-                }
-
-                if (Try(input, out result))
-                {
-                    ErrorContext.Clear();
-                    return true;
-                }
-
-                using (ErrorContext.Freeze())
-                {
-                    if (input == null
-                        || Convert3.TryTo(input, out str) == false
-                        || Try(str, out result) == false)
-                    {
-                        result = default(T);
-                        return false;
-                    }
-                }
-                ErrorContext.Clear();
-                return true;
-            }
-        }
-
-        bool IConvertor<T>.Try(string input, Type outputType, out T result)
-        {
-            using (ErrorContext.Callin())
-            {
-                if (input == null)
-                {
-                    result = default(T);
-                    if (outputType.IsClass
-                        || Nullable.GetUnderlyingType(outputType) != null)
-                    {
-                        return true;
-                    }
-                    ErrorContext.CastFail(input, outputType);
-                    return false;
-                }
-                if (Try(input, out result))
-                {
-                    ErrorContext.Clear();
-                    return true;
-                }
-                return false;
-            }
-        }
-        #endregion
-
-
+        
         void IConvertor.Initialize() { Initialize(); }
+        /// <summary>
+        /// 允许子类重写初始化操作
+        /// </summary>
         protected virtual void Initialize() { }
 
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success">是否成功</param>
+        public abstract T ChangeType(object input, Type outputType, out bool success);
+        
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success">是否成功</param>
+        public abstract T ChangeType(string input, Type outputType, out bool success);
+
+        T IConvertor<T>.ChangeType(object input, Type outputType, out bool success)
+        {
+            var str = input as string;
+            if (str != null || input == null)
+            {
+                return This.ChangeType(str, outputType, out success);
+            }
+            var contract = Error.Contract();
+            success = false;
+            try
+            {
+                //类型相同直接转换
+                if (input is T)
+                {
+                    success = true;
+                    return (T)input;
+                }
+
+                //子类转换逻辑
+                var result = ChangeType(input, outputType, out success);
+                if (success)
+                {
+                    return result;
+                }
+
+                Error.BeginTransaction();
+                //尝试转string后转换
+                str = Convert3.ChangeType<string>(input, out success);
+                if (success)
+                {
+                    Error.EndTransaction();
+                    return This.ChangeType(str, outputType, out success);
+                }
+                return default(T);
+            }
+            finally
+            {
+                if (success)
+                {
+                    Error.Rollback();
+                }
+                else
+                {
+                    Error.CastFail((object)null, outputType);
+                }
+                if (contract.Enabled) contract.Dispose();
+            }
+            
+        }
+
+        T IConvertor<T>.ChangeType(string input, Type outputType, out bool success)
+        {
+            var contract = Error.Contract();
+            T result;
+            if (input == null)
+            {   //是否可以为null
+                success = outputType.IsValueType == false
+                        || Nullable.GetUnderlyingType(outputType) != null;
+                result = default(T);
+            }
+            else
+            {
+                result = ChangeType(input, outputType, out success);
+            }
+            if (success)
+            {
+                Error.Rollback();
+            }
+            else
+            {
+                Error.CastFail((object)null, outputType);
+            }
+            if (contract.Enabled) contract.Dispose();
+            return result;
+        }
+
+        object IConvertor.ChangeType(object input, Type outputType, out bool success)
+        {
+            return This.ChangeType(input, outputType, out success);
+        }
+
+        object IConvertor.ChangeType(string input, Type outputType, out bool success)
+        {
+            return This.ChangeType(input, outputType, out success);
+        }
     }
 }
