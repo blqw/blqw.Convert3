@@ -197,6 +197,11 @@ namespace blqw
             }
         }
 
+        internal static T ChangeType<T>(object input, out bool success)
+        {
+            throw new NotImplementedException();
+        }
+
         internal static TypeCacheItem GetCache<T>()
         {
             var cache = _cache.Get<T>();

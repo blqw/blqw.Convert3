@@ -61,6 +61,15 @@ namespace blqw
         }
 
         /// <summary>
+        /// 直接说明转换失败的原因
+        /// </summary>
+        /// <param name="message">转换失败原因</param>
+        public static void CastFail(string message)
+        {
+            _Contract.Add(new InvalidCastException(message));
+        }
+
+        /// <summary>
         /// 因为值原因导致转换失败
         /// </summary>
         /// <param name="value"></param>
