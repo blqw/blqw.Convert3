@@ -15,10 +15,12 @@ namespace blqw
     {
         private readonly static Type _outputType = typeof(T);
 
-        IConvertor<T> This;
+        protected IConvertor<T> This;
+        private bool _IsOverrideImpl;
         public BaseConvertor()
         {
             This = this;
+            _IsOverrideImpl = this.GetType().GetMethod("ChangeTypeImpl").DeclaringType != typeof(BaseConvertor<T>);
         }
 
         /// <summary> 转换器优先级,默认0
@@ -28,7 +30,7 @@ namespace blqw
         /// <summary> 转换器的输出类型
         /// </summary>
         public Type OutputType { get { return _outputType; } }
-        
+
         void IConvertor.Initialize() { Initialize(); }
         /// <summary>
         /// 允许子类重写初始化操作
@@ -42,7 +44,7 @@ namespace blqw
         /// <param name="outputType"> 换转后的类型 </param>
         /// <param name="success">是否成功</param>
         public abstract T ChangeType(object input, Type outputType, out bool success);
-        
+
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定字符串对象。
         /// </summary>
@@ -50,6 +52,11 @@ namespace blqw
         /// <param name="outputType"> 换转后的类型 </param>
         /// <param name="success">是否成功</param>
         public abstract T ChangeType(string input, Type outputType, out bool success);
+
+        protected virtual T ChangeTypeImpl(object input, Type outputType, out bool success)
+        {
+            return ChangeType(input, outputType, out success);
+        }
 
         T IConvertor<T>.ChangeType(object input, Type outputType, out bool success)
         {
@@ -70,11 +77,14 @@ namespace blqw
                 }
 
                 //子类转换逻辑
-                var result = ChangeType(input, outputType, out success);
+                var result = _IsOverrideImpl ?
+                    ChangeTypeImpl(input, outputType, out success)
+                    : ChangeType(input, outputType, out success);
                 if (success)
                 {
                     return result;
                 }
+
 
                 Error.BeginTransaction();
                 //尝试转string后转换
@@ -98,7 +108,7 @@ namespace blqw
                 }
                 if (contract.Enabled) contract.Dispose();
             }
-            
+
         }
 
         T IConvertor<T>.ChangeType(string input, Type outputType, out bool success)
