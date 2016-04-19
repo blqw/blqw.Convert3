@@ -21,48 +21,22 @@ namespace blqw
         /// 开始异常契约
         /// </summary>
         /// <returns></returns>
-        public static IDisposable Contract()
+        public static ErrorContract Contract()
         {
             if (_Contract.Enabled)
             {
-                return null;
+                return default(ErrorContract);
             }
             _Contract.Enable();
             return _Contract;
         }
 
-        /// <summary>
-        /// 开始一个事务操作
-        /// </summary>
-        public static Transaction BeginTransaction()
-        {
-            return new Transaction(_Contract.Count);
-        }
 
-        /// <summary>
-        /// 异常事务
-        /// </summary>
-        public struct Transaction
-        {
-            private int _index;
+        public static Action BeginTransaction = _Contract.BeginTransaction;
 
-            /// <summary>
-            /// 初始化异常事务
-            /// </summary>
-            /// <param name="index">契约中异常索引的保存点</param>
-            public Transaction(int index)
-            {
-                _index = index;
-            }
+        public static Action Rollback = _Contract.Rollback;
 
-            /// <summary>
-            /// 回滚事务中产生的所有异常
-            /// </summary>
-            public void Rollback()
-            {
-                _Contract.RemoveIndexToEnd(_index);
-            }
-        }
+        public static Action EndTransaction = _Contract.Commit;
 
         /// <summary>
         /// 转换器未找到
@@ -112,12 +86,12 @@ namespace blqw
         /// <summary>
         /// 异常契约
         /// </summary>
-        struct ErrorContract : IDisposable
+        public struct ErrorContract : IDisposable
         {
             /// <summary>
             /// 异常栈
             /// </summary>
-            List<Exception> _Errors;
+            List<Exception> _Stack;
             /// <summary>
             /// 是否启用
             /// </summary>
@@ -128,21 +102,16 @@ namespace blqw
             /// </summary>
             public void Enable()
             {
-                if (_Errors == null)
+                if (_Stack == null)
                 {
-                    _Errors = new List<Exception>();
+                    _Stack = new List<Exception>(10);
                 }
-                else if (_Errors.Count > 0)
+                else if (_Stack.Count > 0)
                 {
-                    _Errors.Clear();
+                    _Stack.Clear();
                 }
                 Enabled = true;
             }
-
-            /// <summary>
-            /// 当前契约中的异常数量
-            /// </summary>
-            public int Count { get { return _Errors?.Count ?? 0; } }
 
             /// <summary>
             /// 向当前契约中添加新的异常,如果契约未启用则不执行任何操作
@@ -150,7 +119,53 @@ namespace blqw
             /// <param name="ex">需要添加到契约的异常</param>
             public void Add(Exception ex)
             {
-                if (Enabled) _Errors?.Add(ex);
+                if (Enabled)
+                {
+                    _Stack.Add(ex);
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public void BeginTransaction()
+            {
+                if (_Stack?.Count > 0)
+                {
+                    _Stack.Add(null);
+                }
+            }
+
+            public void Rollback()
+            {
+                if (_Stack?.Count > 0)
+                {
+                    var index = _Stack.LastIndexOf(null);
+                    if (index <= 0)
+                    {
+                        _Stack.Clear();
+                        return;
+                    }
+                    var count = _Stack.Count - index;
+                    if (count <= 0)
+                    {
+                        return;
+                    }
+                    _Stack.RemoveRange(index, count);
+                }
+            }
+
+            public void Commit()
+            {
+                if (_Stack?.Count > 0)
+                {
+                    var ex = _Stack[_Stack.Count - 1];
+                    if (ex != null)
+                    {
+                        throw new NotSupportedException($"在错误的位置调用{nameof(Commit)}");
+                    }
+                    _Stack.RemoveAt(_Stack.Count - 1);
+                }
             }
 
             /// <summary>
@@ -158,37 +173,26 @@ namespace blqw
             /// </summary>
             public void Dispose()
             {
-                _Errors?.Clear();
+                _Stack?.Clear();
                 Enabled = false;
             }
-
-            /// <summary>
-            /// 移除从指定索引处(包含)开始的所有异常
-            /// </summary>
-            /// <param name="index">需要移除异常的开始索引(包含)</param>
-            public void RemoveIndexToEnd(int index)
-            {
-                if (index <= 0 || _Errors == null) return;
-                var count = _Errors.Count - index;
-                if (count <= 0) return;
-                _Errors.RemoveRange(index, count);
-            }
-
+            
             /// <summary>
             /// 抛出当前契约中的所有异常
             /// </summary>
             public void ThrowError()
             {
-                if (Enabled == false || _Errors == null || _Errors.Count == 0)
+                if (Enabled == false || _Stack == null || _Stack.Count == 0)
                 {
                     return;
                 }
-                if (_Errors.Count == 1)
+                if (_Stack.Count == 1)
                 {
-                    throw _Errors[0];
+                    throw _Stack[0];
                 }
-                throw new AggregateException(_Errors.Reverse<Exception>());
+                throw new AggregateException(_Stack.Reverse<Exception>());
             }
         }
+        
     }
 }
