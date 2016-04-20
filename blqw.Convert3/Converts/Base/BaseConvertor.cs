@@ -8,9 +8,11 @@ namespace blqw
 {
     /// <summary> 
     /// 基本转换器,提供基本类型的转换器基类
-    /// <para>基本类型的定义: T 是密封类或结构体,不会有被继承的情况</para>
     /// </summary>
     /// <typeparam name="T">基本类型泛型</typeparam>
+    /// <remarks>
+    /// 基本类型的定义: T 是密封类或结构体,不会有被继承的情况
+    /// </remarks>
     public abstract class BaseConvertor<T> : IConvertor<T>
     {
         private readonly static Type _outputType = typeof(T);
@@ -29,8 +31,8 @@ namespace blqw
 
         /// <summary> 转换器的输出类型
         /// </summary>
-        public Type OutputType { get { return _outputType; } }
-
+        public virtual Type OutputType { get { return _outputType; } }
+        
         void IConvertor.Initialize() { Initialize(); }
         /// <summary>
         /// 允许子类重写初始化操作
@@ -145,6 +147,11 @@ namespace blqw
         object IConvertor.ChangeType(string input, Type outputType, out bool success)
         {
             return This.ChangeType(input, outputType, out success);
+        }
+        
+        IConvertor IConvertor.GetConvertor(Type outputType)
+        {
+            throw new NotSupportedException();
         }
     }
 }

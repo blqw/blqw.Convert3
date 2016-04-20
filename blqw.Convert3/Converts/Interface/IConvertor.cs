@@ -41,6 +41,15 @@ namespace blqw
         /// <param name="outputType"> 换转后的类型 </param>
         /// <param name="success">是否成功</param>
         object ChangeType(string input, Type outputType, out bool success);
+
+        /// <summary>
+        /// 根据<paramref name="outputType"/>返回一个<see cref="IConvertor"/>,<paramref name="outputType"/> 应该是当前转换器<see cref="OutputType"/> 的子类 
+        /// </summary>
+        /// <param name="outputType">返回值类型</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="outputType"/>不是<see cref="OutputType"/>的子类</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="outputType"/>是null</exception>
+        IConvertor GetConvertor(Type outputType);
     }
 
     /// <summary> 泛型转换器

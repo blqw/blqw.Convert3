@@ -82,6 +82,7 @@
     <Compile Include="Converts\CUInt64.cs" />
     <Compile Include="Converts\CUIntPtr.cs" />
     <Compile Include="Converts\CUri.cs" />
+    <Compile Include="Converts\Generic\GenericConvertor.cs" />
     <Compile Include="Dynamic\DynamicDataRow.cs" />
     <Compile Include="Dynamic\DynamicDictionary.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="Converts\Base\AdvancedConvertor.cs" />
     <Compile Include="Converts\Base\BaseConvertor.cs" />
     <Compile Include="Converts\Base\GenericConvertorFactory.cs" />
-    <Compile Include="Converts\Base\LiskovConvertor.cs" />
     <Compile Include="Converts\Base\SystemTypeConvertor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
