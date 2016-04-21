@@ -28,7 +28,7 @@ namespace blqw
 
         class Import
         {
-            [Import(typeof(IConvertor))]
+            [ImportMany(typeof(IConvertor))]
             public List<IConvertor> Convertors;
         }
 

@@ -11,10 +11,6 @@ namespace blqw
     [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CArray<T> : AdvancedConvertor<Array>
     {
-        public CArray()
-        {
-
-        }
         protected override bool Try(object input, Type outputType, out Array result)
         {
             var emab = input as IEnumerable;
