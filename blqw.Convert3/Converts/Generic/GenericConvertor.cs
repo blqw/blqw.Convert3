@@ -103,8 +103,6 @@ namespace blqw.Converts
                 }
             }
 
-
-
             return false;
         }
 
