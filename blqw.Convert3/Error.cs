@@ -93,6 +93,15 @@ namespace blqw
         }
 
         /// <summary>
+        /// 将异常添加到异常栈
+        /// </summary>
+        /// <param name="ex"></param>
+        public static void Add(Exception ex)
+        {
+            _Contract.Add(ex);
+        }
+
+        /// <summary>
         /// 异常契约
         /// </summary>
         public struct ErrorContract : IDisposable

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using blqw.Convert3Component;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,12 @@ using System.Threading.Tasks;
 namespace blqw
 {
     [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CArray : AdvancedConvertor<Array>
+    public class CArray<T> : AdvancedConvertor<Array>
     {
+        public CArray()
+        {
+
+        }
         protected override bool Try(object input, Type outputType, out Array result)
         {
             var emab = input as IEnumerable;
@@ -48,15 +53,42 @@ namespace blqw
 
         protected override bool Try(string input, Type outputType, out Array result)
         {
+            
+        }
+
+        static void WriteFail(object value)
+        {
+            var str = value == null ? "<null>" : value.ToString();
+            ErrorContext.Error = new ArrayTypeMismatchException(value + " 写入数组失败!");
+        }
+
+        public override Array ChangeType(object input, Type outputType, out bool success)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Array ChangeType(string input, Type outputType, out bool success)
+        {
             if (input.Length == 0)
             {
-                result = Array.CreateInstance(outputType.GetElementType(), 0);
-                return true;
+                success = true;
+                return Array.CreateInstance(outputType.GetElementType(), 0);
             }
             input = input.Trim();
             if (input[0] == '[' && input[input.Length - 1] == ']')
             {
-                return CJsonObject.TryTo(input, outputType, out result);
+                try
+                {
+                    var result = Component.ToJsonObject(outputType, input);
+                    success = true;
+                    return (Array)result;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                }
+                success = false;
+                return null;
             }
             var elementType = outputType.GetElementType();
             var conv = Convert3.GetConvertor(outputType.GetElementType());
@@ -84,10 +116,9 @@ namespace blqw
             return true;
         }
 
-        static void WriteFail(object value)
+        protected override IConvertor GetConvertor(Type outputType)
         {
-            var str = value == null ? "<null>" : value.ToString();
-            ErrorContext.Error = new ArrayTypeMismatchException(value + " 写入数组失败!");
+            return base.GetConvertor(outputType);
         }
     }
 }

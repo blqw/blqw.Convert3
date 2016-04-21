@@ -18,240 +18,56 @@ namespace blqw
     {
         #region private
 
-        private static TypeCache _cache = InitCache();
+        public static ConvertorCollection Convertors { get; } = Initialize();
 
-        private static TypeCache InitCache()
+        private static ConvertorCollection Initialize()
         {
-            _cache = new TypeCache();
-            AddCache(typeof(string), typeof(CString));
-            foreach (var ass in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var m in ass.GetModules())
-                {
-                    try
-                    {
-                        foreach (var conv in m.GetTypes())
-                        {
-                            if (conv.IsAbstract)
-                            {
-                                continue;
-                            }
-                            foreach (var iface in conv.GetInterfaces())
-                            {
-                                if (iface.IsGenericTypeDefinition
-                                    || iface.IsGenericType == false
-                                    || iface.GetGenericTypeDefinition() != typeof(IConvertor<>))
-                                {
-                                    continue;
-                                }
-
-                                var type = iface.GenericTypeArguments[0];
-                                AddCache(type, conv);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.WriteLine(ex.ToString(), "Convert3初始化出现错误");
-                    }
-                }
-            }
-            _cache.Initialize();
-            return _cache;
-        }
-
-
-        /// <summary> 添加缓存
-        /// </summary>
-        /// <param name="outputType"> 输出类型 </param>
-        /// <param name="convType"> 转换器类型 </param>
-        private static void AddCache(Type outputType, Type convType)
-        {
-            if (convType == null)
-            {
-                throw new ArgumentNullException("convType");
-            }
-
-            //泛型定义的处理
-            //如果转换器是一个泛型定义类型,则从转换器的接口中提取当前T的类型,必须也是泛型,且泛型参数个数相同
-            if (convType.IsGenericTypeDefinition)
-            {
-                var iconvT = CType.GetInterface(convType.GetInterfaces(), typeof(IConvertor<>));
-                var resultT = iconvT.GetGenericArguments()[0];
-                if (resultT.IsGenericType == false)
-                {
-                    return;
-                }
-
-                var args = resultT.GetGenericArguments();
-                if (outputType.IsGenericType == false)
-                {
-                    return;
-                }
-
-                if (args.Any(it => it.IsGenericParameter) == false
-                    && resultT.IsGenericTypeDefinition == false)
-                {
-                    return;
-                }
-
-                if (outputType.GetGenericArguments().Length != args.Length)
-                {
-                    return;
-                }
-                outputType = outputType.GetGenericTypeDefinition();
-                _cache.Set(outputType,
-                              TypeCacheItem.New(outputType, new GenericConvertorFactory(convType)));
-                return;
-            }
-
-            var conv = (IConvertor)Activator.CreateInstance(convType);
-
-            var cache = _cache.Get(outputType);
-
-            if (cache == null || cache.Convertor.Priority <= conv.Priority)
-            {
-                _cache.Set(outputType, TypeCacheItem.New(outputType, conv));
-            }
-        }
-
-        /// <summary> 抛出异常
-        /// </summary>
-        /// <param name="input">待转换的值</param>
-        /// <param name="type">输出类型</param>
-        internal static void ThrowError(object input, Type type)
-        {
-            throw ErrorContext.Error 
-                ?? new InvalidCastException(CType.GetFriendlyName(type) + " 类型转换失败");
+            var convertors = new ConvertorCollection();
+            convertors.Load();
+            return convertors;
         }
 
         #endregion
 
-        internal static TypeCacheItem GetCache(Type type)
-        {
-            var cache = _cache.Get(type);
-            if (cache != null)
-            {
-                return cache ?? _cache.Get<object>();
-            }
-
-            //泛型的处理
-            if (type.IsGenericType
-                && type.IsGenericTypeDefinition == false)
-            {
-                cache = _cache.Get(type.GetGenericTypeDefinition());
-                if (cache != null)
-                {
-                    var factory = cache.Convertor as GenericConvertorFactory;
-                    if (factory != null)
-                    {
-                        var convType = factory.Create(type);
-                        AddCache(type, convType);
-                        return _cache.Get(type);
-                    }
-                }
-            }
-
-            //如果是接口就不用继续了,接口没有基类,接口不用递归接口
-            if (type.IsInterface || type.IsGenericTypeDefinition)
-            {
-                return null;
-            }
-
-            //基类型
-            var baseType = type.BaseType;
-            while (baseType != null && baseType != typeof(object))
-            {
-                var baseConv = GetConvertor(baseType);
-                if (baseConv != null)
-                {
-                    if (baseConv is IIgnoreInherit == false)
-                    {
-                        var convType = typeof(LiskovConvertor<,>).MakeGenericType(baseType, type);
-                        AddCache(type, convType);
-                        return _cache.Get(type);
-                    }
-                }
-                baseType = baseType.BaseType;
-            }
-
-            //接口类型
-            foreach (var item in type.GetInterfaces())
-            {
-                var baseConv = GetConvertor(item);
-                if (baseConv != null)
-                {
-                    if (baseConv is IIgnoreInherit == false)
-                    {
-                        var convType = typeof(LiskovConvertor<,>).MakeGenericType(item, type);
-                        AddCache(type, convType);
-                        return _cache.Get(type);
-                    }
-                }
-            }
-
-            {
-                var convType = typeof(LiskovConvertor<,>).MakeGenericType(typeof(object), type);
-                AddCache(type, convType);
-                return _cache.Get(type);
-            }
-        }
-
-        internal static T ChangeType<T>(object input, out bool success)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static TypeCacheItem GetCache<T>()
-        {
-            var cache = _cache.Get<T>();
-            if (cache != null)
-            {
-                return cache;
-            }
-            return GetCache(typeof(T));
-        }
-
-        /// <summary> 获取转换器,失败返回null
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定对象。
         /// </summary>
-        /// <param name="outputType">输出类型</param>
-        /// <returns></returns>
-        public static IConvertor GetConvertor(Type outputType)
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success">是否成功</param>
+        public static object ChangeType(this object input, Type outputType, out bool success)
         {
-            var cache = GetCache(outputType);
-            if (cache == null)
+            var conv = Convertors.Get(outputType);
+            if (conv == null)
             {
+                success = false;
                 return null;
             }
-            return cache.Convertor;
+            return conv.ChangeType(input, outputType, out success);
         }
 
-        /// <summary> 获取转换器,失败返回null
-        /// </summary>
-        /// <typeparam name="T">输出类型泛型</typeparam>
-        /// <returns></returns>
-        public static IConvertor<T> GetConvertor<T>()
-        {
-            var cache = GetCache<T>();
-            if (cache == null)
-            {
-                return null;
-            }
-            return (IConvertor<T>)cache.Convertor;
-        }
-
-        /// <summary> 返回一个指定类型的对象，该对象的值等效于指定的对象。转换失败抛出异常
+        /// <summary> 
+        /// 返回一个指定类型的对象，该对象的值等效于指定的对象。转换失败抛出异常
         /// </summary>
         /// <param name="input">需要转换类型的对象</param>
         /// <param name="outputType">要返回的对象的类型</param>
         public static object ChangeType(this object input, Type outputType)
         {
-            using (ErrorContext.Callin())
+            var conv = Convertors.Get(outputType);
+            using (Error.Contract())
             {
-                object result;
-                if (TryChangedType(input, outputType, out result) == false)
+                if (conv == null)
                 {
-                    ThrowError(input, outputType);
+                    Error.ConvertorNotFound(outputType);
+                    Error.ThrowIfHaveError();
+                }
+
+                bool success;
+                var result = conv.ChangeType(input, outputType, out success);
+                if (success == false)
+                {
+                    Error.CastFail(input, outputType);
+                    Error.ThrowIfHaveError();
                 }
                 return result;
             }
@@ -264,12 +80,38 @@ namespace blqw
         /// <param name="defaultValue">转换失败时返回的默认值</param>
         public static object ChangeType(this object input, Type outputType, object defaultValue)
         {
-            object result;
-            if (TryChangedType(input, outputType, out result) == false)
+            var conv = Convertors.Get(outputType);
+
+            if (conv == null)
+            {
+                return defaultValue;
+            }
+
+            bool success;
+            var result = conv.ChangeType(input, outputType, out success);
+            if (success == false)
             {
                 return defaultValue;
             }
             return result;
+        }
+        
+
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <typeparam name="T"> 换转后的类型 </typeparam>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="success">是否成功</param>
+        public static T To<T>(this object input, out bool success)
+        {
+            var conv = Convertors.Get<T>();
+            if (conv == null)
+            {
+                success = false;
+                return default(T);
+            }
+            return conv.ChangeType(input, typeof(T), out success);
         }
 
         /// <summary> 返回一个指定类型的对象，该对象的值等效于指定的对象。转换失败抛出异常
@@ -278,12 +120,21 @@ namespace blqw
         /// <param name="input">需要转换类型的对象</param>
         public static T To<T>(this object input)
         {
-            using (ErrorContext.Callin())
+            var conv = Convertors.Get<T>();
+            using (Error.Contract())
             {
-                T result;
-                if (TryTo<T>(input, out result) == false)
+                if (conv == null)
                 {
-                    ThrowError(input, typeof(T));
+                    Error.ConvertorNotFound(typeof(T));
+                    Error.ThrowIfHaveError();
+                }
+
+                bool success;
+                var result = conv.ChangeType(input, typeof(T), out success);
+                if (success == false)
+                {
+                    Error.CastFail(input, typeof(T));
+                    Error.ThrowIfHaveError();
                 }
                 return result;
             }
@@ -296,41 +147,21 @@ namespace blqw
         /// <param name="defaultValue">转换失败时返回的默认值</param>
         public static T To<T>(this object input, T defaultValue)
         {
-            T result;
-            if (TryTo<T>(input, out result) == false)
+            var conv = Convertors.Get<T>();
+            if (conv == null)
+            {
+                return defaultValue;
+            }
+
+            bool success;
+            var result = conv.ChangeType(input, typeof(T), out success);
+            if (success == false)
             {
                 return defaultValue;
             }
             return result;
         }
-
-        /// <summary> 尝试将指定对象转换为指定类型的值。返回是否转换成功
-        /// </summary>
-        /// <param name="input">需要转换类型的对象</param>
-        /// <param name="outputType">要返回的对象的类型</param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为null</param>
-        public static bool TryChangedType(this object input, Type outputType, out object result)
-        {
-            var conv = GetConvertor(outputType);
-            return conv.Try(input, outputType, out result);
-        }
-
-        /// <summary> 尝试将指定对象转换为指定类型的值。返回是否转换成功
-        /// </summary>
-        /// <typeparam name="T">要返回的对象类型的泛型</typeparam>
-        /// <param name="input">需要转换类型的对象</param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为default(T)</param>
-        public static bool TryTo<T>(this object input, out T result)
-        {
-            var conv = GetConvertor<T>();
-            if (conv == null)
-            {
-                return CObject.TryTo<T>(input, typeof(T), out result);
-            }
-            return conv.Try(input, typeof(T), out result);
-        }
-
-
+        
         /// <summary> 转为动态类型
         /// </summary>
         public static dynamic ToDynamic(this object obj)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -10,6 +11,7 @@ namespace blqw
 
     /// <summary> 转换器
     /// </summary>
+    [InheritedExport(typeof(IConvertor))]
     public interface IConvertor
     {
         /// <summary>
@@ -26,6 +28,11 @@ namespace blqw
         /// (有可能是泛型定义类型)
         /// </summary>
         Type OutputType { get; }
+
+        /// <summary>
+        /// 输出类型的名称
+        /// </summary>
+        string OutputTypeName { get; }
 
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定对象。

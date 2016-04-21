@@ -57,7 +57,6 @@ namespace blqw
             return _convType.MakeGenericType(outputType.GetGenericArguments());
         }
 
-        void IConvertor.Initialize() { }
 
     }
 }

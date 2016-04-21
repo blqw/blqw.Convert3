@@ -19,11 +19,6 @@ namespace blqw
 
         protected IConvertor<T> This;
         private bool _IsOverrideImpl;
-        public BaseConvertor()
-        {
-            This = this;
-            _IsOverrideImpl = this.GetType().GetMethod("ChangeTypeImpl").DeclaringType != typeof(BaseConvertor<T>);
-        }
 
         /// <summary> 转换器优先级,默认0
         /// </summary>
@@ -32,8 +27,16 @@ namespace blqw
         /// <summary> 转换器的输出类型
         /// </summary>
         public virtual Type OutputType { get { return _outputType; } }
-        
-        void IConvertor.Initialize() { Initialize(); }
+
+        public string OutputTypeName { get; private set; }
+
+        void IConvertor.Initialize()
+        {
+            This = this;
+            _IsOverrideImpl = this.GetType().GetMethod("ChangeTypeImpl").DeclaringType != typeof(BaseConvertor<T>);
+            OutputTypeName = CType.GetFriendlyName(OutputType);
+            Initialize();
+        }
         /// <summary>
         /// 允许子类重写初始化操作
         /// </summary>
@@ -148,7 +151,7 @@ namespace blqw
         {
             return This.ChangeType(input, outputType, out success);
         }
-        
+
         IConvertor IConvertor.GetConvertor(Type outputType)
         {
             throw new NotSupportedException();
