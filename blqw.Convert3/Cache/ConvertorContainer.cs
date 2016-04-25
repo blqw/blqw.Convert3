@@ -13,12 +13,35 @@ namespace blqw
     /// <summary> 
     /// 转换器容器
     /// </summary>
-    public class ConvertorContainer
+    public sealed class ConvertorContainer
     {
+        public static readonly ConvertorContainer Default = new ConvertorContainer();
+
+        public static IConvertor<string> StringConvertor
+        {
+            get
+            {
+                return GenericCache<string>.Convertor;
+            }
+        }
+
+        public static IConvertor<long> Int64Convertor
+        {
+            get
+            {
+                return GenericCache<long>.Convertor;
+            }
+        }
+
+        private ConvertorContainer()
+        {
+            _cache = new ConcurrentDictionary<Type, IConvertor>();
+            ReLoad();
+        }
+
         /// <summary> 标准的字典缓存
         /// </summary>
-        private static readonly ConcurrentDictionary<Type, IConvertor> _cache 
-            = new ConcurrentDictionary<Type, IConvertor>();
+        private readonly ConcurrentDictionary<Type, IConvertor> _cache;
 
         class Import
         {
@@ -29,8 +52,9 @@ namespace blqw
         /// <summary>
         /// 加载转换器
         /// </summary>
-        public void Load()
+        internal void ReLoad()
         {
+            _cache.Clear();
             var import = new Import();
             MEFPart.Import(import);
             import.Convertors.ForEach(it => it.Initialize());
@@ -54,27 +78,32 @@ namespace blqw
                 return conv;
             }
 
-            conv = OnOptimal(key, MatchConvertor(key))?.GetConvertor(key);
+            conv = OnOptimal(MatchConvertor(key), key)?.GetConvertor(key);
             if (conv == null)
             {
                 throw new NotSupportedException("无法获取与当前类型匹配的转换器");
             }
+            conv.Initialize();
             _cache.TryAdd(key, conv);
             return conv;
         }
 
-        private IConvertor OnOptimal(Type outputType, IEnumerable<IConvertor> convertors)
+        /// <summary>
+        /// 选出最符合输出类型的转换器
+        /// </summary>
+        /// <param name="convertors"></param>
+        /// <param name="outputType"></param>
+        /// <returns></returns>
+        private IConvertor OnOptimal(IEnumerable<IConvertor> convertors, Type outputType)
         {
             return convertors?.FirstOrDefault();
         }
-
-
 
         /// <summary> 泛型缓存
         /// </summary>
         class GenericCache<Key>
         {
-            public static IConvertor<Key> Convertor;
+            public static IConvertor<Key> Convertor = Default.Get(typeof(Key)) as IConvertor<Key>;
         }
 
         /// <summary> 获取缓存值
@@ -82,8 +111,11 @@ namespace blqw
         /// <typeparam name="Key">缓存键的类型</typeparam>
         public IConvertor<Key> Get<Key>()
         {
-            return GenericCache<Key>.Convertor
-                ?? (GenericCache<Key>.Convertor = Get(typeof(Key)) as IConvertor<Key>);
+            if (ReferenceEquals(this, Default))
+            {
+                return GenericCache<Key>.Convertor;
+            }
+            return Get(typeof(Key)) as IConvertor<Key>;
         }
 
         private IEnumerable<IConvertor> MatchConvertor(Type key)

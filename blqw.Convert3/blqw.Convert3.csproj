@@ -61,6 +61,7 @@
     <Compile Include="Converts\CEnum.cs" />
     <Compile Include="Converts\CGuid.cs" />
     <Compile Include="Converts\CIDictionary.cs" />
+    <Compile Include="Converts\CValueType.cs" />
     <Compile Include="Converts\Generic\CIDictionaryT.cs" />
     <Compile Include="Converts\CIList.cs" />
     <Compile Include="Converts\Generic\CIListT.cs" />

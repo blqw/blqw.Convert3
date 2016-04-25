@@ -6,52 +6,16 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CBoolean : SystemTypeConvertor<bool>
     {
-
-        protected override bool Try(object input, out bool result)
-        {
-            var conv = input as IConvertible;
-            if (conv != null)
-            {
-                switch (conv.GetTypeCode())
-                {
-                    case TypeCode.Boolean:
-                        result = conv.ToBoolean(null);
-                        return true;
-                    case TypeCode.Empty:
-                    case TypeCode.DBNull:
-                    case TypeCode.DateTime:
-                        result = false;
-                        return false;
-                    case TypeCode.Byte: result = conv.ToByte(null) != 0; return true;
-                    case TypeCode.Char: result = conv.ToChar(null) != 0; return true;
-                    case TypeCode.Int16: result = conv.ToInt16(null) != 0; return true;
-                    case TypeCode.Int32: result = conv.ToInt32(null) != 0; return true;
-                    case TypeCode.Int64: result = conv.ToInt64(null) != 0; return true;
-                    case TypeCode.SByte: result = conv.ToSByte(null) != 0; return true;
-                    case TypeCode.Double: result = conv.ToDouble(null) != 0; return true;
-                    case TypeCode.Single: result = conv.ToSingle(null) != 0; return true;
-                    case TypeCode.UInt16: result = conv.ToUInt16(null) != 0; return true;
-                    case TypeCode.UInt32: result = conv.ToUInt32(null) != 0; return true;
-                    case TypeCode.UInt64: result = conv.ToUInt64(null) != 0; return true;
-                    case TypeCode.Decimal: result = conv.ToDecimal(null) != 0; return true;
-                    default:
-                        break;
-                }
-            }
-            result = false;
-            return false;
-        }
-
-        protected override bool Try(string input, out bool result)
+        protected override bool ChangeType(string input, Type outputType, out bool success)
         {
             if (input == null)
             {
-                result = false;
-                return false;
+                success = false;
+                return default(bool);
             }
+            success = true;
             switch (input.Length)
             {
                 case 1:
@@ -65,7 +29,6 @@ namespace blqw
                         case '真':
                         case '是':
                         case '男':
-                            result = true;
                             return true;
                         case '0':
                         case 'F':
@@ -75,8 +38,7 @@ namespace blqw
                         case '假':
                         case '否':
                         case '女':
-                            result = false;
-                            return true;
+                            return false;
                         default:
                             break;
                     }
@@ -84,30 +46,62 @@ namespace blqw
                 case 2:
                     if (input[0] == '-' && input[1] == '1')
                     {
-                        result = true;
                         return true;
                     }
                     break;
                 case 4:
                     if (input.Equals("true", StringComparison.OrdinalIgnoreCase))
                     {
-                        result = true;
                         return true;
                     }
                     break;
                 case 5:
                     if (input.Equals("false", StringComparison.OrdinalIgnoreCase))
                     {
-                        result = false;
-                        return true;
+                        return false;
                     }
                     break;
                 default:
                     break;
             }
 
-            result = false;
-            return false;
+            success = false;
+            return default(bool);
+        }
+
+        protected override bool ChangeType(object input, Type outputType, out bool success)
+        {
+            success = true;
+            var conv = input as IConvertible;
+            if (conv != null)
+            {
+                switch (conv.GetTypeCode())
+                {
+                    case TypeCode.Boolean:
+                        return conv.ToBoolean(null);
+                    case TypeCode.Empty:
+                    case TypeCode.DBNull:
+                    case TypeCode.DateTime:
+                        success = false;
+                        return default(bool);
+                    case TypeCode.Byte: return conv.ToByte(null) != 0;
+                    case TypeCode.Char: return conv.ToChar(null) != 0;
+                    case TypeCode.Int16: return conv.ToInt16(null) != 0;
+                    case TypeCode.Int32: return conv.ToInt32(null) != 0;
+                    case TypeCode.Int64: return conv.ToInt64(null) != 0;
+                    case TypeCode.SByte: return conv.ToSByte(null) != 0;
+                    case TypeCode.Double: return conv.ToDouble(null) != 0;
+                    case TypeCode.Single: return conv.ToSingle(null) != 0;
+                    case TypeCode.UInt16: return conv.ToUInt16(null) != 0;
+                    case TypeCode.UInt32: return conv.ToUInt32(null) != 0;
+                    case TypeCode.UInt64: return conv.ToUInt64(null) != 0;
+                    case TypeCode.Decimal: return conv.ToDecimal(null) != 0;
+                    default:
+                        break;
+                }
+            }
+            success = false;
+            return default(bool);
         }
     }
 }

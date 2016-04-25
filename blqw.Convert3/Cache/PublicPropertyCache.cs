@@ -52,7 +52,7 @@ namespace blqw
             return result;
         }
 
-        private static PropertyHandler GetPropertyHandler(PropertyInfo property)
+        internal static PropertyHandler GetPropertyHandler(this PropertyInfo property)
         {
             if (property == null)
             {

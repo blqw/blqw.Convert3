@@ -7,176 +7,169 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    public class CSByte : SystemTypeConvertor<SByte>
+    public class CSByte : SystemTypeConvertor<sbyte>
     {
-        [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-        protected override bool Try(object input, out sbyte result)
+        protected override sbyte ChangeType(string input, Type outputType, out bool success)
+        {
+            sbyte result;
+            if (sbyte.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (CString.IsHexString(ref input))
+            {
+                success = sbyte.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
+            }
+            success = false;
+            return default(sbyte);
+        }
+
+        protected override sbyte ChangeType(object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (sbyte)1 : (sbyte)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (sbyte)1 : (sbyte)0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
+                        success = false;
+                        return default(sbyte);
                     case TypeCode.Byte:
                         {
                             var a = conv.ToByte(null);
-                            if (a > 127)
+                            if (a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.Char:
                         {
                             var a = conv.ToChar(null);
-                            if (a > 127)
+                            if (a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.Int16:
                         {
                             var a = conv.ToInt16(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
+                            
                         }
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.SByte:
                         {
                             var a = conv.ToSByte(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
+                            
                         }
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.UInt16:
                         {
                             var a = conv.ToUInt16(null);
-                            if (a > 127)
+                            if (a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
+                            
                         }
                     case TypeCode.UInt32:
                         {
                             var a = conv.ToUInt32(null);
-                            if (a > 127)
+                            if (a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.UInt64:
                         {
                             var a = conv.ToUInt64(null);
                             if (a > 127)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
-                            if (a < -128 || a > 127)
+                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(sbyte);
                             }
-                            result = (sbyte)a;
-                            return true;
+                            return (sbyte)a;
                         }
                     default:
                         break;
                 }
             }
-            result = 0;
-            return false;
-        }
-
-        protected override bool Try(string input, out sbyte result)
-        {
-            if (sbyte.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return sbyte.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
+            success = false;
+            return default(sbyte);
         }
     }
 }

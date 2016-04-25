@@ -9,13 +9,8 @@ namespace blqw
 {
     public class CInt32 : SystemTypeConvertor<int>
     {
-        public override int ChangeType(string input, Type outputType, out bool success)
+        protected override int ChangeType(string input, Type outputType, out bool success)
         {
-            if (input == null || input.Length == 0)
-            {
-                success = false;
-                return 0;
-            }
             int result;
             if (int.TryParse(input, out result))
             {
@@ -31,7 +26,7 @@ namespace blqw
             return 0;
         }
 
-        public override int ChangeType(object input, Type outputType, out bool success)
+        protected override int ChangeType(object input, Type outputType, out bool success)
         {
             if (input == null)
             {

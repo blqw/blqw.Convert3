@@ -1,4 +1,5 @@
-﻿using System;
+﻿using blqw.Convert3Component;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -9,58 +10,50 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    class CNameValueCollection : AdvancedConvertor<NameValueCollection>
+    public class CNameValueCollection : AdvancedConvertor<NameValueCollection>
     {
-        static IConvertor<string> _stringConvertor;
-
-        protected override void Initialize()
+        protected override NameValueCollection ChangeType(object input, Type outputType, out bool success)
         {
-            _stringConvertor = Convert3.GetConvertor<string>();
-        }
-
-        protected override bool Try(object input, Type outputType, out NameValueCollection result)
-        {
+            if (input == null)
+            {
+                success = true;
+                return null;
+            }
+            var helper = new NVCollectiontHelper(outputType);
+            if (helper.CreateInstance() == false)
+            {
+                success = false;
+                return null;
+            }
+            success = true;
             var nv = input as NameValueCollection;
             if (nv != null)
             {
-                var arg = new ConvertHelper(outputType);
                 foreach (string name in nv)
                 {
-                    if (arg.Add(name, nv[name]) == false)
+                    if (helper.Add(name, nv[name]) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = arg.Collection;
-                return true;
+                return helper.Collection;
             }
 
-            var rv = input as DataRowView;
-            DataRow row;
-            if (rv != null)
-            {
-                row = rv.Row;
-            }
-            else
-            {
-                row = input as DataRow;
-            }
+            var row = (input as DataRowView)?.Row ?? (input as DataRow);
             if (row != null && row.Table != null)
             {
-                var arg = new ConvertHelper(outputType);
+                var arg = new NVCollectiontHelper(outputType);
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
                 {
                     if (arg.Add(col.ColumnName, row[col]) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = arg.Collection;
-                return true;
+                return helper.Collection;
             }
 
             var reader = input as IDataReader;
@@ -68,112 +61,153 @@ namespace blqw
             {
                 if (reader.IsClosed)
                 {
-                    ErrorContext.Error = new InvalidCastException("DataReader已经关闭");
-                    result = null;
-                    return false;
+                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    success = false;
+                    return null;
                 }
-                var arg = new ConvertHelper(outputType);
+                var arg = new NVCollectiontHelper(outputType);
                 var cols = Enumerable.Range(0, reader.FieldCount).Select(i => new { name = reader.GetName(i), i });
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
                     if (arg.Add(reader.GetName(i), reader.GetValue, i) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = arg.Collection;
-                return true;
+                return helper.Collection;
             }
 
             var dict = input as IDictionary;
             if (dict != null)
             {
-                var arg = new ConvertHelper(outputType);
+                var arg = new NVCollectiontHelper(outputType);
                 foreach (DictionaryEntry item in dict)
                 {
                     if (arg.Add(item.Key, item.Value) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = arg.Collection;
-                return true;
+                return helper.Collection;
             }
-
 
             var ps = PublicPropertyCache.GetByType(input.GetType());
             if (ps.Length > 0)
             {
-                var arg = new ConvertHelper(outputType);
+                var arg = new NVCollectiontHelper(outputType);
                 foreach (var p in ps)
                 {
                     if (p.Get != null && arg.Add(p.Name, p.Get, input) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = arg.Collection;
-                return true;
+                return helper.Collection;
             }
+            success = false;
+            return null;
+        }
 
-            ErrorContext.CastFail(input, outputType);
-            result = null;
-            return false;
+        protected override NameValueCollection ChangeType(string input, Type outputType, out bool success)
+        {
+            if (input[0] == '{' && input[input.Length - 1] == '}')
+            {
+                try
+                {
+                    var result = Component.ToJsonObject(outputType, input);
+                    success = true;
+                    return (NameValueCollection)result;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                }
+            }
+            success = false;
+            return null;
         }
 
 
-        struct ConvertHelper
+        struct NVCollectiontHelper
         {
             public readonly NameValueCollection Collection;
-            public ConvertHelper(Type type)
+            private Type _type;
+            public NVCollectiontHelper(Type type)
             {
-                Collection = (NameValueCollection)Activator.CreateInstance(type);
+                _type = type;
+                Collection = null;
             }
 
+            internal bool CreateInstance()
+            {
+                try
+                {
+                    Collection = (NameValueCollection)Activator.CreateInstance(_type);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    return false;
+                }
+            }
             public bool Add(object key, object value)
             {
-                string skey, svalue;
-                if (_stringConvertor.Try(key, null, out skey) == false)
+                var conv = ConvertorContainer.StringConvertor;
+                bool b;
+                var skey = conv.ChangeType(key, typeof(string), out b);
+                if (b == false)
                 {
                     return false;
                 }
-                if (_stringConvertor.Try(value, null, out svalue) == false)
+                var svalue = conv.ChangeType(value, typeof(string), out b);
+                if (b == false)
                 {
                     return false;
                 }
-                Collection.Add(skey, svalue);
-                return true;
+                try
+                {
+                    Collection.Add(skey, svalue);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    return false;
+                }
             }
 
             public bool Add<P>(object key, Func<P, object> getValue, P param)
             {
-                string skey, svalue;
-                if (_stringConvertor.Try(key, null, out skey) == false)
+                var conv = ConvertorContainer.StringConvertor;
+                bool b;
+                var skey = conv.ChangeType(key, typeof(string), out b);
+                if (b == false)
                 {
                     return false;
                 }
-                var value = getValue(param);
-                if (_stringConvertor.Try(value, null, out svalue) == false)
+                try
                 {
+                    var value = getValue(param);
+                    var svalue = conv.ChangeType(value, typeof(string), out b);
+                    if (b == false)
+                    {
+                        return false;
+                    }
+                    Collection.Add(skey, svalue);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
                     return false;
                 }
-                Collection.Add(skey, svalue);
-                return true;
             }
         }
 
 
-        protected override bool Try(string input, Type outputType, out NameValueCollection result)
-        {
-            if (input[0] == '{' && input[input.Length - 1] == '}')
-            {
-                return CJsonObject.TryTo(input, outputType, out result);
-            }
-            result = null;
-            return false;
-        }
     }
 }

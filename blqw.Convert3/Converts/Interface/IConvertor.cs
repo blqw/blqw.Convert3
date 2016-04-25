@@ -57,6 +57,7 @@ namespace blqw
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="outputType"/>不是<see cref="OutputType"/>的子类</exception>
         /// <exception cref="ArgumentNullException"><paramref name="outputType"/>是null</exception>
         IConvertor GetConvertor(Type outputType);
+        
     }
 
     /// <summary> 泛型转换器

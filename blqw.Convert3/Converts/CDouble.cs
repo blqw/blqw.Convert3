@@ -7,36 +7,53 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CDouble : SystemTypeConvertor<Double>
+    public class CDouble : SystemTypeConvertor<double>
     {
-        protected override bool Try(object input, out double result)
+        protected override double ChangeType(string input, Type outputType, out bool success)
+        {
+            double result;
+            if (double.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (CString.IsHexString(ref input)
+                && double.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result))
+            {
+                success = true;
+                return result;
+            }
+            success = false;
+            return default(double);
+        }
+
+        protected override double ChangeType(object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (Double)1 : (Double)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (Double)1 : (Double)0;   
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
-                    case TypeCode.Byte: result = conv.ToByte(null); return true;
-                    case TypeCode.Char: result = (Double)conv.ToChar(null); return true;
-                    case TypeCode.Int16: result = (Double)conv.ToInt16(null); return true;
-                    case TypeCode.Int32: result = (Double)conv.ToInt32(null); return true;
-                    case TypeCode.Int64: result = (Double)conv.ToInt64(null); return true;
-                    case TypeCode.SByte: result = (Double)conv.ToSByte(null); return true;
-                    case TypeCode.Double: result = (Double)conv.ToDouble(null); return true;
-                    case TypeCode.Single: result = (Double)conv.ToSingle(null); return true;
-                    case TypeCode.UInt16: result = (Double)conv.ToUInt16(null); return true;
-                    case TypeCode.UInt32: result = (Double)conv.ToUInt32(null); return true;
-                    case TypeCode.UInt64: result = (Double)conv.ToUInt64(null); return true;
-                    case TypeCode.Decimal: result = (Double)conv.ToDecimal(null); return true;
+                        success = false;
+                        return default(double);
+                    case TypeCode.Byte: return conv.ToByte(null); 
+                    case TypeCode.Char: return (Double)conv.ToChar(null); 
+                    case TypeCode.Int16: return (Double)conv.ToInt16(null); 
+                    case TypeCode.Int32: return (Double)conv.ToInt32(null); 
+                    case TypeCode.Int64: return (Double)conv.ToInt64(null); 
+                    case TypeCode.SByte: return (Double)conv.ToSByte(null); 
+                    case TypeCode.Double: return (Double)conv.ToDouble(null); 
+                    case TypeCode.Single: return (Double)conv.ToSingle(null); 
+                    case TypeCode.UInt16: return (Double)conv.ToUInt16(null); 
+                    case TypeCode.UInt32: return (Double)conv.ToUInt32(null); 
+                    case TypeCode.UInt64: return (Double)conv.ToUInt64(null); 
+                    case TypeCode.Decimal: return (Double)conv.ToDecimal(null); 
                     default:
                         break;
                 }
@@ -48,27 +65,13 @@ namespace blqw
                 {
                     if (bs.Length == 8)
                     {
-                        result = BitConverter.ToDouble(bs, 0);
-                        return true;
+                        success = true;
+                        return BitConverter.ToDouble(bs, 0);
                     }
                 }
             }
-            result = 0;
-            return false;
-        }
-
-        protected override bool Try(string input, out double result)
-        {
-            if (double.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return double.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
+            success = false;
+            return default(double);
         }
     }
 }

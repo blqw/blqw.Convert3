@@ -8,68 +8,79 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CArray<T> : AdvancedConvertor<Array>
+    public class CArray : AdvancedConvertor<Array>
     {
-        protected override bool Try(object input, Type outputType, out Array result)
-        {
-            var emab = input as IEnumerable;
-            var emtr = emab == null ? input as IEnumerator : emab.GetEnumerator();
-            if (emtr == null)
-            {
-                result = null;
-                return false;
-            }
-            var elementType = outputType.GetElementType();
-            var conv = Convert3.GetConvertor(elementType);
-            if (conv == null)
-            {
-                ErrorContext.ConvertorNotFound(elementType);
-                result = null;
-                return false;
-            }
-
-            var array = new ArrayList();
-            while (emtr.MoveNext())
-            {
-                object value;
-                if (conv.Try(emtr.Current, elementType, out value) == false)
-                {
-                    WriteFail(emtr.Current);
-                    result = null;
-                    return false;
-                }
-                array.Add(value);
-            }
-            result = array.ToArray(elementType);
-            return true;
-        }
-
-        readonly static string[] Separator = { ", ", "," };
-
-        protected override bool Try(string input, Type outputType, out Array result)
-        {
-            
-        }
-
-        static void WriteFail(object value)
-        {
-            var str = value == null ? "<null>" : value.ToString();
-            ErrorContext.Error = new ArrayTypeMismatchException(value + " 写入数组失败!");
-        }
-
-        public override Array ChangeType(object input, Type outputType, out bool success)
+        protected override Array ChangeType(string input, Type outputType, out bool success)
         {
             throw new NotImplementedException();
         }
 
-        public override Array ChangeType(string input, Type outputType, out bool success)
+        protected override Array ChangeType(object input, Type outputType, out bool success)
         {
-            if (input.Length == 0)
+            throw new NotImplementedException();
+        }
+
+        protected override IConvertor GetConvertor(Type outputType)
+        {
+            var type = typeof(CArray<>).MakeGenericType(outputType);
+            var conv = (IConvertor)Activator.CreateInstance(type);
+            return conv;
+        }
+    }
+
+    public class CArray<T> : CArray
+    {
+        readonly static string[] Separator = { ", ", "," };
+        
+        private IConvertor<T> _ElementConvertor;
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+            _ElementConvertor = ConvertorContainer.Default.Get<T>();
+        }
+
+        protected override Array ChangeType(object input, Type outputType, out bool success)
+        {
+            if (input == null)
             {
                 success = true;
-                return Array.CreateInstance(outputType.GetElementType(), 0);
+                return null;
             }
+            var ee = (input as IEnumerable)?.GetEnumerator() 
+                    ?? input as IEnumerator;
+            if (ee == null)
+            {
+                success = false;
+                return null;
+            }
+            var conv = _ElementConvertor;
+            if (conv == null)
+            {
+                Error.ConvertorNotFound(typeof(T));
+                success = false;
+                return null;
+            }
+
+            var array = new ArrayList();
+            var elementType = _ElementConvertor.OutputType;
+            while (ee.MoveNext())
+            {
+                var value = conv.ChangeType(ee.Current, elementType, out success);
+                if (success == false)
+                {
+                    Error.Add(new ArrayTypeMismatchException($"{value?.ToString() ?? "<null>"} 写入数组失败!"));
+                    success = false;
+                    return null;
+                }
+                array.Add(value);
+            }
+            success = true;
+            return array.ToArray(elementType);
+        }
+
+        protected override Array ChangeType(string input, Type outputType, out bool success)
+        {
             input = input.Trim();
             if (input[0] == '[' && input[input.Length - 1] == ']')
             {
@@ -82,39 +93,33 @@ namespace blqw
                 catch (Exception ex)
                 {
                     Error.Add(ex);
+                    success = false;
+                    return null;
                 }
+            }
+
+            var conv = _ElementConvertor;
+            if (conv == null)
+            {
+                Error.ConvertorNotFound(typeof(T));
                 success = false;
                 return null;
             }
-            var elementType = outputType.GetElementType();
-            var conv = Convert3.GetConvertor(outputType.GetElementType());
-            if (conv == null)
-            {
-                ErrorContext.ConvertorNotFound(elementType);
-                result = null;
-                return false;
-            }
             var items = input.Split(Separator, StringSplitOptions.None);
-            var array = Array.CreateInstance(elementType, items.Length);
+            var array = Array.CreateInstance(conv.OutputType, items.Length);
             for (int i = 0; i < items.Length; i++)
             {
-                object value;
-                if (conv.Try(items[i], elementType, out value) == false)
+                var value = conv.ChangeType(items[i], conv.OutputType, out success);
+                if (success == false)
                 {
-                    WriteFail(items[i]);
-                    result = null;
-                    return false;
+                    Error.Add(new ArrayTypeMismatchException($"{value?.ToString() ?? "<null>"} 写入数组失败!"));
+                    success = false;
+                    return null;
                 }
                 array.SetValue(value, i);
             }
-
-            result = array;
-            return true;
-        }
-
-        protected override IConvertor GetConvertor(Type outputType)
-        {
-            return base.GetConvertor(outputType);
+            success = true;
+            return array;
         }
     }
 }

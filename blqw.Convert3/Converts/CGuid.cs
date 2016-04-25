@@ -8,9 +8,9 @@ namespace blqw
 {
     public class CGuid : SystemTypeConvertor<Guid>
     {
-        public override Guid ChangeType(string input, Type outputType, out bool success)
+        protected override Guid ChangeType(string input, Type outputType, out bool success)
         {
-            if (input == null || input.Length == 0)
+            if (input.Length == 0)
             {
                 success = false;
                 return Guid.Empty;
@@ -20,7 +20,7 @@ namespace blqw
             return result;
         }
 
-        public override Guid ChangeType(object input, Type outputType, out bool success)
+        protected override Guid ChangeType(object input, Type outputType, out bool success)
         {
             var bs = input as byte[];
             if (bs != null && bs.Length == 16)

@@ -48,7 +48,10 @@ namespace blqw
         /// <param name="input"> 需要转换类型的对象 </param>
         /// <param name="outputType"> 换转后的类型 </param>
         /// <param name="success">是否成功</param>
-        public abstract T ChangeType(object input, Type outputType, out bool success);
+        public T ChangeType(object input, out bool success)
+        {
+            return This.ChangeType(input, OutputType, out success);
+        }
 
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定字符串对象。
@@ -56,17 +59,42 @@ namespace blqw
         /// <param name="input"> 需要转换类型的字符串对象 </param>
         /// <param name="outputType"> 换转后的类型 </param>
         /// <param name="success">是否成功</param>
-        public abstract T ChangeType(string input, Type outputType, out bool success);
+        public T ChangeType(string input, out bool success)
+        {
+            return This.ChangeType(input, OutputType, out success);
+        }
+
+
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success">是否成功</param>
+        protected abstract T ChangeType(object input, Type outputType, out bool success);
+
+        /// <summary> 
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success">是否成功</param>
+        protected abstract T ChangeType(string input, Type outputType, out bool success);
 
         protected virtual T ChangeTypeImpl(object input, Type outputType, out bool success)
         {
             return ChangeType(input, outputType, out success);
         }
 
+
         T IConvertor<T>.ChangeType(object input, Type outputType, out bool success)
         {
+            if (input == null)
+            {
+                return This.ChangeType(input, outputType, out success);
+            }
             var str = input as string;
-            if (str != null || input == null)
+            if (str != null)
             {
                 return This.ChangeType(str, outputType, out success);
             }
@@ -75,7 +103,7 @@ namespace blqw
             try
             {
                 //类型相同直接转换
-                if (input is T)
+                if (outputType.IsAssignableFrom(input.GetType()))
                 {
                     success = true;
                     return (T)input;
@@ -89,11 +117,10 @@ namespace blqw
                 {
                     return result;
                 }
-
-
+                
                 Error.BeginTransaction();
                 //尝试转string后转换
-                str = Convert3.ChangeType<string>(input, out success);
+                str = ConvertorContainer.StringConvertor.ChangeType(input, typeof(string), out success);
                 if (success)
                 {
                     Error.EndTransaction();

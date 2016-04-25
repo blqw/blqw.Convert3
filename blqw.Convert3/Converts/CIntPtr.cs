@@ -6,33 +6,20 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CIntPtr : SystemTypeConvertor<IntPtr>
     {
-        protected override bool Try(object input, out IntPtr result)
+        protected override IntPtr ChangeType(string input, Type outputType, out bool success)
         {
-            var conv = Convert3.GetConvertor<Int64>();
-            long r;
-            if (conv.Try(input, null, out r))
-            {
-                result = new IntPtr(r);
-                return true;
-            }
-            result = default(IntPtr);
-            return false;
+            var conv = ConvertorContainer.Int64Convertor;
+            var num = ConvertorContainer.Int64Convertor.ChangeType(input, typeof(long), out success);
+            return (success) ? new IntPtr(num) : default(IntPtr);
         }
 
-        protected override bool Try(string input, out IntPtr result)
+        protected override IntPtr ChangeType(object input, Type outputType, out bool success)
         {
-            var conv = Convert3.GetConvertor<Int64>();
-            long r;
-            if (conv.Try(input, null, out r))
-            {
-                result = new IntPtr(r);
-                return true;
-            }
-            result = default(IntPtr);
-            return false;
+            var conv = ConvertorContainer.Int64Convertor;
+            var num = ConvertorContainer.Int64Convertor.ChangeType(input, typeof(long), out success);
+            return (success) ? new IntPtr(num) : default(IntPtr);
         }
     }
 }

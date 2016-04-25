@@ -7,115 +7,123 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CInt16 : SystemTypeConvertor<Int16>
+    public class CInt16 : SystemTypeConvertor<short>
     {
-        protected override bool Try(object input, out short result)
+        protected override short ChangeType(string input, Type outputType, out bool success)
         {
+            short result;
+            if (short.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (CString.IsHexString(ref input))
+            {
+                success = short.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
+            }
+            success = false;
+            return default(short);
+        }
+
+        protected override short ChangeType(object input, Type outputType, out bool success)
+        {
+            success = true;
             var conv = input as IConvertible;
             if (conv != null)
             {
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (short)1 : (short)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (short)1 : (short)0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
-                    case TypeCode.Byte: result = conv.ToByte(null); return true;
-                    case TypeCode.Char: result = (short)conv.ToChar(null); return true;
-                    case TypeCode.Int16: result = conv.ToInt16(null); return true;
+                        success = false;
+                        return default(short);
+                    case TypeCode.Byte: return conv.ToByte(null);
+                    case TypeCode.Char: return (short)conv.ToChar(null);
+                    case TypeCode.Int16: return conv.ToInt16(null);
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
                             if (a < -32768 || a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
                             if (a < -32768 || a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
-                    case TypeCode.SByte: result = (short)conv.ToSByte(null); return true;
+                    case TypeCode.SByte: return (short)conv.ToSByte(null);
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
                             if (a < -32768 || a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
                             if (a < -32768 || a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.UInt16:
                         {
                             var a = conv.ToUInt16(null);
                             if (a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.UInt32:
                         {
                             var a = conv.ToUInt32(null);
                             if (a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.UInt64:
                         {
                             var a = conv.ToUInt64(null);
                             if (a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
                             if (a < -32768 || a > 32767)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(short);
                             }
-                            result = (short)a;
-                            return true;
+                            return (short)a;
                         }
                     default:
                         break;
@@ -128,27 +136,13 @@ namespace blqw
                 {
                     if (bs.Length == 2)
                     {
-                        result = BitConverter.ToInt16(bs, 0);
-                        return true;
+                        return BitConverter.ToInt16(bs, 0);
                     }
                 }
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(short);
         }
-
-        protected override bool Try(string input, out short result)
-        {
-            if (short.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return short.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
-        }
+        
     }
 }

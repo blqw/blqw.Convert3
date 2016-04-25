@@ -7,50 +7,65 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CSingle : SystemTypeConvertor<Single>
+    public class CSingle : SystemTypeConvertor<float>
     {
-        protected override bool Try(object input, out float result)
+        protected override float ChangeType(string input, Type outputType, out bool success)
+        {
+            float result;
+            if (float.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (CString.IsHexString(ref input))
+            {
+                success = float.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
+            }
+            success = false;
+            return 0;
+        }
+
+        protected override float ChangeType(object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (Single)1 : (Single)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (Single)1 : (Single)0;
+
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
+                        success = false;
+                        return default(float);
                     case TypeCode.Byte:
-                        result = conv.ToByte(null);
-                        return true;
+                        return conv.ToByte(null);
                     case TypeCode.Char:
-                        result = (Single)conv.ToChar(null);
-                        return true;
-                    case TypeCode.Int16: result = (Single)conv.ToInt16(null); return true;
-                    case TypeCode.Int32: result = (Single)conv.ToInt32(null); return true;
-                    case TypeCode.Int64: result = (Single)conv.ToInt64(null); return true;
-                    case TypeCode.SByte: result = (Single)conv.ToSByte(null); return true;
+                        return (Single)conv.ToChar(null);
+                    case TypeCode.Int16: return (Single)conv.ToInt16(null);
+                    case TypeCode.Int32: return (Single)conv.ToInt32(null);
+                    case TypeCode.Int64: return (Single)conv.ToInt64(null);
+                    case TypeCode.SByte: return (Single)conv.ToSByte(null);
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
                             if (a < Single.MinValue || a > Single.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(float);
                             }
-                            result = (Single)a;
-                            return true;
+                            return (Single)a;
+
                         }
-                    case TypeCode.Single: result = (Single)conv.ToSingle(null); return true;
-                    case TypeCode.UInt16: result = (Single)conv.ToUInt16(null); return true;
-                    case TypeCode.UInt32: result = (Single)conv.ToUInt32(null); return true;
-                    case TypeCode.UInt64: result = (Single)conv.ToUInt64(null); return true;
-                    case TypeCode.Decimal: result = (Single)conv.ToDecimal(null); return true;
+                    case TypeCode.Single: return (Single)conv.ToSingle(null);
+                    case TypeCode.UInt16: return (Single)conv.ToUInt16(null);
+                    case TypeCode.UInt32: return (Single)conv.ToUInt32(null);
+                    case TypeCode.UInt64: return (Single)conv.ToUInt64(null);
+                    case TypeCode.Decimal: return (Single)conv.ToDecimal(null);
                     default:
                         break;
                 }
@@ -62,27 +77,14 @@ namespace blqw
                 {
                     if (bs.Length == 4)
                     {
-                        result = BitConverter.ToSingle(bs, 0);
-                        return true;
+                        success = true;
+                        return BitConverter.ToSingle(bs, 0);
                     }
                 }
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(float);
         }
 
-        protected override bool Try(string input, out float result)
-        {
-            if (float.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return float.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
-        }
     }
 }

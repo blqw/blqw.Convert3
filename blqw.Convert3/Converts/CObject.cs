@@ -12,57 +12,49 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CObject : AdvancedConvertor<object>, IIgnoreInherit
+    public class CObject : AdvancedConvertor<object>
     {
-        protected override bool Try(object input, Type outputType, out object result)
+        protected override object ChangeType(object input, Type outputType, out bool success)
         {
             if (input == null)
             {
-                result = null;
-                return true;
+                success = true;
+                return null;
             }
+            var obj = new SetObjectProperty(outputType);
+            if (obj.CreateInstance() == false)
+            {
+                success = false;
+                return null;
+            }
+            success = true;
             var nv = input as NameValueCollection;
             if (nv != null)
             {
-                var obj = new SetObjectProperty(outputType);
                 foreach (string name in nv)
                 {
                     if (obj.Set(name, nv[name]) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = obj.Instance;
-                return true;
+                return obj.Instance;
             }
 
-            var rv = input as DataRowView;
-            DataRow row;
-            if (rv != null)
-            {
-                row = rv.Row;
-            }
-            else
-            {
-                row = input as DataRow;
-            }
-
+            var row = (input as DataRowView)?.Row ?? (input as DataRow);
             if (row != null && row.Table != null)
             {
-                var obj = new SetObjectProperty(outputType);
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
                 {
                     if (obj.Set(col.ColumnName, row[col]) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = obj.Instance;
-                return true;
+                return obj.Instance;
             }
 
             var reader = input as IDataReader;
@@ -70,70 +62,111 @@ namespace blqw
             {
                 if (reader.IsClosed)
                 {
-                    ErrorContext.Error = new InvalidCastException("DataReader已经关闭");
-                    result = null;
-                    return false;
+                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    success = false;
+                    return null;
                 }
-                var obj = new SetObjectProperty(outputType);
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
                     if (obj.Set(reader.GetName(i), reader.GetValue, i) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = obj.Instance;
-                return true;
+                return obj.Instance;
             }
 
             var dict = input as IDictionary;
             if (dict != null)
             {
-                var obj = new SetObjectProperty(outputType);
                 foreach (DictionaryEntry item in dict)
                 {
                     var name = item.Key as string;
                     if (name != null && obj.Set(name, item.Value) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = obj.Instance;
-                return true;
+                return obj.Instance;
             }
 
             var ps = PublicPropertyCache.GetByType(input.GetType());
             if (ps.Length > 0)
             {
-                var obj = new SetObjectProperty(outputType);
                 foreach (var p in ps)
                 {
                     if (p.Get != null && obj.Set(p.Name, p.Get, input) == false)
                     {
-                        result = null;
-                        return false;
+                        success = false;
+                        return null;
                     }
                 }
-                result = obj.Instance;
-                return true;
+                return obj.Instance;
             }
-            ErrorContext.CastFail(input, outputType);
-            result = null;
-            return false;
+            success = false;
+            return null;
+
         }
+
+        protected override object ChangeType(string input, Type outputType, out bool success)
+        {
+            try
+            {
+                var type = Type.GetType(input, false, true);
+                if (type == null)
+                {
+                    Error.Add(new TypeLoadException($"没有找到名为 {input} 的类型"));
+                    success = false;
+                    return null;
+                }
+                else if (outputType.IsAssignableFrom(type) == false)
+                {
+                    Error.CastFail(type, outputType);
+                    success = false;
+                    return null;
+                }
+
+                outputType = type;
+                success = true;
+                return Activator.CreateInstance(type, true);
+            }
+            catch (Exception ex)
+            {
+                Error.Add(ex);
+            }
+            success = false;
+            return null;
+        }
+
 
         struct SetObjectProperty
         {
             PropertyHandler[] _properties;
             int _propertyCount;
-            public readonly object Instance;
+            public object Instance;
+            Type _type;
             public SetObjectProperty(Type type)
             {
                 _properties = PublicPropertyCache.GetByType(type);
                 _propertyCount = _properties.Length;
-                Instance = Activator.CreateInstance(type);
+                _type = type;
+                Instance = null;
+            }
+
+            public bool CreateInstance()
+            {
+                try
+                {
+                    Instance = Activator.CreateInstance(_type);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    return false;
+                }
             }
 
             private PropertyHandler GetProperty(string name)
@@ -154,13 +187,7 @@ namespace blqw
                 var p = GetProperty(name);
                 if (p != null && p.Set != null)
                 {
-                    if (Convert3.TryChangedType(value, p.Property.PropertyType, out value))
-                    {
-                        p.Set(Instance, value);
-                        return true;
-                    }
-                    ErrorContext.Error = WriteFail(p.Property);
-                    return false;
+                    return p.SetValue(Instance, value);
                 }
                 return true;
             }
@@ -171,96 +198,10 @@ namespace blqw
                 if (p != null && p.Set != null)
                 {
                     var value = getValue(param);
-                    if (Convert3.TryChangedType(value, p.Property.PropertyType, out value))
-                    {
-                        p.Set(Instance, value);
-                        return true;
-                    }
-                    ErrorContext.Error = WriteFail(p.Property);
-                    return false;
+                    return p.SetValue(Instance, value);
                 }
                 return true;
             }
-
-            private NotImplementedException WriteFail(PropertyInfo p)
-            {
-                return new NotImplementedException(CType.GetFriendlyName(p.ReflectedType) + "." + p.Name + " 赋值失败");
-            }
-        }
-
-        protected override bool Try(string input, Type outputType, out object result)
-        {
-            try
-            {
-                var type = Type.GetType(input, false, true);
-                if (type == null)
-                {
-                    ErrorContext.Error = new TypeLoadException("没有找到名为 " + input + " 的类型");
-                    result = null;
-                    return false;
-                }
-                else if (outputType.IsAssignableFrom(type) == false)
-                {
-                    ErrorContext.CastFail(type, outputType);
-                    result = null;
-                    return false;
-                }
-
-                outputType = type;
-                result = Activator.CreateInstance(type, true);
-                return true;
-            }
-            catch (FileLoadException ex)
-            {
-                ErrorContext.CastFail(input, outputType);
-            }
-            catch (TargetInvocationException ex)
-            {
-                ErrorContext.Error = ex;
-                Trace.TraceInformation(CType.GetFriendlyName(outputType) + ",初始化失败:" + ex.Message);
-            }
-            catch (Exception ex)
-            {
-                ErrorContext.Error = ex;
-            }
-            result = null;
-            return false;
-        }
-
-        static IConvertor<object> _convertor = new CObject();
-
-        /// <summary> 尝试将指定对象转换为指定类型的值。返回是否转换成功
-        /// </summary>
-        /// <param name="input"> 需要转换类型的对象 </param>
-        /// <param name="outputType"> 换转后的类型 </param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为default(T)</param>
-        public static bool TryTo<T>(object input, Type outputType, out T result)
-        {
-            object r;
-            if (_convertor.Try(input, outputType, out r))
-            {
-                result = (T)r;
-                return true;
-            }
-            result = default(T);
-            return false;
-        }
-
-        /// <summary> 尝试将指定对象转换为指定类型的值。返回是否转换成功
-        /// </summary>
-        /// <param name="input"> 需要转换类型的对象 </param>
-        /// <param name="outputType"> 换转后的类型 </param>
-        /// <param name="result">如果转换成功,则包含转换后的对象,否则为default(T)</param>
-        public static bool TryTo<T>(string input, Type outputType, out T result)
-        {
-            object r;
-            if (_convertor.Try(input, outputType, out r))
-            {
-                result = (T)r;
-                return true;
-            }
-            result = default(T);
-            return false;
         }
     }
 }

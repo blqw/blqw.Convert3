@@ -7,80 +7,93 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CInt64 : SystemTypeConvertor<Int64>
+    public class CInt64 : SystemTypeConvertor<long>
     {
-        protected override bool Try(object input, out long result)
+        protected override long ChangeType(string input, Type outputType, out bool success)
+        {
+            long result;
+            if (long.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (CString.IsHexString(ref input))
+            {
+                success = long.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
+            }
+            success = false;
+            return default(long);
+        }
+
+        protected override long ChangeType(object input, Type outputType, out bool success)
+
         {
             if (input == null)
             {
-                result = 0;
-                return false;
+                success = false;
+                return default(long);
             }
+            success = true;
             var conv = input as IConvertible;
             if (conv != null)
             {
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (long)1 : (long)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (long)1 : (long)0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
-                    case TypeCode.Byte: result = (long)conv.ToByte(null); return true;
-                    case TypeCode.Char: result = (long)conv.ToChar(null); return true;
-                    case TypeCode.Int16: result = (long)conv.ToInt16(null); return true;
-                    case TypeCode.Int32: result = (long)conv.ToInt32(null); return true;
-                    case TypeCode.Int64: result = (long)conv.ToInt64(null); return true;
-                    case TypeCode.SByte: result = (long)conv.ToSByte(null); return true;
+                        success = false;
+                        return default(long);
+                    case TypeCode.Byte: return (long)conv.ToByte(null); 
+                    case TypeCode.Char: return (long)conv.ToChar(null); 
+                    case TypeCode.Int16: return (long)conv.ToInt16(null); 
+                    case TypeCode.Int32: return (long)conv.ToInt32(null); 
+                    case TypeCode.Int64: return (long)conv.ToInt64(null); 
+                    case TypeCode.SByte: return (long)conv.ToSByte(null); 
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
-                            if (a < -9223372036854775808L || a > 9223372036854775807L)
+                            if (a < long.MinValue || a > long.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(long);
                             }
-                            result = (long)a;
-                            return true;
+                            return (long)a;
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
-                            if (a < -9223372036854775808L || a > 9223372036854775807L)
+                            if (a < long.MinValue || a > long.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(long);
                             }
-                            result = (long)a;
-                            return true;
+                            return (long)a;
                         }
-                    case TypeCode.UInt16: result = (long)conv.ToUInt16(null); return true;
-                    case TypeCode.UInt32: result = (long)conv.ToUInt32(null); return true;
+                    case TypeCode.UInt16: return (long)conv.ToUInt16(null); 
+                    case TypeCode.UInt32: return (long)conv.ToUInt32(null); 
                     case TypeCode.UInt64:
                         {
                             var a = conv.ToUInt64(null);
-                            if (a > 9223372036854775807L)
+                            if (a > long.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(long);
                             }
-                            result = (long)a;
-                            return true;
+                            return (long)a;
                         }
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
-                            if (a < -9223372036854775808L || a > 9223372036854775807L)
+                            if (a < long.MinValue || a > long.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(long);
                             }
-                            result = (long)a;
-                            return true;
+                            return (long)a;
                         }
                     default:
                         break;
@@ -88,45 +101,29 @@ namespace blqw
             }
             else if (input is IntPtr)
             {
-                result = ((IntPtr)input).ToInt64();
-                return true;
+                return ((IntPtr)input).ToInt64();
             }
             else if (input is UIntPtr)
             {
                 var a = ((UIntPtr)input).ToUInt64();
-                if (a > 9223372036854775807L)
+                if (a > long.MaxValue)
                 {
-                    result = 0;
-                    return false;
+                    success = false;
+                    return default(long);
                 }
-                result = (long)a;
-                return true;
+                return (long)a;
             }
             else
             {
                 var bs = input as byte[];
                 if (bs != null && bs.Length == 8)
                 {
-                    result = BitConverter.ToInt64(bs, 0);
-                    return true;
+                    return BitConverter.ToInt64(bs, 0);
                 }
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(long);
         }
 
-        protected override bool Try(string input, out long result)
-        {
-            if (long.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return long.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
-        }
     }
 }

@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CDateTime : SystemTypeConvertor<DateTime>
     {
-        protected override bool Try(object input, out DateTime result)
+        static readonly string[] Formats = new[] { "yyyyMMddHHmmss", "yyyyMMddHHmmssfff" }; 
+        
+        protected override DateTime ChangeType(object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
             if (conv != null)
@@ -18,8 +19,8 @@ namespace blqw
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.DateTime:
-                        result = conv.ToDateTime(null);
-                        return true;
+                        success = true;
+                        return conv.ToDateTime(null);
                     case TypeCode.Byte:
                     case TypeCode.Boolean:
                     case TypeCode.Empty:
@@ -35,22 +36,31 @@ namespace blqw
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
                     case TypeCode.Decimal:
-                        result = default(DateTime);
-                        return false;
+                        success = false;
+                        return default(DateTime);
                     default:
                         break;
                 }
             }
-            result = default(DateTime);
-            return false;
+            success = false;
+            return default(DateTime);
         }
 
-        static readonly string[] Formats = new[] { "yyyyMMddHHmmss", "yyyyMMddHHmmssfff" }; 
-
-        protected override bool Try(string input, out DateTime result)
+        protected override DateTime ChangeType(string input, Type outputType, out bool success)
         {
-            return DateTime.TryParse(input, out  result)
-                || DateTime.TryParseExact(input, Formats, null, DateTimeStyles.None, out  result);
+            DateTime result;
+            if (DateTime.TryParse(input, out result))
+            {
+                success = true;
+                return result;
+            }
+            if (DateTime.TryParseExact(input, Formats, null, DateTimeStyles.None, out result))
+            {
+                success = true;
+                return result;
+            }
+            success = false;
+            return default(DateTime);
         }
     }
 }

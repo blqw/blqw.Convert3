@@ -7,16 +7,48 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CEnum : AdvancedConvertor<Enum>
+    public class CEnum : SystemTypeConvertor<Enum>, IConvertor
     {
-        protected override bool Try(object input, Type enumType, out Enum result)
+        protected override Enum ChangeType(string input, Type outputType, out bool success)
         {
-            return Try(input, enumType, out result, true);
+            if (input.Length == 0)
+            {
+                success = false;
+                return null;
+            }
+            Enum result;
+            try
+            {
+                result = (Enum)Enum.Parse(outputType, input, true);
+            }
+            catch (Exception ex)
+            {
+                Error.Add(ex);
+                success = false;
+                return null;
+            }
+
+            if (Enum.IsDefined(outputType, result))
+            {
+                success = true;
+                return result;
+            }
+            if (Attribute.IsDefined(outputType, typeof(FlagsAttribute)))
+            {
+                if (result.ToString().Contains(","))
+                {
+                    success = true;
+                    return result;
+                }
+                Error.CastFail($"{result.ToString()} 不是有效的枚举值");
+            }
+            success = false;
+            return null;
         }
-        
-        private bool Try(object input, Type enumType, out Enum result, bool switchType)
+
+        protected override Enum ChangeType(object input, Type outputType, out bool success)
         {
+            success = true;
             var conv = input as IConvertible;
             if (conv != null)
             {
@@ -25,100 +57,37 @@ namespace blqw
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                    case TypeCode.Decimal:
                     case TypeCode.Boolean:
-                        result = null;
-                        return false;
-                    case TypeCode.Byte: result = (Enum)Enum.ToObject(enumType, conv.ToByte(null)); return true;
-                    case TypeCode.Char: result = (Enum)Enum.ToObject(enumType, conv.ToChar(null)); return true;
-                    case TypeCode.Int16: result = (Enum)Enum.ToObject(enumType, conv.ToInt16(null)); return true;
-                    case TypeCode.Int32: result = (Enum)Enum.ToObject(enumType, conv.ToInt32(null)); return true;
-                    case TypeCode.Int64: result = (Enum)Enum.ToObject(enumType, conv.ToInt64(null)); return true;
-                    case TypeCode.SByte: result = (Enum)Enum.ToObject(enumType, conv.ToInt64(null)); return true;
-                    case TypeCode.Double: result = (Enum)Enum.ToObject(enumType, conv.ToDouble(null)); return true;
-                    case TypeCode.Single: result = (Enum)Enum.ToObject(enumType, conv.ToSingle(null)); return true;
-                    case TypeCode.UInt16: result = (Enum)Enum.ToObject(enumType, conv.ToUInt16(null)); return true;
-                    case TypeCode.UInt32: result = (Enum)Enum.ToObject(enumType, conv.ToUInt32(null)); return true;
-                    case TypeCode.UInt64: result = (Enum)Enum.ToObject(enumType, conv.ToUInt64(null)); return true;
+                        success = false;
+                        return null;
+                    case TypeCode.Decimal:
+                    case TypeCode.Byte: 
+                    case TypeCode.Char: 
+                    case TypeCode.Int16: 
+                    case TypeCode.Int32: 
+                    case TypeCode.Int64: 
+                    case TypeCode.SByte: 
+                    case TypeCode.Double: 
+                    case TypeCode.Single: 
+                    case TypeCode.UInt16: 
+                    case TypeCode.UInt32: 
+                    case TypeCode.UInt64:
+                        return (Enum)Enum.ToObject(outputType, conv.ToUInt64(null));
                     default:
                         break;
                 }
             }
-            else if (switchType)
-            {
-                var row = input as DataRow;
-                if (row != null)
-                {
-                    var arr = row.ItemArray;
-                    if (arr.Length > 0)
-                    {
-                        return Try(arr[0], enumType, out result, false);
-                    }
-                    result = null;
-                    return false;
-                }
-                var rv = input as DataRowView;
-                if (rv != null)
-                {
-                    if (rv.DataView.Table.Columns.Count > 0)
-                    {
-                        return Try(rv[0], enumType, out result, false);
-                    }
-                    result = null;
-                    return false;
-                }
-                var reader = input as IDataReader;
-                if (reader != null)
-                {
-                    if (reader.FieldCount > 0)
-                    {
-                        return Try(reader.GetValue(0), enumType, out result, false);
-                    }
-                    result = null;
-                    return false;
-                }
-
-            }
-            result = null;
-            return false;
+            success = false;
+            return null;
         }
 
-        protected override bool Try(string input, Type enumType, out Enum result)
+        IConvertor IConvertor.GetConvertor(Type outputType)
         {
-            if (input == null || input.Length == 0)
-            {
-                ErrorContext.CastFail(input, enumType);
-                result = null;
-                return false;
-            }
-            try
-            {
-                result = (Enum)Enum.Parse(enumType, input, true);
-            }
-            catch (Exception ex)
-            {
-                ErrorContext.Error = ex;
-                result = null;
-                return false;
-            }
-
-            if (Enum.IsDefined(enumType, result))
-            {
-                return true;
-            }
-            if (Attribute.IsDefined(enumType, typeof(FlagsAttribute)))
-            {
-                var b = result.ToString().Contains(", ");
-                if (b)
-                {
-                    return true;
-                }
-                ErrorContext.Error = new InvalidCastException(result.ToString() + " 不是有效的值");
-                return false;
-            }
-            ErrorContext.CastFail(input, enumType);
-            return false;
-
-        }
+            if (outputType == null)
+                throw new ArgumentNullException(nameof(outputType));
+            if (outputType.IsEnum == false)
+                throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}必须是枚举");
+            return this;
+        }        
     }
 }

@@ -6,139 +6,137 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CChar : SystemTypeConvertor<char>
     {
-        protected override bool Try(object input, out char result)
+        protected override char ChangeType(string input, Type outputType, out bool success)
+        {
+            if (input.Length == 1)
+            {
+                success = true;
+                return input[0];
+            }
+            success = false;
+            return default(char);
+        }
+
+        protected override char ChangeType(object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? 'T' : 'F';
-                        return true;
+                        return conv.ToBoolean(null) ? 'T' : 'F';
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = default(char);
-                        return false;
+                        success = false;
+                        return default(char);
                     case TypeCode.Byte:
-                        result = (char)conv.ToByte(null);
-                        return true;
+                        return (char)conv.ToByte(null);
                     case TypeCode.Char:
-                        result = conv.ToChar(null);
-                        return true;
+                        return conv.ToChar(null);
                     case TypeCode.Int16:
                         {
                             var a = conv.ToInt16(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.SByte:
                         {
                             var a = conv.ToSByte(null);
                             if (a < 0)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.UInt16:
                         {
                             var a = conv.ToUInt16(null);
                             if (a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.UInt32:
                         {
                             var a = conv.ToUInt32(null);
                             if (a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.UInt64:
                         {
                             var a = conv.ToUInt64(null);
                             if (a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
                             if (a < 0 || a > 255)
                             {
-                                result = default(char);
-                                return false;
+                                success = false;
+                                return default(char);
                             }
-                            result = (char)a;
-                            return true;
+                            return (char)a;
                         }
                     default:
                         break;
@@ -151,29 +149,19 @@ namespace blqw
                 {
                     if (bs.Length == 1)
                     {
-                        result = (char)bs[0];
-                        return true;
+                        success = true;
+                        return (char)bs[0];
                     }
                     if (bs.Length == 2)
                     {
-                        result = BitConverter.ToChar(bs, 0);
-                        return true;
+                        success = true;
+                        return BitConverter.ToChar(bs, 0);
                     }
                 }
             }
-            result = default(char);
-            return false;
+            success = false;
+            return default(char);
         }
 
-        protected override bool Try(string input, out char result)
-        {
-            if (input != null && input.Length == 1)
-            {
-                result = input[0];
-                return true;
-            }
-            result = default(char);
-            return false;
-        }
     }
 }

@@ -31,6 +31,7 @@ namespace blqw
         public PropertyHandler(PropertyInfo property)
         {
             Property = property;
+            Convertor = ConvertorContainer.Default.Get(Property.PropertyType);
             Name = property.Name;
             if (GetGeter != null && GetSeter != null)
             {
@@ -62,5 +63,37 @@ namespace blqw
         public Action<object, object> Set { get; }
         public PropertyInfo Property { get; }
         public string Name { get; }
+        public IConvertor Convertor { get; }
+
+        public bool SetValue(object target, object value)
+        {
+            if (Set == null)
+            {
+                Error.Add(new NotSupportedException($"{Property.ReflectedType}.{Property.Name}属性没有set"));
+                return false;
+            }
+            if (Convertor == null)
+            {
+                Error.ConvertorNotFound(Property.PropertyType);
+                return false;
+            }
+            bool b;
+            var v = Convertor.ChangeType(value, Property.PropertyType, out b);
+            if (b == false)
+            {
+                Error.Add(new NotSupportedException($"{Property.ReflectedType}.{Property.Name}属性赋值失败"));
+                return false;
+            }
+            try
+            {
+                Set(target, v);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Error.Add(ex);
+                return false;
+            }
+        }
     }
 }

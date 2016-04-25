@@ -84,12 +84,11 @@ namespace blqw.Dynamic
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
             var p = this[binder.Name];
-            if (p == null || p.Set == null)
+            if (p == null)
             {
                 return false;
             }
-            p.Set(_Entity, value);
-            return true;
+            return p.SetValue(_Entity, value);
         }
 
 
