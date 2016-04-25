@@ -8,75 +8,8 @@ using blqw.Convert3Component;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CString : SystemTypeConvertor<string>, IConvertor<string>
+    public class CString : SystemTypeConvertor<string>
     {
-        protected override bool Try(object input, out string result)
-        {
-            var str = input as string;
-            if (str != null)
-            {
-                result = str;
-                return true;
-            }
-
-            if (input == null || input is DBNull)
-            {
-                result = null;
-                return true;
-            }
-
-            if (input is bool)
-            {
-                result = (bool)input ? "true" : "false";
-                return true;
-            }
-
-            var convertible = input as IConvertible;
-            if (convertible != null)
-            {
-                result = convertible.ToString(null);
-                return true;
-            }
-            
-            var format = input as IFormattable;
-            if (format != null)
-            {
-                result = format.ToString(null, null);
-                return true;
-            }
-
-            var type = input as Type;
-            if (type != null)
-            {
-                result = CType.GetFriendlyName(type); 
-                return true;
-            }
-
-            var bs = input as byte[];
-            if (bs != null)
-            {
-                result = Encoding.UTF8.GetString(bs);
-                return true;
-            }
-
-            var ps = input.GetType().GetProperties();
-            if (ps.Length > 0)
-            {
-                result = Component.ToJsonString(input);
-                return true;
-            }
-
-            result = input.ToString();
-            return true;
-        }
-
-        protected override bool Try(string input, out string result)
-        {
-            result = input;
-            return true;
-        }
-
         /// <summary> 判断是否为16进制格式的字符串,如果为true,将参数s的前缀(0x/&h)去除
         /// </summary>
         /// <param name="s">需要判断的字符串</param>
@@ -122,6 +55,64 @@ namespace blqw
             }
             return false;
         }
-        
+
+        public override string ChangeType(object input, Type outputType, out bool success)
+        {
+            success = true;
+
+            var str = input as string;
+            if (str != null)
+            {
+                return str;
+            }
+
+            if (input == null || input is DBNull)
+            {
+                return null;
+            }
+
+            if (input is bool)
+            {
+                return (bool)input ? "true" : "false";
+            }
+
+            var convertible = input as IConvertible;
+            if (convertible != null)
+            {
+                return convertible.ToString(null);
+            }
+
+            var format = input as IFormattable;
+            if (format != null)
+            {
+                return format.ToString(null, null);
+            }
+
+            var type = input as Type;
+            if (type != null)
+            {
+                return CType.GetFriendlyName(type);
+            }
+
+            var bs = input as byte[];
+            if (bs != null)
+            {
+                return Encoding.UTF8.GetString(bs);
+            }
+
+            var ps = input.GetType().GetProperties();
+            if (ps.Length > 0)
+            {
+                return Component.ToJsonString(input);
+            }
+
+            return input.ToString();
+        }
+
+        public override string ChangeType(string input, Type outputType, out bool success)
+        {
+            success = true;
+            return input;
+        }
     }
 }

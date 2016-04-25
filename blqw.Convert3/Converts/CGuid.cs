@@ -6,35 +6,31 @@ using System.Threading.Tasks;
 
 namespace blqw
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CGuid : SystemTypeConvertor<Guid>
     {
-        protected override bool Try(object input, out Guid result)
+        public override Guid ChangeType(string input, Type outputType, out bool success)
+        {
+            if (input == null || input.Length == 0)
+            {
+                success = false;
+                return Guid.Empty;
+            }
+            Guid result;
+            success = Guid.TryParse(input, out result);
+            return result;
+        }
+
+        public override Guid ChangeType(object input, Type outputType, out bool success)
         {
             var bs = input as byte[];
             if (bs != null && bs.Length == 16)
             {
-                result = new Guid(bs);
-                return true;
+                success = true;
+                return new Guid(bs);
             }
-            result = default(Guid);
-            return false;
+            success = false;
+            return default(Guid);
         }
-
-        protected override bool Try(string input, out Guid result)
-        {
-            if (input == null || input.Length == 0)
-            {
-                result = Guid.Empty;
-                return false;
-            }
-
-            if (Guid.TryParse(input, out result))
-            {
-                return true;
-            }
-            result = Guid.Empty;
-            return false;
-        }
+        
     }
 }

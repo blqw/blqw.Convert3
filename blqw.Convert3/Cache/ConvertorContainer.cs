@@ -11,20 +11,14 @@ using System.Collections.Generic;
 namespace blqw
 {
     /// <summary> 
-    /// 转换器集合
+    /// 转换器容器
     /// </summary>
-    public class ConvertorCollection
+    public class ConvertorContainer
     {
         /// <summary> 标准的字典缓存
         /// </summary>
-        private readonly ConcurrentDictionary<Type, IConvertor> _cache = new ConcurrentDictionary<Type, IConvertor>();
-
-        /// <summary> 泛型缓存
-        /// </summary>
-        class GenericCache<Key>
-        {
-            public static IConvertor<Key> Convertor;
-        }
+        private static readonly ConcurrentDictionary<Type, IConvertor> _cache 
+            = new ConcurrentDictionary<Type, IConvertor>();
 
         class Import
         {
@@ -45,8 +39,9 @@ namespace blqw
                 _cache.TryAdd(conv.OutputType, conv);
             }
         }
-        
-        /// <summary> 获取缓存值
+
+
+        /// <summary> 获取转换器
         /// </summary>
         /// <param name="key">缓存键</param>
         public IConvertor Get(Type key)
@@ -59,13 +54,27 @@ namespace blqw
                 return conv;
             }
 
-            conv = MatchConvertor(key).FirstOrDefault()?.GetConvertor(key);
+            conv = OnOptimal(key, MatchConvertor(key))?.GetConvertor(key);
             if (conv == null)
             {
                 throw new NotSupportedException("无法获取与当前类型匹配的转换器");
             }
             _cache.TryAdd(key, conv);
             return conv;
+        }
+
+        private IConvertor OnOptimal(Type outputType, IEnumerable<IConvertor> convertors)
+        {
+            return convertors?.FirstOrDefault();
+        }
+
+
+
+        /// <summary> 泛型缓存
+        /// </summary>
+        class GenericCache<Key>
+        {
+            public static IConvertor<Key> Convertor;
         }
 
         /// <summary> 获取缓存值
@@ -111,6 +120,6 @@ namespace blqw
                 }
             }
         }
-        
+
     }
 }

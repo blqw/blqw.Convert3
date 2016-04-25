@@ -30,7 +30,8 @@ List<Dictionary<string, object>>.To<DataTable>();
 new { ID=1, Name="blqw"}.To<User>(); //匿名类转换
 
 //变态嵌套
-Dictionary<Guid, Dictionary<int, User>>.To<Dictionary<string, Dictionary<DateTime, NameValueCollection>>>(); //不能理解就算了
+Dictionary<Guid, Dictionary<int, User>>
+    .To<Dictionary<string, Dictionary<DateTime, NameValueCollection>>>(); //不能理解就算了
 ```
 
 ## 更新说明  

@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="Cache\PropertyHandler.cs" />
     <Compile Include="Cache\PublicPropertyCache.cs" />
-    <Compile Include="Cache\ConvertorCollection.cs" />
+    <Compile Include="Cache\ConvertorContainer.cs" />
     <Compile Include="Convert3.cs" />
     <Compile Include="Convert3_NumberToUpper.cs" />
     <Compile Include="Converts\CArray.cs" />

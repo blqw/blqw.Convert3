@@ -18,11 +18,11 @@ namespace blqw
     {
         #region private
 
-        public static ConvertorCollection Convertors { get; } = Initialize();
+        public static ConvertorContainer Convertors { get; } = Initialize();
 
-        private static ConvertorCollection Initialize()
+        private static ConvertorContainer Initialize()
         {
-            var convertors = new ConvertorCollection();
+            var convertors = new ConvertorContainer();
             convertors.Load();
             return convertors;
         }

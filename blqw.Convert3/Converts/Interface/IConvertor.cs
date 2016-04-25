@@ -50,7 +50,7 @@ namespace blqw
         object ChangeType(string input, Type outputType, out bool success);
 
         /// <summary>
-        /// 根据<paramref name="outputType"/>返回一个<see cref="IConvertor"/>,<paramref name="outputType"/> 应该是当前转换器<see cref="OutputType"/> 的子类 
+        /// 根据<paramref name="outputType"/>返回一个<see cref="IConvertor"/>,<paramref name="outputType"/>应该是当前转换器<see cref="OutputType"/> 的兼容类型
         /// </summary>
         /// <param name="outputType">返回值类型</param>
         /// <returns></returns>
