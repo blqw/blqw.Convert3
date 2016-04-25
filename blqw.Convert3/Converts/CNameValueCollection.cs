@@ -43,11 +43,10 @@ namespace blqw.Converts
             var row = (input as DataRowView)?.Row ?? (input as DataRow);
             if (row != null && row.Table != null)
             {
-                var arg = new NVCollectiontHelper(outputType);
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
                 {
-                    if (arg.Add(col.ColumnName, row[col]) == false)
+                    if (helper.Add(col.ColumnName, row[col]) == false)
                     {
                         success = false;
                         return null;
@@ -65,11 +64,10 @@ namespace blqw.Converts
                     success = false;
                     return null;
                 }
-                var arg = new NVCollectiontHelper(outputType);
                 var cols = Enumerable.Range(0, reader.FieldCount).Select(i => new { name = reader.GetName(i), i });
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    if (arg.Add(reader.GetName(i), reader.GetValue, i) == false)
+                    if (helper.Add(reader.GetName(i), reader.GetValue, i) == false)
                     {
                         success = false;
                         return null;
@@ -81,10 +79,9 @@ namespace blqw.Converts
             var dict = input as IDictionary;
             if (dict != null)
             {
-                var arg = new NVCollectiontHelper(outputType);
                 foreach (DictionaryEntry item in dict)
                 {
-                    if (arg.Add(item.Key, item.Value) == false)
+                    if (helper.Add(item.Key, item.Value) == false)
                     {
                         success = false;
                         return null;
@@ -96,10 +93,9 @@ namespace blqw.Converts
             var ps = PublicPropertyCache.GetByType(input.GetType());
             if (ps.Length > 0)
             {
-                var arg = new NVCollectiontHelper(outputType);
                 foreach (var p in ps)
                 {
-                    if (p.Get != null && arg.Add(p.Name, p.Get, input) == false)
+                    if (p.Get != null && helper.Add(p.Name, p.Get, input) == false)
                     {
                         success = false;
                         return null;

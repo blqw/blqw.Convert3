@@ -15,7 +15,13 @@ namespace blqw
     /// </summary>
     public sealed class ConvertorContainer
     {
-        public static readonly ConvertorContainer Default = new ConvertorContainer();
+        static ConvertorContainer()
+        {
+            Default = new ConvertorContainer();
+            Default.ReLoad();
+        }
+        public static readonly ConvertorContainer Default;
+
 
         public static IConvertor<string> StringConvertor
         {
@@ -44,7 +50,6 @@ namespace blqw
         private ConvertorContainer()
         {
             _cache = new ConcurrentDictionary<Type, IConvertor>();
-            ReLoad();
         }
 
         /// <summary> 标准的字典缓存
@@ -65,11 +70,15 @@ namespace blqw
             _cache.Clear();
             var import = new Import();
             MEFPart.Import(import);
-            import.Convertors.ForEach(it => it.Initialize());
             foreach (var conv in import.Convertors)
             {
-                _cache.TryAdd(conv.OutputType, conv);
+                var get = _cache.GetOrAdd(conv.OutputType, conv);
+                if (ReferenceEquals(get, conv) == false && conv.Priority > get.Priority)
+                {
+                    _cache.TryUpdate(conv.OutputType, conv, get);
+                }
             }
+            import.Convertors.ForEach(it => it.Initialize());
         }
 
 
@@ -104,7 +113,8 @@ namespace blqw
         /// <returns></returns>
         private IConvertor OnOptimal(IEnumerable<IConvertor> convertors, Type outputType)
         {
-            return convertors?.FirstOrDefault();
+            return convertors?.Where(it => it.OutputType != typeof(object)).FirstOrDefault()
+                    ?? convertors.FirstOrDefault();
         }
 
         /// <summary> 泛型缓存
@@ -121,44 +131,49 @@ namespace blqw
         {
             if (ReferenceEquals(this, Default))
             {
-                return GenericCache<Key>.Convertor;
+                return GenericCache<Key>.Convertor
+                    ?? (GenericCache<Key>.Convertor = Default.Get(typeof(Key)) as IConvertor<Key>);
             }
             return Get(typeof(Key)) as IConvertor<Key>;
         }
 
         private IEnumerable<IConvertor> MatchConvertor(Type key)
         {
-            IConvertor conv;
-            var baseType = key.BaseType;
+            var baseType = key;
             while (baseType != null)
             {
-                if (_cache.TryGetValue(baseType, out conv))
+                var conv = TryGetConvertor(baseType);
+                if (conv != null)
                 {
                     yield return conv;
-                }
-                else if (baseType.IsGenericType && baseType.IsGenericTypeDefinition == false)
-                {
-                    if (_cache.TryGetValue(baseType.GetGenericTypeDefinition(), out conv))
-                    {
-                        yield return conv;
-                    }
                 }
                 baseType = baseType.BaseType;
             }
             foreach (var @interface in key.GetInterfaces())
             {
-                if (_cache.TryGetValue(@interface, out conv))
+                var conv = TryGetConvertor(@interface);
+                if (conv != null)
                 {
                     yield return conv;
                 }
-                else if (@interface.IsGenericType && @interface.IsGenericTypeDefinition == false)
+            }
+        }
+
+        private IConvertor TryGetConvertor(Type type)
+        {
+            IConvertor conv;
+            if (_cache.TryGetValue(type, out conv))
+            {
+                return conv;
+            }
+            else if (type.IsGenericType && type.IsGenericTypeDefinition == false)
+            {
+                if (_cache.TryGetValue(type.GetGenericTypeDefinition(), out conv))
                 {
-                    if (_cache.TryGetValue(@interface.GetGenericTypeDefinition(), out conv))
-                    {
-                        yield return conv;
-                    }
+                    return conv;
                 }
             }
+            return null;
         }
 
     }

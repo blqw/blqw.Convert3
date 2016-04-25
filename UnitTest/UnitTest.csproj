@@ -60,6 +60,11 @@
       <Name>blqw.Convert3</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="blqw.Json.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

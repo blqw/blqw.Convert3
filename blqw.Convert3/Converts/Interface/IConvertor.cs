@@ -63,7 +63,7 @@ namespace blqw
     /// <summary> 泛型转换器
     /// </summary>
     /// <typeparam name="T">输出类型泛型</typeparam>
-    public interface IConvertor<T> : IConvertor
+    public interface IConvertor<out T> : IConvertor
     {
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定对象。

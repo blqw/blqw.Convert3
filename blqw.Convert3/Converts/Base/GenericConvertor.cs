@@ -29,11 +29,13 @@ namespace blqw.Converts
                 throw new ArgumentNullException(nameof(outputType));
             if (OutputType.IsGenericType == false)
                 throw new ArgumentOutOfRangeException(nameof(outputType), "必须是泛型");
-            
+
             Type[] genericTypes;
             if (IsCompatible(OutputType, outputType, out genericTypes))
             {
-                return GetConvertor(outputType, genericTypes);
+                var conv = GetConvertor(outputType, genericTypes);
+                var type = typeof(InnerConvertor<>).MakeGenericType(conv.OutputType, outputType);
+                return (IConvertor)Activator.CreateInstance(type, conv);
             }
             throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}无法兼容类型{OutputType}");
         }
@@ -104,10 +106,35 @@ namespace blqw.Converts
             return false;
         }
 
+        class InnerConvertor<TOutput> : GenericConvertor<TOutput>
+            where TOutput : T
+        {
+            GenericConvertor<T> _convertor;
+            public InnerConvertor(GenericConvertor<T> convertor)
+            {
+                _convertor = convertor;
+            }
+            protected override TOutput ChangeType(string input, Type outputType, out bool success)
+            {
+                return (TOutput)_convertor.ChangeType(input, outputType, out success);
+            }
 
+            protected override TOutput ChangeType(object input, Type outputType, out bool success)
+            {
+                return (TOutput)_convertor.ChangeType(input, outputType, out success);
+            }
 
+            protected override IConvertor GetConvertor(Type outputType, Type[] genericTypes)
+            {
+                return _convertor.GetConvertor(outputType, genericTypes);
+            }
 
-
+            protected override void Initialize()
+            {
+                base.Initialize();
+                _convertor.Initialize();
+            }
+        }
 
     }
 }

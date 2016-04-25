@@ -10,7 +10,13 @@ namespace blqw.Converts
 {
     public class CArray : CArray<object>
     {
-
+        public override Type OutputType
+        {
+            get
+            {
+                return typeof(Array);
+            }
+        }
     }
 
     public class CArray<T> : AdvancedConvertor<Array>
@@ -23,6 +29,14 @@ namespace blqw.Converts
         {
             base.Initialize();
             _ElementConvertor = ConvertorContainer.Default.Get<T>();
+        }
+
+        public override Type OutputType
+        {
+            get
+            {
+                return typeof(T[]);
+            }
         }
 
         protected override Array ChangeType(object input, Type outputType, out bool success)
@@ -109,7 +123,7 @@ namespace blqw.Converts
 
         protected override IConvertor GetConvertor(Type outputType)
         {
-            var type = typeof(CArray<>).MakeGenericType(outputType);
+            var type = typeof(CArray<>).MakeGenericType(outputType.GetElementType());
             var conv = (IConvertor)Activator.CreateInstance(type);
             return conv;
         }

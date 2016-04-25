@@ -12,7 +12,13 @@ namespace blqw.Converts
 {
     public class CIDictionaryT : CIDictionary<object, object>
     {
-
+        public override Type OutputType
+        {
+            get
+            {
+                return typeof(IDictionary<,>);
+            }
+        }
     }
     
     public class CIDictionary<K, V> : GenericConvertor<IDictionary<K, V>>
@@ -168,7 +174,7 @@ namespace blqw.Converts
             public bool Add(object key, object value)
             {
                 bool b;
-                var k = _keyConvertor.ChangeType(value, _keyConvertor.OutputType, out b);
+                var k = _keyConvertor.ChangeType(key, _keyConvertor.OutputType, out b);
                 if (b == false)
                 {
                     return false;

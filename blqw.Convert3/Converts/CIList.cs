@@ -89,8 +89,8 @@ namespace blqw.Converts
                     return null;
                 }
             }
-            success = true;
-            return input.Split(Separator, StringSplitOptions.None);
+            var arr = input.Split(Separator, StringSplitOptions.None);
+            return ChangeType(arr, outputType, out success);
         }
 
         struct ListHelper

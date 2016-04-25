@@ -46,11 +46,12 @@ namespace blqw.Converts
             var helper = new DataRowHelper(table);
             while (ee.MoveNext())
             {
-                if (helper.AddRow(ee.Current))
+                if (helper.CreateRow(ee.Current) == false)
                 {
                     success = false;
                     return null;
                 }
+                helper.AddRow();
             }
             return table;
         }
@@ -120,7 +121,11 @@ namespace blqw.Converts
             }
 
             DataRow _currentRow;
-            public bool AddRow(object value)
+            public void AddRow()
+            {
+                _table.Rows.Add(_currentRow);
+            }
+            public bool CreateRow(object value)
             {
                 _currentRow = _table.NewRow();
                 var nv = value as NameValueCollection;
@@ -157,6 +162,7 @@ namespace blqw.Converts
                         }
                         do
                         {
+                            entry = ee.Current;
                             var name = getKey(entry) as string;
                             if (name == null)
                             {

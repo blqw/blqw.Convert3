@@ -11,7 +11,13 @@ namespace blqw.Converts
 {
     public class CIListT: CIList<object>
     {
-
+        public override Type OutputType
+        {
+            get
+            {
+                return typeof(ICollection<>);
+            }
+        }
     }
     public class CIList<T> : GenericConvertor<ICollection<T>>
     {

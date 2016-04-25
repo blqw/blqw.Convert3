@@ -6,32 +6,45 @@ using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CNullable : SystemTypeConvertor<ValueType>, IConvertor
+    //public class CNullable : SystemTypeConvertor<ValueType>, IConvertor
+    //{
+    //    protected override ValueType ChangeType(string input, Type outputType, out bool success)
+    //    {
+    //        Error.CastFail("无法为值类型(struct)提供转换");
+    //        success = false;
+    //        return null;
+    //    }
+
+    //    protected override ValueType ChangeType(object input, Type outputType, out bool success)
+    //    {
+    //        Error.CastFail("无法为值类型(struct)提供转换");
+    //        success = false;
+    //        return null;
+    //    }
+
+    //    IConvertor IConvertor.GetConvertor(Type outputType)
+    //    {
+    //        var valuetype = Nullable.GetUnderlyingType(outputType);
+    //        if (valuetype == null)
+    //        {
+    //            throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}必须是可空值类型");
+    //        }
+    //        var type = typeof(CNullable<>).MakeGenericType(valuetype);
+    //        var conv = (IConvertor)Activator.CreateInstance(type);
+    //        return conv;
+    //    }
+    //}
+    public class CNullable : CNullable<int>
     {
-        protected override ValueType ChangeType(string input, Type outputType, out bool success)
+        public override Type OutputType
         {
-            throw new NotImplementedException();
-        }
-
-        protected override ValueType ChangeType(object input, Type outputType, out bool success)
-        {
-            throw new NotImplementedException();
-        }
-
-        IConvertor IConvertor.GetConvertor(Type outputType)
-        {
-            var valuetype = Nullable.GetUnderlyingType(outputType);
-            if (valuetype == null)
+            get
             {
-                throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}必须是可空值类型");
+                return typeof(Nullable<>);
             }
-            var type = typeof(CNullable<>).MakeGenericType(valuetype);
-            var conv = (IConvertor)Activator.CreateInstance(type);
-            return conv;
         }
     }
-
-    public class CNullable<T> : SystemTypeConvertor<T?>
+    public class CNullable<T> : GenericConvertor<T?>
         where T : struct
     {
         IConvertor<T> _conv;
@@ -78,5 +91,10 @@ namespace blqw.Converts
             return _conv.ChangeType(input, _conv.OutputType, out success);
         }
 
+        protected override IConvertor GetConvertor(Type outputType, Type[] genericTypes)
+        {
+            var type = typeof(CNullable<>).MakeGenericType(genericTypes);
+            return (IConvertor)Activator.CreateInstance(type);
+        }
     }
 }

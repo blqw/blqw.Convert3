@@ -81,7 +81,7 @@ namespace blqw
             var text = value == null ? "`null`" : value is DBNull ? "`DBNull`" : null;
             if (text == null)
             {
-                text = $"类型:{CType.GetFriendlyName(value.GetType())} \n{value.ToString()}";
+                text = $"类型:{CType.GetFriendlyName(value.GetType())} 值:`{value.ToString()}`";
             }
             var name = CType.GetFriendlyName(toType);
             _Contract.Add(new InvalidCastException(string.Concat(text, " 无法转为 ", name)));
@@ -195,7 +195,7 @@ namespace blqw
                 _Stack?.Clear();
                 Enabled = false;
             }
-            
+
             /// <summary>
             /// 抛出当前契约中的所有异常
             /// </summary>
@@ -209,9 +209,10 @@ namespace blqw
                 {
                     throw _Stack[0];
                 }
-                throw new AggregateException(_Stack.Reverse<Exception>());
+                var message = string.Join(Environment.NewLine, _Stack.Select(it => it.Message));
+                throw new AggregateException(message, _Stack.Reverse<Exception>());
             }
         }
-        
+
     }
 }

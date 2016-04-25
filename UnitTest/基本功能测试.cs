@@ -14,6 +14,7 @@ namespace blqw
         [TestMethod]
         public void 基本功能()
         {
+            
             Assert.AreEqual(1, "1".To<int>());
             Assert.AreEqual(null, "".To<int?>());
 

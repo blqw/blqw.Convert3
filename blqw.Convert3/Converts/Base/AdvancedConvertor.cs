@@ -19,11 +19,6 @@ namespace blqw.Converts
     {
         protected override T ChangeTypeImpl(object input, Type outputType, out bool success)
         {
-            if (outputType.IsInstanceOfType(input))
-            {
-                success = true;
-                return (T)input;
-            }
             if (outputType.IsGenericTypeDefinition)
             {
                 Error.CastFail("无法转为泛型定义类");
@@ -32,19 +27,46 @@ namespace blqw.Converts
             }
             return ChangeType(input, outputType, out success);
         }
-        
+
         protected virtual IConvertor GetConvertor(Type outputType)
         {
             return this;
+        }
+
+        class InnerConvertor<TOutput> : AdvancedConvertor<TOutput>
+            where TOutput : T
+        {
+            AdvancedConvertor<T> _convertor;
+            public InnerConvertor(AdvancedConvertor<T> convertor)
+            {
+                _convertor = convertor;
+            }
+            protected override TOutput ChangeType(string input, Type outputType, out bool success)
+            {
+                return (TOutput)_convertor.ChangeType(input, outputType, out success);
+            }
+
+            protected override TOutput ChangeType(object input, Type outputType, out bool success)
+            {
+                return (TOutput)_convertor.ChangeType(input, outputType, out success);
+            }
+            protected override void Initialize()
+            {
+                base.Initialize();
+                _convertor.Initialize();
+            }
         }
 
         IConvertor IConvertor.GetConvertor(Type outputType)
         {
             if (outputType == null)
                 throw new ArgumentNullException(nameof(outputType));
-            if (OutputType.IsAssignableFrom(outputType) == false)
-                throw new ArgumentOutOfRangeException(nameof(outputType),$"类型{outputType}不是{OutputType}的子类或实现类");
-            return GetConvertor(outputType);
+            if (OutputType.IsGenericTypeDefinition == false
+                && OutputType.IsAssignableFrom(outputType) == false)
+                throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}不是{OutputType}的子类或实现类");
+            var conv = GetConvertor(outputType);
+            var type = typeof(InnerConvertor<>).MakeGenericType(typeof(T), outputType);
+            return (IConvertor)Activator.CreateInstance(type, conv);
         }
     }
 }

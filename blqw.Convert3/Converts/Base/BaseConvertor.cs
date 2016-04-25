@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,8 @@ namespace blqw.Converts
         void IConvertor.Initialize()
         {
             This = this;
-            _IsOverrideImpl = this.GetType().GetMethod("ChangeTypeImpl").DeclaringType != typeof(BaseConvertor<T>);
+            const BindingFlags flag = BindingFlags.NonPublic | BindingFlags.Instance;
+            _IsOverrideImpl = this.GetType().GetMethod("ChangeTypeImpl", flag).DeclaringType != typeof(BaseConvertor<T>);
             OutputTypeName = CType.GetFriendlyName(OutputType);
             Initialize();
         }
@@ -104,7 +106,7 @@ namespace blqw.Converts
             try
             {
                 //类型相同直接转换
-                if (outputType.IsAssignableFrom(input.GetType()))
+                if (outputType.IsInstanceOfType(input))
                 {
                     success = true;
                     return (T)input;
