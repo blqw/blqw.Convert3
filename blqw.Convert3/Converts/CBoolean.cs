@@ -4,17 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CBoolean : SystemTypeConvertor<bool>
     {
         protected override bool ChangeType(string input, Type outputType, out bool success)
         {
-            if (input == null)
-            {
-                success = false;
-                return default(bool);
-            }
             success = true;
             switch (input.Length)
             {

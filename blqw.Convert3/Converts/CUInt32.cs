@@ -5,122 +5,108 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CUInt32 : SystemTypeConvertor<UInt32>
+    public class CUInt32 : SystemTypeConvertor<uint>
     {
-        protected override bool Try(object input, out uint result)
+        protected override uint ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
-            {
-                result = 0;
-                return false;
-            }
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (uint)1 : (uint)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (uint)1 : (uint)0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
-                    case TypeCode.Byte: result = (uint)conv.ToByte(null); return true;
-                    case TypeCode.Char: result = (uint)conv.ToChar(null); return true;
+                        success = false;
+                        return default(uint);
+                    case TypeCode.Byte: return (uint)conv.ToByte(null);
+                    case TypeCode.Char: return (uint)conv.ToChar(null);
                     case TypeCode.Int16:
                         {
                             var a = conv.ToInt16(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
-                            if (a < 0 || a > 4294967295)
+                            if (a < 0 || a > uint.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.SByte:
                         {
                             var a = conv.ToSByte(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
-                            if (a < 0 || a > 4294967295)
+                            if (a < 0 || a > uint.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
-                            if (a < 0 || a > 4294967295)
+                            if (a < 0 || a > uint.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
-                    case TypeCode.UInt16: result = (uint)conv.ToUInt16(null); return true;
-                    case TypeCode.UInt32: result = conv.ToUInt32(null); return true;
+                    case TypeCode.UInt16: return (uint)conv.ToUInt16(null);
+                    case TypeCode.UInt32: return conv.ToUInt32(null);
                     case TypeCode.UInt64:
                         {
                             var a = conv.ToUInt64(null);
-                            if (a > 4294967295)
+                            if (a > uint.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
-                            if (a < 0 || a > 4294967295)
+                            if (a < 0 || a > uint.MaxValue)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(uint);
                             }
-                            result = (uint)a;
-                            return true;
+                            return (uint)a;
                         }
                     default:
                         break;
@@ -129,50 +115,56 @@ namespace blqw
             else if (input is IntPtr)
             {
                 var a = ((IntPtr)input).ToInt64();
-                if (a < 0 || a > 4294967295)
+                if (a < 0 || a > uint.MaxValue)
                 {
-                    result = 0;
-                    return false;
+                    success = false;
+                    return default(uint);
                 }
-                result = (uint)a;
-                return true;
+                success = true;
+                return (uint)a;
+
             }
             else if (input is UIntPtr)
             {
                 var a = ((UIntPtr)input).ToUInt64();
-                if (a > 4294967295)
+                if (a > uint.MaxValue)
                 {
-                    result = 0;
-                    return false;
+                    success = false;
+                    return default(uint);
                 }
-                result = (uint)a;
-                return true;
+                success = true;
+                return (uint)a;
+
             }
             else
             {
                 var bs = input as byte[];
                 if (bs != null && bs.Length == 4)
                 {
-                    result = BitConverter.ToUInt32(bs, 0);
-                    return true;
+                    success = true;
+                    return BitConverter.ToUInt32(bs, 0);
                 }
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(uint);
         }
 
-        protected override bool Try(string input, out uint result)
+        protected override uint ChangeType(string input, Type outputType, out bool success)
         {
+            uint result;
             if (uint.TryParse(input, out result))
             {
-                return true;
+                success = true;
+                return result;
             }
             if (CString.IsHexString(ref input))
             {
-                return uint.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                success = uint.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(uint);
         }
+
     }
 }

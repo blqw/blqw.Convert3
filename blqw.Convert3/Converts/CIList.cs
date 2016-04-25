@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CIList : AdvancedConvertor<IList>
     {
         protected override IList ChangeType(object input, Type outputType, out bool success)
         {
             success = true;
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 return null;
             }
@@ -31,12 +31,16 @@ namespace blqw
                     success = false;
                     return null;
                 }
-                for (int i = 0; i < reader.FieldCount; i++)
+                while (reader.Read())
                 {
                     var dict = (IDictionary<string, object>)new System.Dynamic.ExpandoObject();
-                    dict.Add(reader.GetName(i), reader.GetValue(i));
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        dict[reader.GetName(i)] = reader.GetValue(i);
+                    }
                     helper.Add(dict);
                 }
+                
                 return helper.List;
             }
 
@@ -62,10 +66,8 @@ namespace blqw
                     success = false;
                     return null;
                 }
-                return helper.List;
             }
-            success = false;
-            return null;
+            return helper.List;
         }
 
         readonly static string[] Separator = { ", ", "," };

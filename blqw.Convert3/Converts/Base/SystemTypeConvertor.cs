@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     /// <summary> 
     /// 系统类型转换器,额外处理 DataRow,DataRowView,DataReader

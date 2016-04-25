@@ -39,27 +39,31 @@ namespace blqw.Convert3Component
         {
             return obj.ToDynamic();
         }
-        
+
         static object Convert1(this IConvertor conv, object obj)
         {
-            using (ErrorContext.Callin())
+            using (Error.Contract())
             {
-                object output;
-                if (conv.Try(obj, conv.OutputType, out output) == false)
+                bool b;
+                var result = conv.ChangeType(obj, conv.OutputType, out b);
+                if (b == false)
                 {
-                    Convert3.ThrowError(obj, conv.OutputType);
+                    Error.CastFail(obj, conv.OutputType);
+                    Error.ThrowIfHaveError();
                 }
-                return output;
+                return result;
             }
         }
 
         static object Convert2(this IConvertor conv, object obj)
         {
-            if (conv.Try(obj, conv.OutputType, out obj))
+            bool b;
+            var result = conv.ChangeType(obj, conv.OutputType, out b);
+            if (b == false)
             {
-                return obj;
+                return Convert3.GetDefaultValue(conv.OutputType);
             }
-            return Convert3.GetDefaultValue(conv.OutputType);
+            return result;
         }
 
     }

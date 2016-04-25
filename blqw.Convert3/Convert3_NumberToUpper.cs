@@ -35,7 +35,7 @@ namespace blqw
             "圓角分",
             "元角分"
         };
-
+        
         #endregion
 
         /// <summary> 将数字文本转换成大写

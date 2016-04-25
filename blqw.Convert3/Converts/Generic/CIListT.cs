@@ -7,140 +7,155 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    public class CIList<T> : AdvancedConvertor<ICollection<T>>
+    public class CIListT: CIList<object>
+    {
+
+    }
+    public class CIList<T> : GenericConvertor<ICollection<T>>
     {
         IConvertor<T> _convertor;
         protected override void Initialize()
         {
-            _convertor = Convert3.GetConvertor<T>();
+            _convertor = ConvertorContainer.Default.Get<T>();
         }
-        struct DataReaderEnumerable : IEnumerator
+        protected override ICollection<T> ChangeType(object input, Type outputType, out bool success)
         {
-            IDataReader _reader;
-            public DataReaderEnumerable(IDataReader reader)
+            success = true;
+            if (input == null || input is DBNull)
             {
-                _reader = reader;
-            }
-            public object Current
-            {
-                get { return _reader; }
+                return null;
             }
 
-            public bool MoveNext()
+            var helper = new ListHelper(outputType, _convertor);
+            if (helper.CreateInstance() == false)
             {
-                return _reader.Read();
-            }
-
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-        }
-        private static IEnumerator GetIEnumerator(object input)
-        {
-            var row = input as DataRow;
-            if (row != null)
-            {
-                return row.ItemArray.GetEnumerator(); ;
-            }
-            var rv = input as DataRowView;
-            if (rv != null)
-            {
-                return rv.Row.ItemArray.GetEnumerator(); ;
+                success = false;
+                return null;
             }
             var reader = input as IDataReader;
             if (reader != null)
             {
                 if (reader.IsClosed)
                 {
-                    ErrorContext.Error = new NotImplementedException("DataReader已经关闭");
+                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    success = false;
                     return null;
                 }
-                return new DataReaderEnumerable(reader);
-            }
-            var ls = input as IListSource;
-            if (ls != null)
-            {
-                return ls.GetList().GetEnumerator();
-            }
-            var emtr = input as IEnumerator;
-            if (emtr != null)
-            {
-                return emtr;
-            }
-            var emab = input as IEnumerable;
-            if (emab != null)
-            {
-                return emab.GetEnumerator();
-            }
-            return null;
-        }
-
-
-        protected override bool Try(object input, Type outputType, out ICollection<T> result)
-        {
-            if (_convertor == null)
-            {
-                ErrorContext.ConvertorNotFound(typeof(T));
-                result = null;
-                return false;
-            }
-            var emtr = GetIEnumerator(input);
-            if (emtr == null)
-            {
-                if (input is IDataReader)
+                while (reader.Read())
                 {
-                    result = null;
-                    return false;
+                    if (helper.Add(reader) == false)
+                    {
+                        success = false;
+                        return null;
+                    }
                 }
-                ErrorContext.Error = new InvalidCastException("目前仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource接口的对象转向IList<T>");
-                result = null;
-                return false;
+                return helper.List;
             }
 
-            var elementType = typeof(T);
-            ICollection<T> list;
-            if (outputType.IsInterface)
+            var ee = (input as IEnumerable)?.GetEnumerator()
+                    ?? (input as IEnumerator)
+                    ?? (input as DataTable)?.Rows.GetEnumerator()
+                    ?? (input as DataView)?.GetEnumerator()
+                    ?? (input as DataRow)?.ItemArray.GetEnumerator()
+                    ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
+                    ?? (input as IListSource)?.GetList()?.GetEnumerator();
+
+            if (ee == null)
             {
-                list = new List<T>();
+                Error.CastFail("目前仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource接口的对象转向IList");
+                success = false;
+                return null;
             }
-            else
+
+            while (ee.MoveNext())
             {
-                list = (ICollection<T>)Activator.CreateInstance(outputType);
-            }
-            while (emtr.MoveNext())
-            {
-                T value;
-                if (_convertor.Try(emtr.Current, elementType, out value) == false)
+                if (helper.Add(ee.Current) == false)
                 {
-                    ErrorContext.Error = new NotImplementedException("IList<T>元素值转换失败");
-                    result = null;
-                    return false;
+                    success = false;
+                    return null;
                 }
-                list.Add(value);
             }
-            result = list;
-            return true;
+            return helper.List;
         }
 
         readonly static string[] Separator = { ", ", "," };
-
-        protected override bool Try(string input, Type outputType, out ICollection<T> result)
+        protected override ICollection<T> ChangeType(string input, Type outputType, out bool success)
         {
             input = input.Trim();
-            if (input.Length == 0)
-            {
-                result = (ICollection<T>)Activator.CreateInstance(outputType);
-                return true;
-            }
             if (input[0] == '[' && input[input.Length - 1] == ']')
             {
-                return CJsonObject.TryTo(input, outputType, out result);
+                try
+                {
+                    var result = Convert3Component.Component.ToJsonObject(outputType, input);
+                    success = true;
+                    return (ICollection<T>)result;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    success = false;
+                    return null;
+                }
             }
             var arr = input.Split(Separator, StringSplitOptions.None);
-            return Try(arr, outputType, out result);
+            return ChangeType(arr, outputType, out success);
+        }
+
+        protected override IConvertor GetConvertor(Type outputType, Type[] genericTypes)
+        {
+            var type = typeof(CIList<>).MakeGenericType(genericTypes);
+            var conv = (IConvertor)Activator.CreateInstance(type);
+            return conv;
+        }
+
+        struct ListHelper
+        {
+            public ICollection<T> List;
+            private IConvertor<T> _convertor;
+            private Type _type;
+
+            public ListHelper(Type type, IConvertor<T> convertor) 
+            {
+                _type = type;
+                List = null;
+                this._convertor = convertor;
+            }
+
+            public bool Add(object value)
+            {
+                bool b;
+                var v = _convertor.ChangeType(value, _convertor.OutputType, out b);
+                if (b == false)
+                {
+                    return false;
+                }
+                try
+                {
+                    List.Add(v);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    return false;
+                }
+            }
+
+            internal bool CreateInstance()
+            {
+                try
+                {
+                    List = (ICollection<T>)Activator.CreateInstance(_type);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error.Add(ex);
+                    return false;
+                }
+            }
         }
     }
 }

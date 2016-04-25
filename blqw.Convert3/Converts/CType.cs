@@ -6,9 +6,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CType : SystemTypeConvertor<Type>
     {
         static CType()
@@ -36,19 +35,27 @@ namespace blqw
         private static readonly NameValueCollection _keywords;
         private static readonly NameValueCollection _typeNames = new NameValueCollection();
 
-        protected override bool Try(object input, out Type result)
+        protected override Type ChangeType(object input, Type outputType, out bool success)
         {
-            result = input == null ? null : input.GetType();
-            return true;
+            success = true;
+            return input?.GetType();
         }
 
-        protected override bool Try(string input, out Type result)
+        protected override Type ChangeType(string input, Type outputType, out bool success)
         {
-            result = Type.GetType(_keywords[input] ?? input, false, true) ?? Type.GetType("System." + input, false, true);
-
-            ErrorContext.Error = new TypeLoadException(input + " 并不是一个类型");
-            return result != null;
+            var result = Type.GetType(_keywords[input] ?? input, false, true) ?? Type.GetType("System." + input, false, true);
+            if (result == null)
+            {
+                Error.Add(new TypeLoadException(input + " 并不是一个类型"));
+                success = false;
+            }
+            else
+            {
+                success = true;
+            }
+            return result;
         }
+        
 
         ///<summary> 获取类型名称的友好展现形式
         /// </summary>
@@ -191,47 +198,6 @@ namespace blqw
                 default:
                     throw new ArgumentOutOfRangeException(nameof(typeCode));
             }
-        }
-
-        /// <summary> 获取接口类型数组中的获取指定类型的接口,如果不存在指定类型的接口则返回null
-        /// </summary>
-        /// <param name="interfaceTypes"> 接口类型集合 </param>
-        /// <param name="interfaceType"> 需要判断比对的接口 </param>
-        public static Type GetInterface(Type[] interfaceTypes, Type interfaceType)
-        {
-            if (interfaceType.IsGenericTypeDefinition)
-            {
-                foreach (var item in interfaceTypes)
-                {
-                    if (item.GetGenericTypeDefinition() == interfaceType)
-                    {
-                        return item;
-                    }
-                }
-            }
-            else if (interfaceType.IsGenericType)
-            {
-                var gt = interfaceType.GetGenericTypeDefinition();
-                foreach (var item in interfaceTypes)
-                {
-                    if (item == interfaceType
-                        || item.GetGenericTypeDefinition() == gt)
-                    {
-                        return item;
-                    }
-                }
-            }
-            else
-            {
-                foreach (var item in interfaceTypes)
-                {
-                    if (item == interfaceType)
-                    {
-                        return item;
-                    }
-                }
-            }
-            return null;
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using blqw;
+using blqw.Converts;
 
 namespace blqw.Convert3Component
 {
@@ -174,52 +175,34 @@ namespace blqw.Convert3Component
         {
             _OutputType = outputType;
             _ThrowError = throwError;
-            _Convertor = Convert3.GetConvertor(outputType);
+            _Convertor = ConvertorContainer.Default.Get(outputType);
         }
 
         public override object Convert(object input, Type type)
         {
-            using (ErrorContext.Callin())
+            using (Error.Contract())
             {
-                object output;
-                if (_Convertor.Try(input, type, out output))
+                bool b;
+                var output = _Convertor.ChangeType(input, type, out b);
+                if (_ThrowError && b == false)
                 {
-                    return output;
+                    Error.ThrowIfHaveError();
                 }
-                if (_ThrowError)
-                {
-                    if (type == null || type.IsAssignableFrom(_OutputType))
-                    {
-                        Convert3.ThrowError(input, type);
-                    }
-                    throw new InvalidCastException("转换器只能转换 " + CType.GetFriendlyName(_OutputType) + " 类型或其子类");
-                }
-                return Convert3.GetDefaultValue(type ?? _OutputType);
+                return output;
             }
         }
 
         public override T Convert<T>(object input)
         {
-            using (ErrorContext.Callin())
+            using (Error.Contract())
             {
-                var conv = _Convertor as IConvertor<T>;
-                if (conv != null)
+                bool b;
+                var output = _Convertor.ChangeType(input, typeof(T), out b);
+                if (_ThrowError && b == false)
                 {
-                    T output;
-                    if (conv.Try(input, null, out output))
-                    {
-                        return output;
-                    }
-                    if (_ThrowError)
-                    {
-                        Convert3.ThrowError(input, typeof(T));
-                    }
+                    Error.ThrowIfHaveError();
                 }
-                else if (_ThrowError)
-                {
-                    throw new InvalidCastException("转换器只能转换 " + CType.GetFriendlyName(_OutputType) + " 类型或其子类");
-                }
-                return default(T);
+                return (T)output;
             }
         }
     }

@@ -5,112 +5,116 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
-    public class CUInt64 : SystemTypeConvertor<UInt64>
+    public class CUInt64 : SystemTypeConvertor<ulong>
     {
-        protected override bool Try(object input, out ulong result)
+        protected override ulong ChangeType(string input, Type outputType, out bool success)
         {
-            if (input == null)
+            ulong result;
+            if (ulong.TryParse(input, out result))
             {
-                result = 0;
-                return false;
+                success = true;
+                return result;
             }
+            if (CString.IsHexString(ref input))
+            {
+                success = ulong.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
+                return result;
+            }
+            success = false;
+            return default(ulong);
+        }
+
+        protected override ulong ChangeType(object input, Type outputType, out bool success)
+        {
             var conv = input as IConvertible;
             if (conv != null)
             {
+                success = true;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        result = conv.ToBoolean(null) ? (ulong)1 : (ulong)0;
-                        return true;
+                        return conv.ToBoolean(null) ? (ulong)1 : (ulong)0;                        
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
-                        result = 0;
-                        return false;
-                    case TypeCode.Byte: result = (ulong)conv.ToByte(null); return true;
-                    case TypeCode.Char: result = (ulong)conv.ToChar(null); return true;
+                        success = false;
+                        return default(ulong);
+                    case TypeCode.Byte: return (ulong)conv.ToByte(null); 
+                    case TypeCode.Char: return (ulong)conv.ToChar(null); 
                     case TypeCode.Int16:
                         {
                             var a = conv.ToInt16(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     case TypeCode.SByte:
                         {
                             var a = conv.ToSByte(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
-                    case TypeCode.UInt16: result = (ulong)conv.ToUInt16(null); return true;
-                    case TypeCode.UInt32: result = (ulong)conv.ToUInt32(null); return true;
-                    case TypeCode.UInt64: result = conv.ToUInt64(null); return true;
+                    case TypeCode.UInt16: return (ulong)conv.ToUInt16(null); 
+                    case TypeCode.UInt32: return (ulong)conv.ToUInt32(null); 
+                    case TypeCode.UInt64: return conv.ToUInt64(null); 
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
                             if (a < 0)
                             {
-                                result = 0;
-                                return false;
+                                success = false;
+                                return default(ulong);
                             }
-                            result = (ulong)a;
-                            return true;
+                            return (ulong)a;                            
                         }
                     default:
                         break;
@@ -121,42 +125,30 @@ namespace blqw
                 var a = ((IntPtr)input).ToInt64();
                 if (a < 0)
                 {
-                    result = 0;
-                    return false;
+                    success = false;
+                    return default(ulong);
                 }
-                result = (ulong)a;
-                return true;
+                success = true;
+                return (ulong)a;
+                
             }
             else if (input is UIntPtr)
             {
-                result = ((UIntPtr)input).ToUInt64();
-                return true;
+                success = true;
+                return ((UIntPtr)input).ToUInt64();                
             }
             else
             {
                 var bs = input as byte[];
                 if (bs != null && bs.Length == 8)
                 {
-                    result = BitConverter.ToUInt64(bs, 0);
-                    return true;
+                    success = true;
+                    return BitConverter.ToUInt64(bs, 0);                    
                 }
             }
-            result = 0;
-            return false;
+            success = false;
+            return default(ulong);
         }
-
-        protected override bool Try(string input, out ulong result)
-        {
-            if (ulong.TryParse(input, out result))
-            {
-                return true;
-            }
-            if (CString.IsHexString(ref input))
-            {
-                return ulong.TryParse(input, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out result);
-            }
-            result = 0;
-            return false;
-        }
+        
     }
 }

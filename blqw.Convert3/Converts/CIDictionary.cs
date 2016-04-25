@@ -9,14 +9,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CIDictionary : AdvancedConvertor<IDictionary>
     {
         protected override IDictionary ChangeType(object input, Type outputType, out bool success)
         {
             success = true;
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 return null;
             }

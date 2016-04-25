@@ -4,21 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CTimeSpan : SystemTypeConvertor<TimeSpan>
     {
-        protected override bool Try(object input, out TimeSpan result)
-        {
-            result = default(TimeSpan);
-            return false;
-        }
         static readonly string[] Formats = new[] { "hhmmss", "hhmmssfff" }; 
-        protected override bool Try(string input, out TimeSpan result)
+        protected override TimeSpan ChangeType(object input, Type outputType, out bool success)
         {
-            return TimeSpan.TryParse(input, out  result)
-                || TimeSpan.TryParseExact(input, Formats, null, out  result);
+            success = false;
+            return default(TimeSpan);
+        }
+
+        protected override TimeSpan ChangeType(string input, Type outputType, out bool success)
+        {
+            TimeSpan result;
+            success = TimeSpan.TryParse(input, out result)
+                || TimeSpan.TryParseExact(input, Formats, null, out result);
+            return result;
         }
     }
 }

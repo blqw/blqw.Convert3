@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CInt64 : SystemTypeConvertor<long>
     {
@@ -27,13 +27,7 @@ namespace blqw
         }
 
         protected override long ChangeType(object input, Type outputType, out bool success)
-
         {
-            if (input == null)
-            {
-                success = false;
-                return default(long);
-            }
             success = true;
             var conv = input as IConvertible;
             if (conv != null)

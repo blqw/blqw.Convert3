@@ -67,7 +67,7 @@ namespace blqw.Dynamic
                     if (object.ReferenceEquals(x, null) == false)
                     {
                         bool b;
-                        if (_value.TryTo<bool>(out b) == false)
+                        if (_value.To<bool>(out b) == false)
                         {
                             result = null;
                             return false;
@@ -87,7 +87,7 @@ namespace blqw.Dynamic
         public override bool TryUnaryOperation(UnaryOperationBinder binder, out object result)
         {
             bool b;
-            if (_value.TryTo<bool>(out b) == false)
+            if (_value.To<bool>(out b) == false)
             {
                 result = null;
                 return false;

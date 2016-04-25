@@ -4,34 +4,39 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CUri : SystemTypeConvertor<Uri>
     {
-        protected override bool Try(object input, out Uri result)
+        protected override Uri ChangeType(string input, Type outputType, out bool success)
         {
-            result = null;
-            return false;
-        }
-
-        protected override bool Try(string input, out Uri result)
-        {
+            Uri result;
             input = input.TrimStart();
             if (input.Length > 10 && input[6] != '/')
             {
                 if (Uri.TryCreate("http://" + input, UriKind.Absolute, out result))
                 {
-                    return true;
+                    success = true;
+                    return result;
                 }
             }
 
-            if (Uri.TryCreate(input, UriKind.Absolute, out result) == false)
+            if (Uri.TryCreate(input, UriKind.Absolute, out result))
             {
-                ErrorContext.Error = new InvalidCastException(input + "不是一个有效的url");
-                return false;
+                success = true;
+                return result;
             }
-            return true;
+
+            Error.CastFail(input + "不是一个有效的url");
+            success = false;
+            return null;
         }
+
+        protected override Uri ChangeType(object input, Type outputType, out bool success)
+        {
+            success = false;
+            return null;
+        }
+
     }
 }

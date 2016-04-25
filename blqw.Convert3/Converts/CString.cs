@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using blqw.Convert3Component;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CString : SystemTypeConvertor<string>
     {
@@ -56,16 +56,10 @@ namespace blqw
             return false;
         }
 
-        public override string ChangeType(object input, Type outputType, out bool success)
+        protected override string ChangeType(object input, Type outputType, out bool success)
         {
             success = true;
-
-            var str = input as string;
-            if (str != null)
-            {
-                return str;
-            }
-
+            
             if (input == null || input is DBNull)
             {
                 return null;
@@ -109,7 +103,7 @@ namespace blqw
             return input.ToString();
         }
 
-        public override string ChangeType(string input, Type outputType, out bool success)
+        protected override string ChangeType(string input, Type outputType, out bool success)
         {
             success = true;
             return input;

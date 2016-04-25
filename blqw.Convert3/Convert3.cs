@@ -17,7 +17,7 @@ namespace blqw
     public static partial class Convert3
     {
         static readonly ConvertorContainer _container = ConvertorContainer.Default;
-        
+
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定对象。
         /// </summary>
@@ -84,7 +84,7 @@ namespace blqw
             }
             return result;
         }
-        
+
 
         /// <summary> 
         /// 返回指定类型的对象，其值等效于指定对象。
@@ -150,7 +150,25 @@ namespace blqw
             }
             return result;
         }
-        
+
+
+        [Obsolete("不建议使用")]
+        public static bool TryChangedType(object input, Type outputType, out object result)
+        {
+            bool b;
+
+            var conv = _container.Get(outputType);
+            if (conv == null)
+            {
+                result = null;
+                return false;
+            }
+            result = conv.ChangeType(input, outputType, out b);
+            return b;
+            throw new NotImplementedException();
+        }
+
+
         /// <summary> 转为动态类型
         /// </summary>
         public static dynamic ToDynamic(this object obj)

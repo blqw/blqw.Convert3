@@ -10,13 +10,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CObject : AdvancedConvertor<object>
     {
         protected override object ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 success = true;
                 return null;
@@ -105,6 +105,11 @@ namespace blqw
                 }
                 return obj.Instance;
             }
+            if (outputType == typeof(object))
+            {
+                success = true;
+                return input;
+            }
             success = false;
             return null;
 
@@ -146,17 +151,31 @@ namespace blqw
             PropertyHandler[] _properties;
             int _propertyCount;
             public object Instance;
+            public IDictionary<string, object> Dynamic;
             Type _type;
             public SetObjectProperty(Type type)
             {
                 _properties = PublicPropertyCache.GetByType(type);
                 _propertyCount = _properties.Length;
-                _type = type;
-                Instance = null;
+                if (type == typeof(object))
+                {
+                    _type = null;
+                    Dynamic = new System.Dynamic.ExpandoObject();
+                }
+                else
+                {
+                    _type = type;
+                    Dynamic = null;
+                }
+                Instance = Dynamic;
             }
 
             public bool CreateInstance()
             {
+                if (Dynamic != null)
+                {
+                    return true;
+                }
                 try
                 {
                     Instance = Activator.CreateInstance(_type);
@@ -184,8 +203,13 @@ namespace blqw
 
             public bool Set(string name, object value)
             {
+                if (Dynamic != null)
+                {
+                    Dynamic[name] = value;
+                    return true;
+                }
                 var p = GetProperty(name);
-                if (p != null && p.Set != null)
+                if (p?.Set != null)
                 {
                     return p.SetValue(Instance, value);
                 }
@@ -194,8 +218,13 @@ namespace blqw
 
             public bool Set<P>(string name, Func<P, object> getValue, P param)
             {
+                if (Dynamic != null)
+                {
+                    Dynamic[name] = getValue(param);
+                    return true;
+                }
                 var p = GetProperty(name);
-                if (p != null && p.Set != null)
+                if (p?.Set != null)
                 {
                     var value = getValue(param);
                     return p.SetValue(Instance, value);

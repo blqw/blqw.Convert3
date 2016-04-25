@@ -6,29 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    public class CArray : AdvancedConvertor<Array>
+    public class CArray : CArray<object>
     {
-        protected override Array ChangeType(string input, Type outputType, out bool success)
-        {
-            throw new NotImplementedException();
-        }
 
-        protected override Array ChangeType(object input, Type outputType, out bool success)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IConvertor GetConvertor(Type outputType)
-        {
-            var type = typeof(CArray<>).MakeGenericType(outputType);
-            var conv = (IConvertor)Activator.CreateInstance(type);
-            return conv;
-        }
     }
 
-    public class CArray<T> : CArray
+    public class CArray<T> : AdvancedConvertor<Array>
     {
         readonly static string[] Separator = { ", ", "," };
         
@@ -42,7 +27,7 @@ namespace blqw
 
         protected override Array ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 success = true;
                 return null;
@@ -120,6 +105,13 @@ namespace blqw
             }
             success = true;
             return array;
+        }
+
+        protected override IConvertor GetConvertor(Type outputType)
+        {
+            var type = typeof(CArray<>).MakeGenericType(outputType);
+            var conv = (IConvertor)Activator.CreateInstance(type);
+            return conv;
         }
     }
 }

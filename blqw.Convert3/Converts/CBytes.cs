@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CBytes : SystemTypeConvertor<byte[]>
     {
@@ -20,11 +20,6 @@ namespace blqw
 
         protected override byte[] ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
-            {
-                success = true;
-                return null;
-            }
             var conv = input as IConvertible;
             if (conv != null)
             {

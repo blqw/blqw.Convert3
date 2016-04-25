@@ -4,35 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
-    [System.ComponentModel.Composition.Export(typeof(IConvertor))]
     public class CUIntPtr : SystemTypeConvertor<UIntPtr>
     {
-        protected override bool Try(object input, out UIntPtr result)
+        protected override UIntPtr ChangeType(string input, Type outputType, out bool success)
         {
-            var conv = Convert3.GetConvertor<UInt64>();
-            ulong r;
-            if (conv.Try(input,null, out r))
-            {
-                result = new UIntPtr(r);
-                return true;
-            }
-            result = default(UIntPtr);
-            return false;
+            var num = ConvertorContainer.UInt64Convertor.ChangeType(input, typeof(ulong), out success);
+            return (success) ? new UIntPtr(num) : default(UIntPtr);
         }
 
-        protected override bool Try(string input, out UIntPtr result)
+        protected override UIntPtr ChangeType(object input, Type outputType, out bool success)
         {
-            var conv = Convert3.GetConvertor<UInt64>();
-            ulong r;
-            if (conv.Try(input, null, out r))
-            {
-                result = new UIntPtr(r);
-                return true;
-            }
-            result = default(UIntPtr);
-            return false;
+            var num = ConvertorContainer.UInt64Convertor.ChangeType(input, typeof(ulong), out success);
+            return (success) ? new UIntPtr(num) : default(UIntPtr);
         }
     }
 }

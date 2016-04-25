@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     /// <summary> 
     /// 基本转换器,提供基本类型的转换器基类
@@ -89,7 +90,7 @@ namespace blqw
 
         T IConvertor<T>.ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 return This.ChangeType(input, outputType, out success);
             }
@@ -149,9 +150,7 @@ namespace blqw
             T result;
             if (input == null)
             {   //是否可以为null
-                success = outputType.IsValueType == false
-                        || Nullable.GetUnderlyingType(outputType) != null;
-                result = default(T);
+                result = ChangeType((object)null, outputType, out success);
             }
             else
             {

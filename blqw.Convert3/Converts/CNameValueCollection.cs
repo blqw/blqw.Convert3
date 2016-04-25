@@ -8,13 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace blqw
+namespace blqw.Converts
 {
     public class CNameValueCollection : AdvancedConvertor<NameValueCollection>
     {
         protected override NameValueCollection ChangeType(object input, Type outputType, out bool success)
         {
-            if (input == null)
+            if (input == null || input is DBNull)
             {
                 success = true;
                 return null;
@@ -133,7 +133,7 @@ namespace blqw
 
         struct NVCollectiontHelper
         {
-            public readonly NameValueCollection Collection;
+            public NameValueCollection Collection;
             private Type _type;
             public NVCollectiontHelper(Type type)
             {

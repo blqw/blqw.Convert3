@@ -33,6 +33,14 @@ namespace blqw
             }
         }
 
+        public static IConvertor<ulong> UInt64Convertor
+        {
+            get
+            {
+                return GenericCache<ulong>.Convertor;
+            }
+        }
+
         private ConvertorContainer()
         {
             _cache = new ConcurrentDictionary<Type, IConvertor>();
