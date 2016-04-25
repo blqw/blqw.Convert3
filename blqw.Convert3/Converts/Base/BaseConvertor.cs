@@ -139,7 +139,7 @@ namespace blqw.Converts
                 }
                 else
                 {
-                    Error.CastFail((object)null, outputType);
+                    Error.CastFail(input, outputType);
                 }
                 if (contract.Enabled) contract.Dispose();
             }
@@ -164,7 +164,7 @@ namespace blqw.Converts
             }
             else
             {
-                Error.CastFail((object)null, outputType);
+                Error.CastFail(input, outputType);
             }
             if (contract.Enabled) contract.Dispose();
             return result;

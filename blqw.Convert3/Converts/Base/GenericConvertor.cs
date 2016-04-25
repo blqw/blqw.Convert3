@@ -50,11 +50,12 @@ namespace blqw.Converts
         /// <returns></returns>
         private static bool IsCompatible(Type definer, Type tester, out Type[] compatibleGenericArgs, bool testInherit = true)
         {
-            compatibleGenericArgs = Type.EmptyTypes;
             if (definer.IsAssignableFrom(tester))
             {
+                compatibleGenericArgs = tester.GetGenericArguments();
                 return true; //2个类本身存在继承关系
             }
+            compatibleGenericArgs = Type.EmptyTypes;
             if (definer.IsGenericType == false)
             {
                 return false; //否则如果definer不是泛型类,则不存在兼容的可能性

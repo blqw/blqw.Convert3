@@ -55,7 +55,6 @@ namespace blqw
                 var result = conv.ChangeType(input, outputType, out success);
                 if (success == false)
                 {
-                    Error.CastFail(input, outputType);
                     Error.ThrowIfHaveError();
                 }
                 return result;
@@ -122,7 +121,6 @@ namespace blqw
                 var result = conv.ChangeType(input, typeof(T), out success);
                 if (success == false)
                 {
-                    Error.CastFail(input, typeof(T));
                     Error.ThrowIfHaveError();
                 }
                 return result;
@@ -165,7 +163,6 @@ namespace blqw
             }
             result = conv.ChangeType(input, outputType, out b);
             return b;
-            throw new NotImplementedException();
         }
 
 

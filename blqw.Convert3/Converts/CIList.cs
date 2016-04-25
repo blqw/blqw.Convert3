@@ -119,6 +119,11 @@ namespace blqw.Converts
 
             internal bool CreateInstance()
             {
+                if (_type.IsInterface)
+                {
+                    List = new ArrayList();
+                    return true;
+                }
                 try
                 {
                     List = (IList)Activator.CreateInstance(_type);

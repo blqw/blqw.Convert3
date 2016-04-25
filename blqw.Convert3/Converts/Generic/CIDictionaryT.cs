@@ -199,6 +199,11 @@ namespace blqw.Converts
 
             internal bool CreateInstance()
             {
+                if (_type.IsInterface)
+                {
+                    Dictionary = new Dictionary<K, V>();
+                    return true;
+                }
                 try
                 {
                     Dictionary = (IDictionary<K, V>)Activator.CreateInstance(_type);

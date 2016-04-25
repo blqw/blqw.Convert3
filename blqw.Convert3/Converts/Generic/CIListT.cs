@@ -151,6 +151,11 @@ namespace blqw.Converts
 
             internal bool CreateInstance()
             {
+                if (_type.IsInterface)
+                {
+                    List = new List<T>();
+                    return true;
+                }
                 try
                 {
                     List = (ICollection<T>)Activator.CreateInstance(_type);

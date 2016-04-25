@@ -160,6 +160,11 @@ namespace blqw.Converts
 
             internal bool CreateInstance()
             {
+                if (_type.IsInterface)
+                {
+                    Dictionary = new Hashtable();
+                    return true;
+                }
                 try
                 {
                     Dictionary = (IDictionary)Activator.CreateInstance(_type);
