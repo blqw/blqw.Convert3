@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BUG测试.cs" />
+    <Compile Include="异常测试.cs" />
     <Compile Include="基本功能测试.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -33,11 +33,13 @@ namespace blqw
         }
 
 
-        public static Action BeginTransaction = _Contract.BeginTransaction;
+        public static void BeginTransaction() => _Contract.BeginTransaction();
 
-        public static Action Rollback = _Contract.Rollback;
+        public static void Rollback() => _Contract.Rollback();
 
-        public static Action EndTransaction = _Contract.Commit;
+        public static void EndTransaction() => _Contract.Commit();
+
+
 
         /// <summary>
         /// 转换器未找到
@@ -78,10 +80,19 @@ namespace blqw
         public static void CastFail(object value, Type toType)
         {
             if (_Contract.Enabled == false) return;
-            var text = value == null ? "`null`" : value is DBNull ? "`DBNull`" : null;
+
+            var text = (value is DBNull ? "`DBNull`" : null)
+                    ?? (value as IConvertible)?.ToString(null)
+                    ?? (value as IFormattable)?.ToString(null, null)
+                    ?? (value == null ? "`null`" : null);
+            
             if (text == null)
             {
-                text = $"类型:{CType.GetFriendlyName(value.GetType())} 值:`{value.ToString()}`";
+                text = CType.GetFriendlyName(value.GetType());
+            }
+            else
+            {
+                text = $"{CType.GetFriendlyName(value.GetType())} 值:`{text}`";
             }
             var name = CType.GetFriendlyName(toType);
             _Contract.Add(new InvalidCastException(string.Concat(text, " 无法转为 ", name)));
@@ -102,6 +113,12 @@ namespace blqw
             _Contract.Add(ex);
         }
 
+
+        class ExceptionCollection : List<Exception>
+        {
+            public ExceptionCollection() : base(10) { }
+            public int Indent { get; set; }
+        }
         /// <summary>
         /// 异常契约
         /// </summary>
@@ -110,7 +127,8 @@ namespace blqw
             /// <summary>
             /// 异常栈
             /// </summary>
-            List<Exception> _Stack;
+            ExceptionCollection _Stack;
+            const int INDENT = 4;
             /// <summary>
             /// 是否启用
             /// </summary>
@@ -123,7 +141,7 @@ namespace blqw
             {
                 if (_Stack == null)
                 {
-                    _Stack = new List<Exception>(10);
+                    _Stack = new ExceptionCollection();
                 }
                 else if (_Stack.Count > 0)
                 {
@@ -140,6 +158,7 @@ namespace blqw
             {
                 if (Enabled)
                 {
+                    ex.Data["Indent"] = _Stack.Indent;
                     _Stack.Add(ex);
                 }
             }
@@ -151,6 +170,7 @@ namespace blqw
             {
                 if (_Stack?.Count > 0)
                 {
+                    _Stack.Indent += INDENT;
                     _Stack.Add(null);
                 }
             }
@@ -159,6 +179,7 @@ namespace blqw
             {
                 if (_Stack?.Count > 0)
                 {
+                    _Stack.Indent -= INDENT;
                     var index = _Stack.LastIndexOf(null);
                     if (index <= 0)
                     {
@@ -178,12 +199,13 @@ namespace blqw
             {
                 if (_Stack?.Count > 0)
                 {
-                    var ex = _Stack[_Stack.Count - 1];
-                    if (ex != null)
+                    _Stack.Indent -= INDENT;
+                    var index = _Stack.LastIndexOf(null);
+                    if (index <= 0)
                     {
                         throw new NotSupportedException($"在错误的位置调用{nameof(Commit)}");
                     }
-                    _Stack.RemoveAt(_Stack.Count - 1);
+                    _Stack.RemoveAt(index);
                 }
             }
 
@@ -209,7 +231,7 @@ namespace blqw
                 {
                     throw _Stack[0];
                 }
-                var message = string.Join(Environment.NewLine, _Stack.Select(it => it.Message));
+                var message = string.Join(Environment.NewLine, _Stack.Select(it => $"{new string(' ', (int)it.Data["Indent"])}{it.Message}"));
                 throw new AggregateException(message, _Stack.Reverse<Exception>());
             }
         }

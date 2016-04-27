@@ -32,6 +32,8 @@ namespace blqw.Converts
 
         public string OutputTypeName { get; private set; }
 
+        protected virtual bool TryConvertString { get { return false; } }
+
         void IConvertor.Initialize()
         {
             This = this;
@@ -120,24 +122,31 @@ namespace blqw.Converts
                 {
                     return result;
                 }
-                
-                Error.BeginTransaction();
-                //尝试转string后转换
-                str = ConvertorContainer.StringConvertor.ChangeType(input, typeof(string), out success);
-                if (success)
+                if (TryConvertString)
                 {
-                    Error.EndTransaction();
-                    return This.ChangeType(str, outputType, out success);
+                    Error.BeginTransaction();
+                    //尝试转string后转换
+                    str = input.ToString();
+                    Error.Add(new Exception($"尝试将{input.GetType()}转为字符串 = \"{str}\""));
+                    result = This.ChangeType(str, outputType, out success);
+                    if (success)
+                    {
+                        Error.Rollback();
+                    }
+                    else
+                    {
+                        Error.EndTransaction();
+                    }
+                    return result;
                 }
-                return default(T);
+                else
+                {
+                    return default(T);
+                }
             }
             finally
             {
-                if (success)
-                {
-                    Error.Rollback();
-                }
-                else
+                if (success == false)
                 {
                     Error.CastFail(input, outputType);
                 }

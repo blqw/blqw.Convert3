@@ -122,13 +122,11 @@ namespace blqw.Converts
                 var type = Type.GetType(input, false, true);
                 if (type == null)
                 {
-                    Error.Add(new TypeLoadException($"没有找到名为 {input} 的类型"));
                     success = false;
                     return null;
                 }
                 else if (outputType.IsAssignableFrom(type) == false)
                 {
-                    Error.CastFail(type, outputType);
                     success = false;
                     return null;
                 }

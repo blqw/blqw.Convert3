@@ -20,7 +20,7 @@ namespace blqw.Converts
             }
         }
     }
-    
+
     public class CIDictionary<K, V> : GenericConvertor<IDictionary<K, V>>
     {
         IConvertor<K> _keyConvertor;
@@ -96,6 +96,21 @@ namespace blqw.Converts
                 return helper.Dictionary;
             }
 
+            var dataset = input as DataSet;
+            if (dataset != null)
+            {
+                for (int i = 0, length = dataset.Tables.Count; i < length; i++)
+                {
+                    var table = dataset.Tables[i];
+                    if (helper.Add(table.TableName ?? $"table_{i}", table) == false)
+                    {
+                        success = false;
+                        return null;
+                    }
+                }
+                return helper.Dictionary;
+            }
+
             var dict = input as IDictionary;
             if (dict != null)
             {
@@ -162,7 +177,7 @@ namespace blqw.Converts
             private IConvertor<K> _keyConvertor;
             private Type _type;
             private IConvertor<V> _valueConvertor;
-            
+
             public DictionaryHelper(Type type, IConvertor<K> keyConvertor, IConvertor<V> valueConvertor)
             {
                 _type = type;
@@ -177,12 +192,14 @@ namespace blqw.Converts
                 var k = _keyConvertor.ChangeType(key, _keyConvertor.OutputType, out b);
                 if (b == false)
                 {
+                    Error.Add(new NotSupportedException($"添加到字典{CType.GetFriendlyName(_type)}失败"));
                     return false;
                 }
-                
+
                 var v = _valueConvertor.ChangeType(value, _valueConvertor.OutputType, out b);
                 if (b == false)
                 {
+                    Error.Add(new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败"));
                     return false;
                 }
                 try
@@ -192,7 +209,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    Error.Add(new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex));
                     return false;
                 }
             }

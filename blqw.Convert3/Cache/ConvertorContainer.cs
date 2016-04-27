@@ -98,7 +98,8 @@ namespace blqw
             conv = OnOptimal(MatchConvertor(key), key)?.GetConvertor(key);
             if (conv == null)
             {
-                throw new NotSupportedException("无法获取与当前类型匹配的转换器");
+                Error.Add(new NotSupportedException($"无法获取与 {key} 类型匹配的转换器"));
+                return null;
             }
             conv.Initialize();
             _cache.TryAdd(key, conv);
@@ -121,7 +122,7 @@ namespace blqw
         /// </summary>
         class GenericCache<Key>
         {
-            public static IConvertor<Key> Convertor = Default.Get(typeof(Key)) as IConvertor<Key>;
+            public static IConvertor<Key> Convertor;
         }
 
         /// <summary> 获取缓存值

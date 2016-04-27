@@ -153,7 +153,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    Error.Add(new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex));
                     return false;
                 }
             }

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -35,7 +36,14 @@ namespace blqw.Converts
                 return table1;
             }
 
-            var ee = GetIEnumerator(input);
+            var ee = (input as IEnumerable)?.GetEnumerator()
+                    ?? (input as IEnumerator)
+                    ?? (input as DataTable)?.Rows.GetEnumerator()
+                    ?? (input as DataView)?.GetEnumerator()
+                    ?? (input as DataRow)?.ItemArray.GetEnumerator()
+                    ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
+                    ?? (input as IListSource)?.GetList()?.GetEnumerator();
+
             if (ee == null)
             {
                 Error.CastFail("目前仅支持DataView,DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象转向DataTable");
@@ -63,7 +71,7 @@ namespace blqw.Converts
             {
                 try
                 {
-                    var result = Component.ToJsonObject(outputType, input);
+                    var result = Convert3Component.Component.ToJsonObject(outputType, input);
                     success = true;
                     return (DataTable)result;
                 }
@@ -77,37 +85,7 @@ namespace blqw.Converts
             success = false;
             return null;
         }
-
-        private static IEnumerator GetIEnumerator(object input)
-        {
-            var emtr = input as IEnumerator;
-            if (emtr != null)
-            {
-                return emtr;
-            }
-            var emab = input as IEnumerable;
-            if (emab != null)
-            {
-                return emab.GetEnumerator();
-            }
-            var ls = input as System.ComponentModel.IListSource;
-            if (ls != null)
-            {
-                return ls.GetList().GetEnumerator();
-            }
-            var row = input as DataRow;
-            if (row != null)
-            {
-                return row.ItemArray.GetEnumerator(); ;
-            }
-            var rv = input as DataRowView;
-            if (rv != null)
-            {
-                return rv.Row.ItemArray.GetEnumerator(); ;
-            }
-            return null;
-        }
-
+        
 
         struct DataRowHelper
         {
@@ -153,11 +131,11 @@ namespace blqw.Converts
                             continue;
                         }
                         var type = entry.GetType();
-                        var getKey = type.GetProperty("Key", flags).GetPropertyHandler()?.Get;
+                        var getKey = type.GetProperty("Key", flags).GetPropertyHandler()?.Get ?? type.GetProperty("Name", flags).GetPropertyHandler()?.Get;
                         var getValue = type.GetProperty("Value", flags).GetPropertyHandler()?.Get;
                         if (getKey == null || getValue == null)
                         {
-                            Error.Add(new NotSupportedException($"值添加到单元格失败"));
+                            Error.Add(new NotSupportedException("值添加到单元格失败:无法获取Key/Name和Value"));
                             return false;
                         }
                         do
@@ -166,7 +144,7 @@ namespace blqw.Converts
                             var name = getKey(entry) as string;
                             if (name == null)
                             {
-                                Error.Add(new NotSupportedException($"字典键必须为字符串"));
+                                Error.Add(new NotSupportedException("标题必须为字符串"));
                                 return false;
                             }
                             if (AddCell(name, typeof(object), getValue(entry)) == false)
@@ -208,7 +186,7 @@ namespace blqw.Converts
                     value = Convert3.ChangeType(value, col.DataType, out success);
                     if (success == false)
                     {
-                        Error.Add(new NotSupportedException($"值添加到行失败"));
+                        Error.Add(new NotSupportedException($"第{_table?.Rows.Count}行{col?.ColumnName}添加到行失败"));
                         return false;
                     }
                 }

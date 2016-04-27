@@ -70,7 +70,7 @@ namespace blqw.Converts
 
             if (ee == null)
             {
-                Error.CastFail("目前仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource接口的对象转向IList");
+                Error.CastFail("目前仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象转向IList");
                 success = false;
                 return null;
             }
@@ -135,6 +135,7 @@ namespace blqw.Converts
                 var v = _convertor.ChangeType(value, _convertor.OutputType, out b);
                 if (b == false)
                 {
+                    Error.Add(new NotSupportedException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败"));
                     return false;
                 }
                 try
@@ -144,7 +145,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    Error.Add(new NotSupportedException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
                     return false;
                 }
             }

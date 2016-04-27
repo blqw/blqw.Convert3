@@ -13,6 +13,7 @@ namespace blqw.Converts
     /// <typeparam name="T"></typeparam>
     public abstract class SystemTypeConvertor<T> : BaseConvertor<T>
     {
+        protected override bool TryConvertString { get { return true; } }
 
         protected override T ChangeTypeImpl(object input, Type outputType, out bool success)
         {

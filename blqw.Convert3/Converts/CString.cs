@@ -56,6 +56,11 @@ namespace blqw.Converts
             return false;
         }
 
+        protected override string ChangeTypeImpl(object input, Type outputType, out bool success)
+        {
+            return ChangeType(input, outputType, out success);
+        }
+
         protected override string ChangeType(object input, Type outputType, out bool success)
         {
             success = true;

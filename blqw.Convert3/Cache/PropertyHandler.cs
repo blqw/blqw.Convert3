@@ -81,7 +81,7 @@ namespace blqw
             var v = Convertor.ChangeType(value, Property.PropertyType, out b);
             if (b == false)
             {
-                Error.Add(new NotSupportedException($"{Property.ReflectedType}.{Property.Name}属性赋值失败"));
+                Error.Add(new NotSupportedException($"{Property.ReflectedType}属性{Property.Name}赋值失败"));
                 return false;
             }
             try
