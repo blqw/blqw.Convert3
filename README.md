@@ -4,8 +4,13 @@
 >从一个任意类型的对象转为另一个任意类型的对象  
 >从未如此简单  
 ```csharp
-object.To<Type>();  //转换失败抛出异常
-object.To<Type>(defaultValue); //转换失败返回默认值
+obj.To<T>();                //转换失败,抛出异常
+obj.To<T>(T defaultValue);  //转换失败,返回默认值
+obj.To<T>(out succeed);     //输入转换解结果
+//下面3个是非泛型方法 
+obj.To(Type outputType);
+obj.To(Type outputType, object defaultValue);
+obj.To(Type outputType, out succeed);
 ```
 
 ## 代码示例
@@ -35,6 +40,13 @@ Dictionary<Guid, Dictionary<int, User>>
 ```
 
 ## 更新说明  
+#### 2016.04.28  
+* 发布2.0新版  
+* 重构内部实现,代码更精简,可读性更高  
+* 调整部分方法签名,更清晰  
+* 优化加载模式,使用MEF注入更简单  
+* 优化错误信息,更明确  
+
 #### 2016.03.16
 * 修复ioc插件bug  
   
