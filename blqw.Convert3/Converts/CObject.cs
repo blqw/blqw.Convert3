@@ -119,6 +119,11 @@ namespace blqw.Converts
         {
             try
             {
+                if (outputType == typeof(object))
+                {
+                    success = true;
+                    return input;
+                }
                 var type = Type.GetType(input, false, true);
                 if (type == null)
                 {

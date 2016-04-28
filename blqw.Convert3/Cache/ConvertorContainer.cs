@@ -122,7 +122,15 @@ namespace blqw
         /// </summary>
         class GenericCache<Key>
         {
-            public static IConvertor<Key> Convertor;
+            static IConvertor<Key> _Convertor;
+            public static IConvertor<Key> Convertor
+            {
+                get
+                {
+                    return _Convertor
+                    ?? (_Convertor = Default.Get(typeof(Key)) as IConvertor<Key>);
+                }
+            }
         }
 
         /// <summary> 获取缓存值
@@ -132,8 +140,7 @@ namespace blqw
         {
             if (ReferenceEquals(this, Default))
             {
-                return GenericCache<Key>.Convertor
-                    ?? (GenericCache<Key>.Convertor = Default.Get(typeof(Key)) as IConvertor<Key>);
+                return GenericCache<Key>.Convertor;
             }
             return Get(typeof(Key)) as IConvertor<Key>;
         }
