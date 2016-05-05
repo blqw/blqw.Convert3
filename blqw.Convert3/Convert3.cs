@@ -356,12 +356,20 @@ namespace blqw
                 var bytes = Encoding.UTF8.GetBytes(input);
                 var hash = md5Provider.ComputeHash(bytes);
                 var count = hash.Length;
-                hash[0] = (byte)(hash[3] + (hash[3] = hash[0]) * 0); //交换0,3的值
-                hash[1] = (byte)(hash[2] + (hash[2] = hash[1]) * 0); //交换1,2的值
-                hash[5] = (byte)(hash[4] + (hash[4] = hash[5]) * 0); //交换4,5的值
-                hash[7] = (byte)(hash[6] + (hash[6] = hash[7]) * 0); //交换6,7的值
+                var temp = hash[0];
+                Swap(hash, 0, 3);   //交换0,3的值
+                Swap(hash, 1, 2);   //交换1,2的值
+                Swap(hash, 4, 5);   //交换4,5的值
+                Swap(hash, 6, 7);   //交换6,7的值
                 return new Guid(hash);
             }
+        }
+
+        private static void Swap(byte[] arr, int a, int b)
+        {
+            var temp = arr[a];
+            arr[a] = arr[b];
+            arr[b] = temp;
         }
 
         /// <summary> 产生一个包含随机'盐'的的MD5
