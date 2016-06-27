@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://en.wikipedia.org/wiki/WTFPL</licenseUrl>
+    <projectUrl>https://github.com/blqw/blqw.Convert3</projectUrl>
+    <iconUrl>https://avatars0.githubusercontent.com/u/9656154</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>
+      全能转换器
+    </releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Convert blqw Parse</tags>
+  </metadata>
+</package>
