@@ -12,7 +12,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
-      全能转换器
+      2016.07.05
+      * 修复一个无限循环的bug
+      * 修复-1转枚举失败的问题
+      * 修复一个转型失败可能抛出异常的问题
+      * 修复一个可空枚举转型失败的问题
+      * 修复当某个类继承泛型类时,但本身不是泛型时抛出异常的问题
+      * 更新IOC模块
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Convert blqw Parse</tags>

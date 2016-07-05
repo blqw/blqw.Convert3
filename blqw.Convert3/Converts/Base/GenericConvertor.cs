@@ -11,10 +11,6 @@ namespace blqw.Converts
     {
         protected override void Initialize()
         {
-            if (OutputType.IsGenericType == false)
-            {
-                throw new ArgumentOutOfRangeException(nameof(OutputType), "必须是泛型");
-            }
             base.Initialize();
         }
 
