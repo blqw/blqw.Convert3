@@ -15,12 +15,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace blqw.Convert3Component
+namespace blqw.IOC
 {
     /// <summary>
     /// 用于执行MEF相关操作
     /// </summary>
-    sealed class MEFPart
+    static class MEFLite
     {
         /// <summary>
         /// 字符串锁
@@ -70,6 +70,17 @@ namespace blqw.Convert3Component
 
         }
 
+        private static bool Add(this HashSet<string> loaded, Assembly assembly)
+        {
+            var key = assembly.ManifestModule.ModuleVersionId + "," + assembly.ManifestModule.MDStreamVersion;
+            if (loaded.Contains(key))
+            {
+                return false;
+            }
+            loaded.Add(key);
+            return true;
+        }
+
         /// <summary> 
         /// 获取插件容器
         /// </summary>
@@ -83,29 +94,61 @@ namespace blqw.Convert3Component
                 , StringComparer.OrdinalIgnoreCase);
             var logs = new AggregateCatalog();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
+            var loaded = new HashSet<string>();
             foreach (var a in assemblies)
             {
-                if (a.IsDynamic == false)
+                if (loaded.Add(a) == false)
+                {
+                    continue;
+                }
+                if (a.IsUseful())
                 {
                     LoadAssembly(a).ForEach(logs.Catalogs.Add);
+                }
+                if (a.IsDynamic == false)
+                {
                     files.Remove(a.Location);
                 }
             }
+            var domain = AppDomain.CreateDomain("mef");
             foreach (var file in files)
             {
+                var bytes = File.ReadAllBytes(file);
                 try
                 {
-                    var ass = Assembly.Load(File.ReadAllBytes(file));
-                    if (ass.IsDynamic == false)
+                    var ass = domain.Load(bytes);
+                    if (loaded.Add(ass) == false)
                     {
+                        continue;
+                    }
+                    if (ass.IsUseful())
+                    {
+                        ass = Assembly.Load(bytes);
                         LoadAssembly(ass).ForEach(logs.Catalogs.Add);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex, "MEF部分插件加载失败1");
+                }
             }
+            AppDomain.Unload(domain);
             return new SelectionPriorityContainer(logs);
         }
+
+        /// <summary>
+        /// 过滤系统组件,动态组件,全局缓存组件
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        private static bool IsUseful(this Assembly assembly)
+        {
+            return assembly.IsDynamic == false
+                && assembly.GlobalAssemblyCache == false
+                && assembly.FullName.StartsWith("System.", StringComparison.OrdinalIgnoreCase) == false
+                && assembly.FullName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase) == false;
+        }
+
 
         private static List<ComposablePartCatalog> LoadAssembly(Assembly assembly)
         {
@@ -119,8 +162,9 @@ namespace blqw.Convert3Component
             {
                 types = ex.Types;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace.WriteLine(ex, "MEF部分插件加载失败2");
                 return list;
             }
             foreach (var type in types)
@@ -134,7 +178,10 @@ namespace blqw.Convert3Component
                         list.Add(new TypeCatalog(type));
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex, "MEF部分插件加载失败3");
+                }
             }
             return list;
         }

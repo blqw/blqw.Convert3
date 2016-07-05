@@ -22,6 +22,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileAlignment>4096</FileAlignment>
+    <DocumentationFile>bin\Debug\blqw.Convert3.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -92,10 +93,10 @@
     <Compile Include="Dynamic\DynamicSystemObject.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="Converts\Interface\IConvertor.cs" />
-    <Compile Include="IOC\Component.cs" />
+    <Compile Include="IOC\Components.cs" />
     <Compile Include="IOC\Converter.cs" />
     <Compile Include="IOC\ExportComponent.cs" />
-    <Compile Include="IOC\MEFPart.cs" />
+    <Compile Include="IOC\MEFLite.cs" />
     <Compile Include="Json\CJsonObject.cs" />
     <Compile Include="Pinyin\ConvertPinyin.cs" />
     <Compile Include="Pinyin\PinyinMode.cs" />
@@ -107,6 +108,7 @@
   <ItemGroup>
     <None Include="blqw.Convert3.nuspec" />
     <None Include="nuget-pack.bat" />
+    <None Include="update-ioc.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

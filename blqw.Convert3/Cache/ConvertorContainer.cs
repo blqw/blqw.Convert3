@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.ComponentModel.Composition;
-using blqw.Convert3Component;
 using System.Collections.Generic;
+using blqw.IOC;
 
 namespace blqw
 {
@@ -69,7 +69,7 @@ namespace blqw
         {
             _cache.Clear();
             var import = new Import();
-            MEFPart.Import(import);
+            MEFLite.Import(import);
             foreach (var conv in import.Convertors)
             {
                 var get = _cache.GetOrAdd(conv.OutputType, conv);

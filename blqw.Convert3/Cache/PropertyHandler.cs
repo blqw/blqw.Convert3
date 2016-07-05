@@ -1,4 +1,4 @@
-﻿using blqw.Convert3Component;
+﻿using blqw.IOC;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -18,7 +18,7 @@ namespace blqw
 
         private static bool Initialize()
         {
-            MEFPart.Import(typeof(PropertyHandler));
+            MEFLite.Import(typeof(PropertyHandler));
             return true;
         }
 

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using blqw.IOC;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using blqw.Convert3Component;
 
 namespace blqw.Converts
 {
@@ -102,7 +102,7 @@ namespace blqw.Converts
             var ps = input.GetType().GetProperties();
             if (ps.Length > 0)
             {
-                return Component.ToJsonString(input);
+                return Components.ToJsonString(input);
             }
 
             return input.ToString();

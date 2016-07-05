@@ -7,13 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
-namespace blqw.Convert3Component
+namespace blqw.IOC
 {
-    class Component
+    class Components
     {
-        static Component()
+        static Components()
         {
-            MEFPart.Import(typeof(Component));
+            MEFLite.Import(typeof(Components));
         }
 
         static readonly JavaScriptSerializer JSON = new JavaScriptSerializer();

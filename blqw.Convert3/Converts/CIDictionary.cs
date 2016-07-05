@@ -1,4 +1,4 @@
-﻿using blqw.Convert3Component;
+﻿using blqw.IOC;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -119,7 +119,7 @@ namespace blqw.Converts
             {
                 try
                 {
-                    var result = Component.ToJsonObject(outputType, input);
+                    var result = Components.ToJsonObject(outputType, input);
                     success = true;
                     return (IDictionary)result;
                 }

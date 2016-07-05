@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using blqw;
 using blqw.Converts;
 
-namespace blqw.Convert3Component
+namespace blqw.IOC
 {
     /// <summary>
     /// 对象转换器
@@ -170,12 +170,18 @@ namespace blqw.Convert3Component
         Type _OutputType;
         bool _ThrowError;
         IConvertor _Convertor;
+        IConvertor Convertor
+        {
+            get
+            {
+                return _Convertor ?? (_Convertor = ConvertorContainer.Default.Get(_OutputType));
+            }
+        }
 
         public DirectConverter(Type outputType, bool throwError)
         {
             _OutputType = outputType;
             _ThrowError = throwError;
-            _Convertor = ConvertorContainer.Default.Get(outputType);
         }
 
         public override object Convert(object input, Type type)
@@ -183,7 +189,7 @@ namespace blqw.Convert3Component
             using (Error.Contract())
             {
                 bool b;
-                var output = _Convertor.ChangeType(input, type, out b);
+                var output = Convertor.ChangeType(input, type, out b);
                 if (_ThrowError && b == false)
                 {
                     Error.ThrowIfHaveError();
@@ -197,7 +203,7 @@ namespace blqw.Convert3Component
             using (Error.Contract())
             {
                 bool b;
-                var output = _Convertor.ChangeType(input, typeof(T), out b);
+                var output = Convertor.ChangeType(input, typeof(T), out b);
                 if (_ThrowError && b == false)
                 {
                     Error.ThrowIfHaveError();

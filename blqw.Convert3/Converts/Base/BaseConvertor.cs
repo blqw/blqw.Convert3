@@ -96,7 +96,7 @@ namespace blqw.Converts
         {
             if (input == null || input is DBNull)
             {
-                return This.ChangeType(input, outputType, out success);
+                return ChangeType(input, outputType, out success);
             }
             var str = input as string;
             if (str != null)

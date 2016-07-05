@@ -118,6 +118,11 @@ namespace blqw
         {
             public ExceptionCollection() : base(10) { }
             public int Indent { get; set; }
+            public new void Clear()
+            {
+                base.Clear();
+                Indent = 0;
+            }
         }
         /// <summary>
         /// 异常契约

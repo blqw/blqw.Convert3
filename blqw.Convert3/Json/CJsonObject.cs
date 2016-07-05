@@ -1,9 +1,9 @@
-﻿using System;
+﻿using blqw.IOC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using blqw.Convert3Component;
 
 namespace blqw.Converts
 {
@@ -45,7 +45,7 @@ namespace blqw.Converts
                 try
                 {
                     success = true;
-                    return Component.ToJsonObject(outputType, input);
+                    return Components.ToJsonObject(outputType, input);
                 }
                 catch (Exception ex)
                 {
