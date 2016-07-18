@@ -104,44 +104,51 @@ namespace blqw.Converts
         private static string GetSimpleName(Type t)
         {
             string name;
-            switch (t.Namespace)
+            if (t.ReflectedType == null)
             {
-                case "System":
-                    switch (t.Name)
-                    {
-                        case "Boolean": return "bool";
-                        case "Byte": return "byte";
-                        case "Char": return "char";
-                        case "Decimal": return "decimal";
-                        case "Double": return "double";
-                        case "Int16": return "short";
-                        case "Int32": return "int";
-                        case "Int64": return "long";
-                        case "SByte": return "sbyte";
-                        case "Single": return "float";
-                        case "String": return "string";
-                        case "Object": return "object";
-                        case "UInt16": return "ushort";
-                        case "UInt32": return "uint";
-                        case "UInt64": return "ulong";
-                        case "Guid": return "Guid";
-                        default:
-                            name = t.Name;
-                            break;
-                    }
-                    break;
-                case null:
-                case "System.Collections":
-                case "System.Collections.Generic":
-                case "System.Data":
-                case "System.Text":
-                case "System.IO":
-                case "System.Collections.Specialized":
-                    name = t.Name;
-                    break;
-                default:
-                    name = t.Namespace + "." + t.Name;
-                    break;
+                switch (t.Namespace)
+                {
+                    case "System":
+                        switch (t.Name)
+                        {
+                            case "Boolean": return "bool";
+                            case "Byte": return "byte";
+                            case "Char": return "char";
+                            case "Decimal": return "decimal";
+                            case "Double": return "double";
+                            case "Int16": return "short";
+                            case "Int32": return "int";
+                            case "Int64": return "long";
+                            case "SByte": return "sbyte";
+                            case "Single": return "float";
+                            case "String": return "string";
+                            case "Object": return "object";
+                            case "UInt16": return "ushort";
+                            case "UInt32": return "uint";
+                            case "UInt64": return "ulong";
+                            case "Guid": return "Guid";
+                            default:
+                                name = t.Name;
+                                break;
+                        }
+                        break;
+                    case null:
+                    case "System.Collections":
+                    case "System.Collections.Generic":
+                    case "System.Data":
+                    case "System.Text":
+                    case "System.IO":
+                    case "System.Collections.Specialized":
+                        name = t.Name;
+                        break;
+                    default:
+                        name = $"{t.Namespace}.{t.Name}";
+                        break;
+                }
+            }
+            else
+            {
+                name = $"{GetSimpleName(t.ReflectedType)}.{t.Name}";
             }
             var index = name.LastIndexOf('`');
             if (index > -1)
