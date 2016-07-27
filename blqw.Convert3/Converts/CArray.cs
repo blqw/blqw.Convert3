@@ -85,7 +85,7 @@ namespace blqw.Converts
             {
                 try
                 {
-                    var result = Components.ToJsonObject(outputType, input);
+                    var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
                     return (Array)result;
                 }

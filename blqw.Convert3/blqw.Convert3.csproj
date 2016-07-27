@@ -34,6 +34,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="blqw.IOC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\blqw.IOC.1.0.1-beta\lib\net45\blqw.IOC.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -93,10 +97,8 @@
     <Compile Include="Dynamic\DynamicSystemObject.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="Converts\Interface\IConvertor.cs" />
-    <Compile Include="IOC\Components.cs" />
     <Compile Include="IOC\Converter.cs" />
     <Compile Include="IOC\ExportComponent.cs" />
-    <Compile Include="IOC\MEFLite.cs" />
     <Compile Include="Json\CJsonObject.cs" />
     <Compile Include="Pinyin\ConvertPinyin.cs" />
     <Compile Include="Pinyin\PinyinMode.cs" />
@@ -108,6 +110,7 @@
   <ItemGroup>
     <None Include="blqw.Convert3.nuspec" />
     <None Include="nuget-pack.bat" />
+    <None Include="packages.config" />
     <None Include="update-ioc.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

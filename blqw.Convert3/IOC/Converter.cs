@@ -13,8 +13,9 @@ namespace blqw.IOC
     /// <summary>
     /// 对象转换器
     /// </summary>
+    [Export("Convert3", typeof(IFormatterConverter))]
     [Export(typeof(IFormatterConverter))]
-    [ExportMetadata("Priority", 100)]
+    [ExportMetadata("Priority", IOC.ExportComponent.PRIORITY)]
     class ObjectConverter : IFormatterConverter
     {
         public virtual object Convert(object input, Type type)

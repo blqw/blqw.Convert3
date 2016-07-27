@@ -692,7 +692,7 @@ namespace blqw
         /// <param name="type"></param>
         /// <returns></returns>
         [Export("GetDefaultValue")]
-        [ExportMetadata("Priority", 100)]
+        [ExportMetadata("Priority", IOC.ExportComponent.PRIORITY)]
         public static object GetDefaultValue(this Type type)
         {
             if (type == null

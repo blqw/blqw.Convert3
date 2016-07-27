@@ -18,7 +18,7 @@ namespace blqw
 
         private static bool Initialize()
         {
-            MEFLite.Import(typeof(PropertyHandler));
+            MEF.Import(typeof(PropertyHandler));
             return true;
         }
 

@@ -102,7 +102,7 @@ namespace blqw.Converts
             var ps = input.GetType().GetProperties();
             if (ps.Length > 0)
             {
-                return Components.ToJsonString(input);
+                return ComponentServices.ToJsonString(input);
             }
 
             return input.ToString();
