@@ -64,10 +64,7 @@ namespace blqw
         //[ImportMany(typeof(IConvertor))]
         //static List<IConvertor> Convertors;
 
-        private static void a(object a)
-        {
-            System.IO.File.AppendAllLines("d:\\1.log", new string[] { DateTime.Now.ToString("mm:ss.ffffff") + " " + AppDomain.CurrentDomain.FriendlyName + " " + (a?.ToString() ?? "null") });
-        }
+        
         /// <summary>
         /// 加载转换器
         /// </summary>
@@ -76,8 +73,6 @@ namespace blqw
             _cache.Clear();
             var import = new Import();
             MEF.Import(import);
-            a(import.Convertors.Count);
-            a(Environment.StackTrace);
             foreach (var conv in import.Convertors)
             {
                 var get = _cache.GetOrAdd(conv.OutputType, conv);
