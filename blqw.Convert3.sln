@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blqw.Convert3", "blqw.Convert3\blqw.Convert3.csproj", "{B8EF5156-6262-4D04-A17B-FA06253C4011}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{2CC9F291-E7D0-4096-9890-004ECC5F1C13}"
 	ProjectSection(SolutionItems) = preProject
+		blqw.Convert3\blqw.Convert3.nuspec = blqw.Convert3\blqw.Convert3.nuspec
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection

@@ -22,7 +22,7 @@ namespace blqw.Converts
     public class CArray<T> : AdvancedConvertor<Array>
     {
         readonly static string[] Separator = { ", ", "," };
-        
+
         private IConvertor<T> _ElementConvertor;
 
         protected override void Initialize()
@@ -46,7 +46,7 @@ namespace blqw.Converts
                 success = true;
                 return null;
             }
-            var ee = (input as IEnumerable)?.GetEnumerator() 
+            var ee = (input as IEnumerable)?.GetEnumerator()
                     ?? input as IEnumerator;
             if (ee == null)
             {
@@ -81,6 +81,11 @@ namespace blqw.Converts
         protected override Array ChangeType(string input, Type outputType, out bool success)
         {
             input = input.Trim();
+            if (input.Length == 0)
+            {
+                success = true;
+                return Array.CreateInstance(outputType.GetElementType(), 0);
+            }
             if (input[0] == '[' && input[input.Length - 1] == ']')
             {
                 try

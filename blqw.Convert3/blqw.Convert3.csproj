@@ -108,7 +108,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="blqw.Convert3.nuspec" />
     <None Include="nuget-pack.bat" />
     <None Include="packages.config" />
     <None Include="update-ioc.ps1" />

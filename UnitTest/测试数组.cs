@@ -16,5 +16,15 @@ namespace blqw
             Assert.AreEqual(2, arr2[1]);
             Assert.AreEqual(3, arr2[2]);
         }
+
+
+        [TestMethod]
+        public void 空字符串转数组()
+        {
+            var str = "";
+            var arr = str.To<string[]>();
+            Assert.IsNotNull(arr);
+            Assert.AreEqual(0, arr.Length);
+        }
     }
 }
