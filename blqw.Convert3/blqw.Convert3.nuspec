@@ -12,8 +12,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
-      2016.08.03
-      修正空字符串转数组时会抛出异常的错误
+      2016.08.04
+      修复DataReader转String错误的问题
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Convert blqw Parse</tags>

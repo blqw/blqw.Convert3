@@ -1,6 +1,7 @@
 ﻿using blqw.IOC;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -56,15 +57,10 @@ namespace blqw.Converts
             return false;
         }
 
-        protected override string ChangeTypeImpl(object input, Type outputType, out bool success)
-        {
-            return ChangeType(input, outputType, out success);
-        }
-
         protected override string ChangeType(object input, Type outputType, out bool success)
         {
             success = true;
-            
+
             if (input == null || input is DBNull)
             {
                 return null;
@@ -112,6 +108,24 @@ namespace blqw.Converts
         {
             success = true;
             return input;
+        }
+
+        protected override string ChangeTypeImpl(object input, Type outputType, out bool success)
+        {
+            success = true;
+            if (input is DataRow || input is DataRowView)
+            {
+                return ComponentServices.ToJsonString(input);
+            }
+
+            var reader = input as IDataReader;
+            if (reader == null)
+                return ChangeType(input, outputType, out success);
+            if (reader.IsClosed)
+            {
+                throw new InvalidOperationException("DataReader已经关闭");
+            }
+            return reader.FieldCount == 0 ? null : This.ChangeType(reader.GetValue(0), outputType, out success);
         }
     }
 }

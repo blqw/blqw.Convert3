@@ -40,6 +40,9 @@ Dictionary<Guid, Dictionary<int, User>>
 ```
 
 ## 更新说明  
+#### 2016.08.04
+* 修复`DataReader`转`String`错误的问题
+
 #### 2016.08.03
 * 修正空字符串转数组时会抛出异常的错误
 
