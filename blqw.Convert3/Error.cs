@@ -206,11 +206,10 @@ namespace blqw
                 {
                     _Stack.Indent -= INDENT;
                     var index = _Stack.LastIndexOf(null);
-                    if (index <= 0)
+                    if (index >= 0)
                     {
-                        throw new NotSupportedException($"在错误的位置调用{nameof(Commit)}");
+                        _Stack.RemoveAt(index);
                     }
-                    _Stack.RemoveAt(index);
                 }
             }
 
