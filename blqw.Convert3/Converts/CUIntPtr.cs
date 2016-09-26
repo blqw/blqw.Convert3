@@ -10,13 +10,13 @@ namespace blqw.Converts
     {
         protected override UIntPtr ChangeType(string input, Type outputType, out bool success)
         {
-            var num = ConvertorContainer.UInt64Convertor.ChangeType(input, typeof(ulong), out success);
+            var num = ConvertorServices.Container.GetConvertor<ulong>().ChangeType(input, typeof(ulong), out success);
             return (success) ? new UIntPtr(num) : default(UIntPtr);
         }
 
         protected override UIntPtr ChangeType(object input, Type outputType, out bool success)
         {
-            var num = ConvertorContainer.UInt64Convertor.ChangeType(input, typeof(ulong), out success);
+            var num = ConvertorServices.Container.GetConvertor<ulong>().ChangeType(input, typeof(ulong), out success);
             return (success) ? new UIntPtr(num) : default(UIntPtr);
         }
     }

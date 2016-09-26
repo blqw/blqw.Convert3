@@ -189,7 +189,7 @@ namespace blqw.Converts
             return This.ChangeType(input, outputType, out success);
         }
 
-        IConvertor IConvertor.GetConvertor(Type outputType)
+        object IServiceProvider.GetService(Type outputType)
         {
             throw new NotSupportedException();
         }

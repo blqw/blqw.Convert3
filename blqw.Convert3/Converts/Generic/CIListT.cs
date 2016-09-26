@@ -25,7 +25,7 @@ namespace blqw.Converts
         IConvertor<T> _convertor;
         protected override void Initialize()
         {
-            _convertor = ConvertorContainer.Default.Get<T>();
+            _convertor = ConvertorServices.Container.GetConvertor<T>();
         }
         protected override ICollection<T> ChangeType(object input, Type outputType, out bool success)
         {

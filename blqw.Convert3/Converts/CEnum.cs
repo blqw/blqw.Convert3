@@ -224,7 +224,7 @@ namespace blqw.Converts
             return default(T);
         }
 
-        IConvertor IConvertor.GetConvertor(Type outputType)
+        object IServiceProvider.GetService(Type outputType)
         {
             if (outputType == null)
                 throw new ArgumentNullException(nameof(outputType));

@@ -31,7 +31,7 @@ namespace blqw
         public PropertyHandler(PropertyInfo property)
         {
             Property = property;
-            Convertor = ConvertorContainer.Default.Get(Property.PropertyType);
+            Convertor = ConvertorServices.Container.GetConvertor(Property.PropertyType);
             Name = property.Name;
             if (GetGeter != null && GetSeter != null)
             {

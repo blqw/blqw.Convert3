@@ -175,7 +175,7 @@ namespace blqw.IOC
         {
             get
             {
-                return _Convertor ?? (_Convertor = ConvertorContainer.Default.Get(_OutputType));
+                return _Convertor ?? (_Convertor = ConvertorServices.Container.GetConvertor(_OutputType));
             }
         }
 

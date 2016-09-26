@@ -152,7 +152,7 @@ namespace blqw.Converts
             }
             public bool Add(object key, object value)
             {
-                var conv = ConvertorContainer.StringConvertor;
+                var conv = ConvertorServices.Container.GetConvertor<string>();
                 bool b;
                 var skey = conv.ChangeType(key, typeof(string), out b);
                 if (b == false)
@@ -178,7 +178,7 @@ namespace blqw.Converts
 
             public bool Add<P>(object key, Func<P, object> getValue, P param)
             {
-                var conv = ConvertorContainer.StringConvertor;
+                var conv = ConvertorServices.Container.GetConvertor<string>();
                 bool b;
                 var skey = conv.ChangeType(key, typeof(string), out b);
                 if (b == false)

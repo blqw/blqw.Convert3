@@ -16,7 +16,7 @@ namespace blqw.Converts
 
         protected abstract IConvertor GetConvertor(Type outputType, Type[] genericTypes);
 
-        IConvertor IConvertor.GetConvertor(Type outputType)
+        object IServiceProvider.GetService(Type outputType)
         {
             var parent = OutputType;
             var child = outputType;

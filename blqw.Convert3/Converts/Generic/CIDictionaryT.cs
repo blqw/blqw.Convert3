@@ -27,8 +27,8 @@ namespace blqw.Converts
         IConvertor<V> _valueConvertor;
         protected override void Initialize()
         {
-            _keyConvertor = ConvertorContainer.Default.Get<K>();
-            _valueConvertor = ConvertorContainer.Default.Get<V>();
+            _keyConvertor = ConvertorServices.Container.GetConvertor<K>();
+            _valueConvertor = ConvertorServices.Container.GetConvertor<V>();
         }
         protected override IDictionary<K, V> ChangeType(object input, Type outputType, out bool success)
         {
