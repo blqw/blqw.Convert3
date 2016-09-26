@@ -32,7 +32,7 @@ namespace blqw
                 success = false;
                 return null;
             }
-            return conv.ChangeType(input, outputType, out success);
+            return conv.ChangeType(new ConvertContext(), input, outputType, out success);
         }
 
         /// <summary> 
@@ -52,7 +52,7 @@ namespace blqw
                 }
 
                 bool success;
-                var result = conv.ChangeType(input, outputType, out success);
+                var result = conv.ChangeType(new ConvertContext(), input, outputType, out success);
                 if (success == false)
                 {
                     Error.ThrowIfHaveError();
@@ -76,7 +76,7 @@ namespace blqw
             }
 
             bool success;
-            var result = conv.ChangeType(input, outputType, out success);
+            var result = conv.ChangeType(new ConvertContext(), input, outputType, out success);
             if (success == false)
             {
                 return defaultValue;
@@ -99,7 +99,7 @@ namespace blqw
                 success = false;
                 return default(T);
             }
-            return conv.ChangeType(input, typeof(T), out success);
+            return conv.ChangeType(new ConvertContext(), input, typeof(T), out success);
         }
 
         /// <summary> 返回一个指定类型的对象，该对象的值等效于指定的对象。转换失败抛出异常
@@ -118,7 +118,7 @@ namespace blqw
                 }
 
                 bool success;
-                var result = conv.ChangeType(input, typeof(T), out success);
+                var result = conv.ChangeType(new ConvertContext(), input, typeof(T), out success);
                 if (success == false)
                 {
                     Error.ThrowIfHaveError();
@@ -141,7 +141,7 @@ namespace blqw
             }
 
             bool success;
-            var result = conv.ChangeType(input, typeof(T), out success);
+            var result = conv.ChangeType(new ConvertContext(), input, typeof(T), out success);
             if (success == false)
             {
                 return defaultValue;
@@ -161,7 +161,7 @@ namespace blqw
                 result = null;
                 return false;
             }
-            result = conv.ChangeType(input, outputType, out b);
+            result = conv.ChangeType(new ConvertContext(),input, outputType, out b);
             return b;
         }
 

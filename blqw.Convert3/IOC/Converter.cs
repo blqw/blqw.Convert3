@@ -190,7 +190,7 @@ namespace blqw.IOC
             using (Error.Contract())
             {
                 bool b;
-                var output = Convertor.ChangeType(input, type, out b);
+                var output = Convertor.ChangeType(new ConvertContext(), input, type, out b);
                 if (_ThrowError && b == false)
                 {
                     Error.ThrowIfHaveError();
@@ -204,7 +204,7 @@ namespace blqw.IOC
             using (Error.Contract())
             {
                 bool b;
-                var output = Convertor.ChangeType(input, typeof(T), out b);
+                var output = Convertor.ChangeType(new ConvertContext(), input, typeof(T), out b);
                 if (_ThrowError && b == false)
                 {
                     Error.ThrowIfHaveError();

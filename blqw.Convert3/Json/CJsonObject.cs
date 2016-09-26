@@ -1,23 +1,17 @@
 ﻿using blqw.IOC;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
+    [ExportMetadata("Priority", 1)]
     class CJsonObject : CObject
     {
-        public override uint Priority
-        {
-            get
-            {
-                return base.Priority + 1;
-            }
-        }
-        
-        protected override object ChangeType(string input, Type outputType, out bool success)
+        protected override object ChangeType(ConvertContext context,string input, Type outputType, out bool success)
         {
             if (input != null && input.Length > 2)
             {
@@ -25,22 +19,22 @@ namespace blqw.Converts
                 {
                     case '"':
                         if (input[input.Length - 1] != '"')
-                            return base.ChangeType(input, outputType, out success);
+                            return base.ChangeType(context, input, outputType, out success);
                         break;
                     case '\'':
                         if (input[input.Length - 1] != '\'')
-                            return base.ChangeType(input, outputType, out success);
+                            return base.ChangeType(context, input, outputType, out success);
                         break;
                     case '{':
                         if (input[input.Length - 1] != '}')
-                            return base.ChangeType(input, outputType, out success);
+                            return base.ChangeType(context, input, outputType, out success);
                         break;
                     case '[':
                         if (input[input.Length - 1] != ']')
-                            return base.ChangeType(input, outputType, out success);
+                            return base.ChangeType(context, input, outputType, out success);
                         break;
                     default:
-                        return base.ChangeType(input, outputType, out success);
+                        return base.ChangeType(context, input, outputType, out success);
                 }
                 try
                 {
@@ -52,7 +46,7 @@ namespace blqw.Converts
                     Error.Add(ex);
                 }
             }
-            return base.ChangeType(input, outputType, out success);
+            return base.ChangeType(context, input, outputType, out success);
         }
     }
 }

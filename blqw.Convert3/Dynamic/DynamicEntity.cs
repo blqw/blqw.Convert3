@@ -4,58 +4,54 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace blqw.Dynamic
 {
-    class DynamicEntity : DynamicObject, IFormatProvider
+    class DynamicEntity : DynamicObject, IObjectReference
     {
-        #region IFormatProvider 成员
+        /// <summary>
+        /// 返回应进行反序列化的真实对象（而不是序列化流指定的对象）。
+        /// </summary>
+        /// <returns>返回放入图形中的实际对象。</returns>
+        /// <param name="context">当前对象从其中进行反序列化的 <see cref="T:System.Runtime.Serialization.StreamingContext" />。</param>
+        public object GetRealObject(StreamingContext context) => _entity;
 
-        object IFormatProvider.GetFormat(Type formatType)
-        {
-            if (formatType != null && string.Equals("Json", formatType.Name, StringComparison.Ordinal))
-            {
-                return _Entity;
-            }
-            return null;
-        }
 
-        #endregion
-
-        object _Entity;
-        int _PropertyCount;
-        PropertyHandler[] _Properties;
+        private readonly object _entity;
+        private readonly int _propertyCount;
+        private readonly PropertyHandler[] _properties;
 
         public DynamicEntity(object entity)
         {
             if (entity == null) return;
-            _Entity = entity;
-            _Properties = PublicPropertyCache.GetByType(entity.GetType());
-            _PropertyCount = _Properties.Length;
+            _entity = entity;
+            _properties = PublicPropertyCache.GetByType(entity.GetType());
+            _propertyCount = _properties.Length;
         }
 
         public override IEnumerable<string> GetDynamicMemberNames()
         {
-            for (int i = 0; i < _PropertyCount; i++)
+            for (int i = 0; i < _propertyCount; i++)
             {
-                yield return _Properties[i].Name;
+                yield return _properties[i].Name;
             }
         }
 
         public override bool TryConvert(ConvertBinder binder, out object result)
         {
-            return Convert3.TryChangedType(_Entity, binder.ReturnType, out result);
+            return Convert3.TryChangedType(_entity, binder.ReturnType, out result);
         }
 
         private PropertyHandler this[string name]
         {
             get
             {
-                for (int i = 0; i < _PropertyCount; i++)
+                for (int i = 0; i < _propertyCount; i++)
                 {
-                    var p = _Properties[i];
+                    var p = _properties[i];
                     if (string.Equals(name, p.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         return p;
@@ -70,7 +66,7 @@ namespace blqw.Dynamic
             var p = this[binder.Name];
             if (p != null && p.Get != null)
             {
-                result = p.Get(_Entity);
+                result = p.Get(_entity);
                 if (Convert3.TryChangedType(result, binder.ReturnType, out result))
                 {
                     result = Convert3.ToDynamic(result);
@@ -88,7 +84,7 @@ namespace blqw.Dynamic
             {
                 return false;
             }
-            return p.SetValue(_Entity, value);
+            return p.SetValue(new ConvertContext(), _entity, value);
         }
 
 

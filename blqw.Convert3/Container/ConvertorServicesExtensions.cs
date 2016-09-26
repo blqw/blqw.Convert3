@@ -40,20 +40,6 @@ namespace blqw
         /// <returns></returns>
         /// <exception cref="OverflowException"> 字典中已包含元素的最大数目 (<see cref="F:System.Int32.MaxValue" />)。 </exception>
         public static IConvertor GetConvertor(this ConvertorServices container, Type type) => (IConvertor)container.GetService(type);
-
-        /// <summary>
-        /// 获取null的转换器
-        /// </summary>
-        /// <param name="container"></param>
-        /// <returns></returns>
-        /// <exception cref="OverflowException"> 字典中已包含元素的最大数目 (<see cref="F:System.Int32.MaxValue" />)。 </exception>
-        public static IConvertor GetNullConvertor(this ConvertorServices container)
-        {
-            if (object.ReferenceEquals(ConvertorServices.Container, container))
-            {
-                return (IConvertor)(_NullWapper ?? (_NullWapper = container.GetServiceItem(typeof(void))))?.Value;
-            }
-            return (IConvertor)container.GetServiceItem(typeof(void))?.Value;
-        }
+        
     }
 }
