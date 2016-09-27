@@ -58,11 +58,11 @@
     <Compile Include="Convert3.cs" />
     <Compile Include="Convert3_NumberToUpper.cs" />
     <Compile Include="Converts\Base\ConvertorFactory.cs" />
-    <Compile Include="Converts\Define\CArray.cs" />
+    <Compile Include="Converts\Generic\CArray.cs" />
     <Compile Include="Converts\Factory\CArrayFactory.cs" />
-    <Compile Include="Converts\Define\CIDictionary.cs" />
-    <Compile Include="Converts\Define\CEnum.cs" />
-    <Compile Include="Converts\Define\CIList.cs" />
+    <Compile Include="Converts\Generic\CIDictionary.cs" />
+    <Compile Include="Converts\Generic\CEnum.cs" />
+    <Compile Include="Converts\Generic\CIList.cs" />
     <Compile Include="Converts\Primitive\CBoolean.cs" />
     <Compile Include="Converts\Primitive\CByte.cs" />
     <Compile Include="Converts\Primitive\CBytes.cs" />
