@@ -4,15 +4,15 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CArray<T> : BaseTypeConvertor<Array>
+    internal sealed class CArray<T> : BaseTypeConvertor<Array>
     {
-        static readonly string[] Separator = { ", ", "," };
+        private static readonly string[] _Separator = { ", ", "," };
 
         public override Type OutputType => typeof(T[]);
 
         protected override Array ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 success = true;
                 return null;
@@ -52,13 +52,13 @@ namespace blqw.Converts
                 success = true;
                 return Array.CreateInstance(outputType.GetElementType(), 0);
             }
-            if (input[0] == '[' && input[input.Length - 1] == ']')
+            if ((input[0] == '[') && (input[input.Length - 1] == ']'))
             {
                 try
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (Array)result;
+                    return (Array) result;
                 }
                 catch (Exception ex)
                 {
@@ -75,9 +75,9 @@ namespace blqw.Converts
                 success = false;
                 return null;
             }
-            var items = input.Split(Separator, StringSplitOptions.None);
+            var items = input.Split(_Separator, StringSplitOptions.None);
             var array = Array.CreateInstance(convertor.OutputType, items.Length);
-            for (int i = 0; i < items.Length; i++)
+            for (var i = 0; i < items.Length; i++)
             {
                 var value = convertor.ChangeType(context, items[i], convertor.OutputType, out success);
                 if (success == false)

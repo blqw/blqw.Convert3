@@ -7,12 +7,15 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public sealed class CIList<T> : BaseTypeConvertor<ICollection<T>>
+    internal sealed class CIList<T> : BaseTypeConvertor<ICollection<T>>
     {
-        protected override ICollection<T> ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        private static readonly string[] Separator = { ", ", "," };
+
+        protected override ICollection<T> ChangeTypeImpl(ConvertContext context, object input, Type outputType,
+            out bool success)
         {
             success = true;
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 return null;
             }
@@ -43,7 +46,7 @@ namespace blqw.Converts
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator()
-                     ?? (input as IEnumerator)
+                     ?? input as IEnumerator
                      ?? (input as DataTable)?.Rows.GetEnumerator()
                      ?? (input as DataRow)?.ItemArray.GetEnumerator()
                      ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
@@ -67,17 +70,17 @@ namespace blqw.Converts
             return helper.List;
         }
 
-        static readonly string[] Separator = { ", ", "," };
-        protected override ICollection<T> ChangeType(ConvertContext context, string input, Type outputType, out bool success)
+        protected override ICollection<T> ChangeType(ConvertContext context, string input, Type outputType,
+            out bool success)
         {
             input = input.Trim();
-            if (input[0] == '[' && input[input.Length - 1] == ']')
+            if ((input[0] == '[') && (input[input.Length - 1] == ']'))
             {
                 try
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (ICollection<T>)result;
+                    return (ICollection<T>) result;
                 }
                 catch (Exception ex)
                 {
@@ -89,8 +92,8 @@ namespace blqw.Converts
             var arr = input.Split(Separator, StringSplitOptions.None);
             return ChangeType(context, arr, outputType, out success);
         }
-        
-        struct ListHelper
+
+        private struct ListHelper
         {
             public ICollection<T> List;
             private readonly IConvertor<T> _convertor;
@@ -121,7 +124,9 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(new NotSupportedException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
+                    Error.Add(
+                        new NotSupportedException(
+                            $"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
                     return false;
                 }
             }
@@ -135,7 +140,7 @@ namespace blqw.Converts
                 }
                 try
                 {
-                    List = (ICollection<T>)Activator.CreateInstance(_type);
+                    List = (ICollection<T>) Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)

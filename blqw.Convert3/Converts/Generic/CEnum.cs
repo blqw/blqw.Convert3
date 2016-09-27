@@ -2,7 +2,7 @@
 
 namespace blqw.Converts
 {
-    public class CEnum<T> : SystemTypeConvertor<T>
+    internal sealed class CEnum<T> : SystemTypeConvertor<T>
         where T : struct
     {
         public override Type OutputType => typeof(T);
@@ -17,7 +17,7 @@ namespace blqw.Converts
             T result;
             try
             {
-                result = (T)Enum.Parse(outputType, input, true);
+                result = (T) Enum.Parse(outputType, input, true);
             }
             catch (Exception ex)
             {
@@ -44,17 +44,17 @@ namespace blqw.Converts
                     return result;
                 }
             }
-            Error.CastFail($"{result.ToString()} 不是有效的枚举值");
+            Error.CastFail($"{result} 不是有效的枚举值");
             success = false;
             return default(T);
         }
 
         protected override T ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            T result;
             var conv = input as IConvertible;
             if (conv != null)
             {
+                T result;
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Empty:
@@ -71,14 +71,17 @@ namespace blqw.Converts
                     case TypeCode.SByte:
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        result = (T)Enum.ToObject(outputType, conv.ToInt64(null));
+                        result = (T) Enum.ToObject(outputType, conv.ToInt64(null));
                         break;
                     case TypeCode.Byte:
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        result = (T)Enum.ToObject(outputType, conv.ToUInt64(null));
+                        result = (T) Enum.ToObject(outputType, conv.ToUInt64(null));
                         break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
+                    case TypeCode.Object:
                     default:
                         success = false;
                         return default(T);
@@ -101,11 +104,10 @@ namespace blqw.Converts
                         return result;
                     }
                 }
-                Error.CastFail($"{result.ToString()} 不是有效的枚举值");
+                Error.CastFail($"{result} 不是有效的枚举值");
             }
             success = false;
             return default(T);
         }
-        
     }
 }
