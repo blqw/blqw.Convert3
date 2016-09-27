@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace blqw.Converts
 {
     [ExportMetadata("Priority", 1)]
-    class CJsonObject : CObject
+    internal sealed class CJsonObject : CObject
     {
         protected override object ChangeType(ConvertContext context,string input, Type outputType, out bool success)
         {
-            if (input != null && input.Length > 2)
+            if (input?.Length > 2)
             {
                 switch (input[0])
                 {

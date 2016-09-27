@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CObject : BaseTypeConvertor<object>
+    internal class CObject : BaseTypeConvertor<object>
     {
         protected override object ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
@@ -43,7 +43,7 @@ namespace blqw.Converts
             }
 
             var row = (input as DataRowView)?.Row ?? (input as DataRow);
-            if (row != null && row.Table != null)
+            if (row?.Table != null)
             {
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
@@ -149,14 +149,14 @@ namespace blqw.Converts
         }
 
 
-        struct SetObjectProperty
+        private struct SetObjectProperty
         {
             private readonly ConvertContext _context;
-            readonly PropertyHandler[] _properties;
-            readonly int _propertyCount;
+            private readonly PropertyHandler[] _properties;
+            private readonly int _propertyCount;
             public object Instance;
             private readonly IDictionary<string, object> _dynamic;
-            readonly Type _type;
+            private readonly Type _type;
             public SetObjectProperty(ConvertContext context, Type type)
             {
                 _context = context;

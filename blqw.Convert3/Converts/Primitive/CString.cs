@@ -1,23 +1,25 @@
-﻿using blqw.IOC;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
-using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CString : SystemTypeConvertor<string>
+    internal sealed class CString : BaseConvertor<string>
     {
-        /// <summary> 判断是否为16进制格式的字符串,如果为true,将参数s的前缀(0x/&h)去除
+        /// <summary>
+        /// 返回是否应该尝试转换String后再转换
         /// </summary>
-        /// <param name="s">需要判断的字符串</param>
-        /// <returns></returns>
+        protected override bool ShouldConvertString => false;
+
+        /// <summary>
+        /// 判断是否为16进制格式的字符串,如果为true,将参数s的前缀(0x/&h)去除
+        /// </summary>
+        /// <param name="s"> 需要判断的字符串 </param>
+        /// <returns> </returns>
         public static bool IsHexString(ref string s)
         {
-            if (s == null || s.Length == 0)
+            if ((s == null) || (s.Length == 0))
             {
                 return false;
             }
@@ -57,7 +59,7 @@ namespace blqw.Converts
             return false;
         }
 
-        protected override string ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        protected override string ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
             if (input is DataRow || input is DataRowView)
@@ -74,17 +76,26 @@ namespace blqw.Converts
                     context.AddException("DataReader已经关闭");
                     return null;
                 }
-                return reader.FieldCount == 0 ? null : BaseChangeType(context, reader.GetValue(0), outputType, out success);
+                switch (reader.FieldCount)
+                {
+                    case 0:
+                        return null;
+                    case 1:
+                        return BaseChangeType(context, reader.GetValue(0), outputType, out success);
+                    default:
+                        return ComponentServices.ToJsonString(input); 
+
+                }
             }
 
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 return null;
             }
 
             if (input is bool)
             {
-                return (bool)input ? "true" : "false";
+                return (bool) input ? "true" : "false";
             }
 
             var convertible = input as IConvertible;
@@ -93,10 +104,10 @@ namespace blqw.Converts
                 return convertible.ToString(null);
             }
 
-            var format = input as IFormattable;
-            if (format != null)
+            var formattable = input as IFormattable;
+            if (formattable != null)
             {
-                return format.ToString(null, null);
+                return formattable.ToString(null, null);
             }
 
             var type = input as Type;

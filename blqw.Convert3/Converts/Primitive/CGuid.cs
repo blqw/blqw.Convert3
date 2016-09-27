@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CGuid : SystemTypeConvertor<Guid>
+    internal sealed class CGuid : SystemTypeConvertor<Guid>
     {
         protected override Guid ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -22,15 +18,22 @@ namespace blqw.Converts
 
         protected override Guid ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            var bs = input as byte[];
-            if (bs != null && bs.Length == 16)
+            var bytes = input as byte[];
+            if (bytes?.Length == 16)
             {
                 success = true;
-                return new Guid(bs);
+                return new Guid(bytes);
+            }
+            if (input is decimal)
+            {
+                var arr = decimal.GetBits((decimal) input);
+                bytes = new byte[16];
+                Buffer.BlockCopy(arr, 0, bytes, 0, 16);
+                success = true;
+                return new Guid(bytes);
             }
             success = false;
             return default(Guid);
         }
-        
     }
 }

@@ -1,22 +1,18 @@
-﻿using blqw.IOC;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CIDictionary : BaseTypeConvertor<IDictionary>
+    internal sealed class CIDictionary : BaseTypeConvertor<IDictionary>
     {
-        protected override IDictionary ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        protected override IDictionary ChangeTypeImpl(ConvertContext context, object input, Type outputType,
+            out bool success)
         {
             success = true;
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 return null;
             }
@@ -37,7 +33,7 @@ namespace blqw.Converts
                     success = false;
                     return null;
                 }
-                for (int i = 0; i < reader.FieldCount; i++)
+                for (var i = 0; i < reader.FieldCount; i++)
                 {
                     if (helper.Add(reader.GetName(i), reader.GetValue(i)) == false)
                     {
@@ -64,8 +60,8 @@ namespace blqw.Converts
             }
 
 
-            var row = (input as DataRowView)?.Row ?? (input as DataRow);
-            if (row != null && row.Table != null)
+            var row = (input as DataRowView)?.Row ?? input as DataRow;
+            if (row?.Table != null)
             {
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
@@ -79,10 +75,9 @@ namespace blqw.Converts
                 return helper.Dictionary;
             }
 
-            var dict = input as IDictionary;
-            if (dict != null)
+            var ee = (input as IDictionary)?.GetEnumerator();
+            if (ee != null)
             {
-                var ee = dict.GetEnumerator();
                 while (ee.MoveNext())
                 {
                     if (helper.Add(ee.Key, ee.Value) == false)
@@ -99,7 +94,7 @@ namespace blqw.Converts
             {
                 foreach (var p in ps)
                 {
-                    if (p.Get != null && helper.Add(p.Name, p.Get(input)) == false)
+                    if ((p.Get != null) && (helper.Add(p.Name, p.Get(input)) == false))
                     {
                         success = false;
                         return null;
@@ -112,16 +107,22 @@ namespace blqw.Converts
             return null;
         }
 
-        protected override IDictionary ChangeType(ConvertContext context, string input, Type outputType, out bool success)
+        protected override IDictionary ChangeType(ConvertContext context, string input, Type outputType,
+            out bool success)
         {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                success = false;
+                return null;
+            }
             input = input.Trim();
-            if (input[0] == '{' && input[input.Length - 1] == '}')
+            if ((input[0] == '{') && (input[input.Length - 1] == '}'))
             {
                 try
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (IDictionary)result;
+                    return (IDictionary) result;
                 }
                 catch (Exception ex)
                 {
@@ -133,11 +134,11 @@ namespace blqw.Converts
         }
 
 
-
-        struct DictionaryHelper
+        private struct DictionaryHelper
         {
             public IDictionary Dictionary;
-            private Type _type;
+            private readonly Type _type;
+
             public DictionaryHelper(Type type)
             {
                 _type = type;
@@ -167,7 +168,7 @@ namespace blqw.Converts
                 }
                 try
                 {
-                    Dictionary = (IDictionary)Activator.CreateInstance(_type);
+                    Dictionary = (IDictionary) Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)
@@ -177,6 +178,5 @@ namespace blqw.Converts
                 }
             }
         }
-
     }
 }

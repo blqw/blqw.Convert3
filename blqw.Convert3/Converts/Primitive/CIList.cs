@@ -1,18 +1,21 @@
-﻿using blqw.IOC;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Dynamic;
+using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CIList : BaseTypeConvertor<IList>
+    internal sealed class CIList : BaseTypeConvertor<IList>
     {
+        private static readonly string[] _Separator = { ", ", "," };
+
         protected override IList ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 return null;
             }
@@ -34,8 +37,8 @@ namespace blqw.Converts
                 }
                 while (reader.Read())
                 {
-                    var dict = (IDictionary<string, object>)new System.Dynamic.ExpandoObject();
-                    for (int i = 0; i < reader.FieldCount; i++)
+                    var dict = (IDictionary<string, object>)new ExpandoObject();
+                    for (var i = 0; i < reader.FieldCount; i++)
                     {
                         dict[reader.GetName(i)] = reader.GetValue(i);
                     }
@@ -46,16 +49,15 @@ namespace blqw.Converts
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator()
-                    ?? (input as IEnumerator)
-                    ?? (input as DataTable)?.Rows.GetEnumerator()
-                    ?? (input as DataView)?.GetEnumerator()
-                    ?? (input as DataRow)?.ItemArray.GetEnumerator()
-                    ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
-                    ?? (input as IListSource)?.GetList()?.GetEnumerator();
+                     ?? input as IEnumerator
+                     ?? (input as DataTable)?.Rows.GetEnumerator()
+                     ?? (input as DataRow)?.ItemArray.GetEnumerator()
+                     ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
+                     ?? (input as IListSource)?.GetList()?.GetEnumerator();
 
             if (ee == null)
             {
-                Error.CastFail("目前仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象转向IList");
+                Error.CastFail("仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对IList的转换");
                 success = false;
                 return null;
             }
@@ -71,11 +73,15 @@ namespace blqw.Converts
             return helper.List;
         }
 
-        static readonly string[] Separator = { ", ", "," };
         protected override IList ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
-            input = input.Trim();
-            if (input[0] == '[' && input[input.Length - 1] == ']')
+            input = input?.Trim();
+            if (input == null || input.Length <= 1)
+            {
+                success = false;
+                return null;
+            }
+            if ((input[0] == '[') && (input[input.Length - 1] == ']'))
             {
                 try
                 {
@@ -90,14 +96,15 @@ namespace blqw.Converts
                     return null;
                 }
             }
-            var arr = input.Split(Separator, StringSplitOptions.None);
+            var arr = input.Split(_Separator, StringSplitOptions.None);
             return ChangeType(context, arr, outputType, out success);
         }
 
-        struct ListHelper
+        private struct ListHelper
         {
             public IList List;
-            private Type _type;
+            private readonly Type _type;
+
             public ListHelper(Type type)
             {
                 _type = type;
@@ -113,7 +120,9 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(new NotSupportedException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
+                    Error.Add(
+                        new NotSupportedException(
+                            $"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
                     return false;
                 }
             }
@@ -137,6 +146,5 @@ namespace blqw.Converts
                 }
             }
         }
-
     }
 }

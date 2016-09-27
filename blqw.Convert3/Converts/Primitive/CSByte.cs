@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CSByte : SystemTypeConvertor<sbyte>
+    internal sealed class CSByte : SystemTypeConvertor<sbyte>
     {
         protected override sbyte ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -35,135 +31,130 @@ namespace blqw.Converts
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        return conv.ToBoolean(null) ? (sbyte)1 : (sbyte)0;
+                        return conv.ToBoolean(null) ? (sbyte) 1 : (sbyte) 0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
                         success = false;
                         return default(sbyte);
                     case TypeCode.Byte:
+                    {
+                        var a = conv.ToByte(null);
+                        if (a > sbyte.MaxValue)
                         {
-                            var a = conv.ToByte(null);
-                            if (a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Char:
+                    {
+                        var a = conv.ToChar(null);
+                        if (a > sbyte.MaxValue)
                         {
-                            var a = conv.ToChar(null);
-                            if (a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Int16:
+                    {
+                        var a = conv.ToInt16(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToInt16(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Int32:
+                    {
+                        var a = conv.ToInt32(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToInt32(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
-                            
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Int64:
+                    {
+                        var a = conv.ToInt64(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToInt64(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.SByte:
-                        {
-                            var a = conv.ToSByte(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
-                            
-                        }
+                    {
+                        return conv.ToSByte(null);
+                    }
                     case TypeCode.Double:
+                    {
+                        var a = conv.ToDouble(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToDouble(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Single:
+                    {
+                        var a = conv.ToSingle(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToSingle(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.UInt16:
+                    {
+                        var a = conv.ToUInt16(null);
+                        if (a > sbyte.MaxValue)
                         {
-                            var a = conv.ToUInt16(null);
-                            if (a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
-                            
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.UInt32:
+                    {
+                        var a = conv.ToUInt32(null);
+                        if (a > sbyte.MaxValue)
                         {
-                            var a = conv.ToUInt32(null);
-                            if (a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.UInt64:
+                    {
+                        var a = conv.ToUInt64(null);
+                        if (a > 127)
                         {
-                            var a = conv.ToUInt64(null);
-                            if (a > 127)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
                     case TypeCode.Decimal:
+                    {
+                        var a = conv.ToDecimal(null);
+                        if ((a < sbyte.MinValue) || (a > sbyte.MaxValue))
                         {
-                            var a = conv.ToDecimal(null);
-                            if (a < sbyte.MinValue || a > sbyte.MaxValue)
-                            {
-                                success = false;
-                                return default(sbyte);
-                            }
-                            return (sbyte)a;
+                            success = false;
+                            return default(sbyte);
                         }
+                        return (sbyte) a;
+                    }
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }

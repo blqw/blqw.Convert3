@@ -1,20 +1,17 @@
-﻿using blqw.IOC;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CDataTable : BaseTypeConvertor<DataTable>
+    internal sealed class CDataTable : BaseTypeConvertor<DataTable>
     {
-        protected override DataTable ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        protected override DataTable ChangeTypeImpl(ConvertContext context, object input, Type outputType,
+            out bool success)
         {
             success = true;
             var view = input as DataView;
@@ -37,16 +34,15 @@ namespace blqw.Converts
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator()
-                    ?? (input as IEnumerator)
-                    ?? (input as DataTable)?.Rows.GetEnumerator()
-                    ?? (input as DataView)?.GetEnumerator()
-                    ?? (input as DataRow)?.ItemArray.GetEnumerator()
-                    ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
-                    ?? (input as IListSource)?.GetList()?.GetEnumerator();
+                     ?? input as IEnumerator
+                     ?? (input as DataTable)?.Rows.GetEnumerator()
+                     ?? (input as DataRow)?.ItemArray.GetEnumerator()
+                     ?? (input as DataRowView)?.Row.ItemArray.GetEnumerator()
+                     ?? (input as IListSource)?.GetList()?.GetEnumerator();
 
             if (ee == null)
             {
-                Error.CastFail("目前仅支持DataView,DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象转向DataTable");
+                Error.CastFail("仅支持DataView,DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对DataTable的转换");
                 success = false;
                 return null;
             }
@@ -67,13 +63,13 @@ namespace blqw.Converts
         protected override DataTable ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             input = input.Trim();
-            if (input[0] == '{' && input[input.Length - 1] == '}')
+            if ((input[0] == '{') && (input[input.Length - 1] == '}'))
             {
                 try
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (DataTable)result;
+                    return (DataTable) result;
                 }
                 catch (Exception ex)
                 {
@@ -85,12 +81,13 @@ namespace blqw.Converts
             success = false;
             return null;
         }
-        
 
-        struct DataRowHelper
+
+        private struct DataRowHelper
         {
-            DataTable _table;
-            DataColumnCollection _columns;
+            private readonly DataTable _table;
+            private readonly DataColumnCollection _columns;
+
             public DataRowHelper(DataTable table)
             {
                 _table = table;
@@ -98,11 +95,13 @@ namespace blqw.Converts
                 _currentRow = null;
             }
 
-            DataRow _currentRow;
+            private DataRow _currentRow;
+
             public void AddRow()
             {
                 _table.Rows.Add(_currentRow);
             }
+
             public bool CreateRow(object value)
             {
                 _currentRow = _table.NewRow();
@@ -119,7 +118,7 @@ namespace blqw.Converts
                     return true;
                 }
 
-                var ee = (value as IEnumerable)?.GetEnumerator() ?? (value as IEnumerator);
+                var ee = (value as IEnumerable)?.GetEnumerator() ?? value as IEnumerator;
                 if (ee != null)
                 {
                     const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public;
@@ -131,9 +130,10 @@ namespace blqw.Converts
                             continue;
                         }
                         var type = entry.GetType();
-                        var getKey = type.GetProperty("Key", flags).GetPropertyHandler()?.Get ?? type.GetProperty("Name", flags).GetPropertyHandler()?.Get;
+                        var getKey = type.GetProperty("Key", flags).GetPropertyHandler()?.Get ??
+                                     type.GetProperty("Name", flags).GetPropertyHandler()?.Get;
                         var getValue = type.GetProperty("Value", flags).GetPropertyHandler()?.Get;
-                        if (getKey == null || getValue == null)
+                        if ((getKey == null) || (getValue == null))
                         {
                             Error.Add(new NotSupportedException("值添加到单元格失败:无法获取Key/Name和Value"));
                             return false;
@@ -157,7 +157,8 @@ namespace blqw.Converts
                     return true;
                 }
 
-                { //实体对象
+                {
+                    //实体对象
                     var props = PublicPropertyCache.GetByType(value.GetType());
                     for (int i = 0, length = props.Length; i < length; i++)
                     {
@@ -169,7 +170,6 @@ namespace blqw.Converts
                     }
                     return true;
                 }
-
             }
 
 
@@ -183,17 +183,16 @@ namespace blqw.Converts
                 else if (col.DataType != type)
                 {
                     bool success;
-                    value = Convert3.ChangeType(value, col.DataType, out success);
+                    value = value.ChangeType(col.DataType, out success);
                     if (success == false)
                     {
-                        Error.Add(new NotSupportedException($"第{_table?.Rows.Count}行{col?.ColumnName}添加到行失败"));
+                        Error.Add(new NotSupportedException($"第{_table?.Rows.Count}行{col.ColumnName}列添加到行失败"));
                         return false;
                     }
                 }
                 _currentRow[col] = value;
                 return true;
             }
-
         }
     }
 }

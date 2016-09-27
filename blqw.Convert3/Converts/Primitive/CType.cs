@@ -1,39 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CType : SystemTypeConvertor<Type>
+    internal sealed class CType : SystemTypeConvertor<Type>
     {
-        static CType()
+        private static readonly StringDictionary _Keywords = new StringDictionary
         {
-            _keywords = new NameValueCollection();
-            _keywords["bool"] = "System.Boolean";
-            _keywords["byte"] = "System.Byte";
-            _keywords["char"] = "System.Char";
-            _keywords["decimal"] = "System.Decimal";
-            _keywords["double"] = "System.Double";
-            _keywords["short"] = "System.Int16";
-            _keywords["int"] = "System.Int32";
-            _keywords["long"] = "System.Int64";
-            _keywords["sbyte"] = "System.SByte";
-            _keywords["float"] = "System.Single";
-            _keywords["string"] = "System.String";
-            _keywords["object"] = "System.Object";
-            _keywords["ushort"] = "System.UInt16";
-            _keywords["uint"] = "System.UInt32";
-            _keywords["ulong"] = "System.UInt64";
-            _keywords["Guid"] = "System.Guid";
+            ["bool"] = "System.Boolean",
+            ["byte"] = "System.Byte",
+            ["char"] = "System.Char",
+            ["decimal"] = "System.Decimal",
+            ["double"] = "System.Double",
+            ["short"] = "System.Int16",
+            ["int"] = "System.Int32",
+            ["long"] = "System.Int64",
+            ["sbyte"] = "System.SByte",
+            ["float"] = "System.Single",
+            ["string"] = "System.String",
+            ["object"] = "System.Object",
+            ["ushort"] = "System.UInt16",
+            ["uint"] = "System.UInt32",
+            ["ulong"] = "System.UInt64",
+            ["Guid"] = "System.Guid"
+        };
 
-        }
-
-        private static readonly NameValueCollection _keywords;
-        private static readonly NameValueCollection _typeNames = new NameValueCollection();
+        private static readonly StringDictionary _TypeNames = new StringDictionary();
 
         protected override Type ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
@@ -43,7 +35,13 @@ namespace blqw.Converts
 
         protected override Type ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
-            var result = Type.GetType(_keywords[input] ?? input, false, true) ?? Type.GetType("System." + input, false, true);
+            if (input == null)
+            {
+                success = true;
+                return null;
+            }
+            var result = Type.GetType(_Keywords[input] ?? input, false, true) ??
+                         Type.GetType("System." + input, false, true);
             if (result == null)
             {
                 Error.Add(new TypeLoadException(input + " 并不是一个类型"));
@@ -55,25 +53,28 @@ namespace blqw.Converts
             }
             return result;
         }
-        
 
-        ///<summary> 获取类型名称的友好展现形式
+
+        /// <summary>
+        /// 获取类型名称的友好展现形式
         /// </summary>
         public static string GetFriendlyName(Type t)
         {
-            if (t == null) return "`null`";
-            var s = _typeNames[t.GetHashCode().ToString()];
+            if (t == null)
+            {
+                return "`null`";
+            }
+            var s = _TypeNames[t.GetHashCode().ToString()];
             if (s != null)
             {
                 return s;
             }
-            lock (_typeNames)
+            lock (_TypeNames)
             {
                 var t2 = Nullable.GetUnderlyingType(t);
                 if (t2 != null)
                 {
-                    return _typeNames[t.GetHashCode().ToString()] = GetFriendlyName(t2) + "?";
-
+                    return _TypeNames[t.GetHashCode().ToString()] = GetFriendlyName(t2) + "?";
                 }
                 if (t.IsGenericType)
                 {
@@ -87,17 +88,16 @@ namespace blqw.Converts
                     {
                         var infos = t.GetGenericArguments();
                         generic = new string[infos.Length];
-                        for (int i = 0; i < infos.Length; i++)
+                        for (var i = 0; i < infos.Length; i++)
                         {
                             generic[i] = GetFriendlyName(infos[i]);
                         }
                     }
-                    return _typeNames[t.GetHashCode().ToString()] = GetSimpleName(t) + "<" + string.Join(", ", generic) + ">";
+                    return
+                        _TypeNames[t.GetHashCode().ToString()] =
+                            GetSimpleName(t) + "<" + string.Join(", ", generic) + ">";
                 }
-                else
-                {
-                    return _typeNames[t.GetHashCode().ToString()] = GetSimpleName(t);
-                }
+                return _TypeNames[t.GetHashCode().ToString()] = GetSimpleName(t);
             }
         }
 
@@ -111,22 +111,38 @@ namespace blqw.Converts
                     case "System":
                         switch (t.Name)
                         {
-                            case "Boolean": return "bool";
-                            case "Byte": return "byte";
-                            case "Char": return "char";
-                            case "Decimal": return "decimal";
-                            case "Double": return "double";
-                            case "Int16": return "short";
-                            case "Int32": return "int";
-                            case "Int64": return "long";
-                            case "SByte": return "sbyte";
-                            case "Single": return "float";
-                            case "String": return "string";
-                            case "Object": return "object";
-                            case "UInt16": return "ushort";
-                            case "UInt32": return "uint";
-                            case "UInt64": return "ulong";
-                            case "Guid": return "Guid";
+                            case "Boolean":
+                                return "bool";
+                            case "Byte":
+                                return "byte";
+                            case "Char":
+                                return "char";
+                            case "Decimal":
+                                return "decimal";
+                            case "Double":
+                                return "double";
+                            case "Int16":
+                                return "short";
+                            case "Int32":
+                                return "int";
+                            case "Int64":
+                                return "long";
+                            case "SByte":
+                                return "sbyte";
+                            case "Single":
+                                return "float";
+                            case "String":
+                                return "string";
+                            case "Object":
+                                return "object";
+                            case "UInt16":
+                                return "ushort";
+                            case "UInt32":
+                                return "uint";
+                            case "UInt64":
+                                return "ulong";
+                            case "Guid":
+                                return "Guid";
                             default:
                                 name = t.Name;
                                 break;
@@ -158,50 +174,52 @@ namespace blqw.Converts
             return name;
         }
 
-        /// <summary> 获取TypeCode对应的Type对象
+        /// <summary>
+        /// 获取TypeCode对应的Type对象
         /// </summary>
-        /// <param name="typeCode">TypeCode</param>
-        /// <returns></returns>
+        /// <param name="typeCode"> TypeCode </param>
+        /// <returns> </returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="typeCode"/> 错误.</exception>
         public static Type GetType(TypeCode typeCode)
         {
             switch (typeCode)
             {
                 case TypeCode.Boolean:
-                    return typeof(Boolean);
+                    return typeof(bool);
                 case TypeCode.Byte:
-                    return typeof(Byte);
+                    return typeof(byte);
                 case TypeCode.Char:
-                    return typeof(Char);
+                    return typeof(char);
                 case TypeCode.DBNull:
                     return typeof(DBNull);
                 case TypeCode.DateTime:
                     return typeof(DateTime);
                 case TypeCode.Decimal:
-                    return typeof(Decimal);
+                    return typeof(decimal);
                 case TypeCode.Double:
-                    return typeof(Double);
+                    return typeof(double);
                 case TypeCode.Empty:
                     return null;
                 case TypeCode.Int16:
-                    return typeof(Int16);
+                    return typeof(short);
                 case TypeCode.Int32:
-                    return typeof(Int32);
+                    return typeof(int);
                 case TypeCode.Int64:
-                    return typeof(Int64);
+                    return typeof(long);
                 case TypeCode.Object:
-                    return typeof(Object);
+                    return typeof(object);
                 case TypeCode.SByte:
-                    return typeof(SByte);
+                    return typeof(sbyte);
                 case TypeCode.Single:
-                    return typeof(Single);
+                    return typeof(float);
                 case TypeCode.String:
-                    return typeof(String);
+                    return typeof(string);
                 case TypeCode.UInt16:
-                    return typeof(UInt16);
+                    return typeof(ushort);
                 case TypeCode.UInt32:
-                    return typeof(UInt32);
+                    return typeof(uint);
                 case TypeCode.UInt64:
-                    return typeof(UInt64);
+                    return typeof(ulong);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(typeCode));
             }

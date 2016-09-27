@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CDateTime : SystemTypeConvertor<DateTime>
+    internal sealed  class CDateTime : SystemTypeConvertor<DateTime>
     {
-        static readonly string[] Formats = new[] { "yyyyMMddHHmmss", "yyyyMMddHHmmssfff" }; 
-        
+        private static readonly string[] _Formats = { "yyyyMMddHHmmss", "yyyyMMddHHmmssfff" };
+
         protected override DateTime ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
@@ -38,6 +34,10 @@ namespace blqw.Converts
                     case TypeCode.Decimal:
                         success = false;
                         return default(DateTime);
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }
@@ -54,7 +54,7 @@ namespace blqw.Converts
                 success = true;
                 return result;
             }
-            if (DateTime.TryParseExact(input, Formats, null, DateTimeStyles.None, out result))
+            if (DateTime.TryParseExact(input, _Formats, null, DateTimeStyles.None, out result))
             {
                 success = true;
                 return result;

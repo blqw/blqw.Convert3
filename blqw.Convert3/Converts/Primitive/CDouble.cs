@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CDouble : SystemTypeConvertor<double>
+    internal sealed class CDouble : SystemTypeConvertor<double>
     {
         protected override double ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -36,24 +32,40 @@ namespace blqw.Converts
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        return conv.ToBoolean(null) ? (Double)1 : (Double)0;   
+                        return conv.ToBoolean(null) ? 1 : 0;
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
                     case TypeCode.DateTime:
                         success = false;
                         return default(double);
-                    case TypeCode.Byte: return conv.ToByte(null); 
-                    case TypeCode.Char: return (Double)conv.ToChar(null); 
-                    case TypeCode.Int16: return (Double)conv.ToInt16(null); 
-                    case TypeCode.Int32: return (Double)conv.ToInt32(null); 
-                    case TypeCode.Int64: return (Double)conv.ToInt64(null); 
-                    case TypeCode.SByte: return (Double)conv.ToSByte(null); 
-                    case TypeCode.Double: return (Double)conv.ToDouble(null); 
-                    case TypeCode.Single: return (Double)conv.ToSingle(null); 
-                    case TypeCode.UInt16: return (Double)conv.ToUInt16(null); 
-                    case TypeCode.UInt32: return (Double)conv.ToUInt32(null); 
-                    case TypeCode.UInt64: return (Double)conv.ToUInt64(null); 
-                    case TypeCode.Decimal: return (Double)conv.ToDecimal(null); 
+                    case TypeCode.Byte:
+                        return conv.ToByte(null);
+                    case TypeCode.Char:
+                        return conv.ToChar(null);
+                    case TypeCode.Int16:
+                        return conv.ToInt16(null);
+                    case TypeCode.Int32:
+                        return conv.ToInt32(null);
+                    case TypeCode.Int64:
+                        return conv.ToInt64(null);
+                    case TypeCode.SByte:
+                        return conv.ToSByte(null);
+                    case TypeCode.Double:
+                        return conv.ToDouble(null);
+                    case TypeCode.Single:
+                        return conv.ToSingle(null);
+                    case TypeCode.UInt16:
+                        return conv.ToUInt16(null);
+                    case TypeCode.UInt32:
+                        return conv.ToUInt32(null);
+                    case TypeCode.UInt64:
+                        return conv.ToUInt64(null);
+                    case TypeCode.Decimal:
+                        return (double)conv.ToDecimal(null);
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }
@@ -61,13 +73,10 @@ namespace blqw.Converts
             else
             {
                 var bs = input as byte[];
-                if (bs != null)
+                if (bs?.Length == 8)
                 {
-                    if (bs.Length == 8)
-                    {
-                        success = true;
-                        return BitConverter.ToDouble(bs, 0);
-                    }
+                    success = true;
+                    return BitConverter.ToDouble(bs, 0);
                 }
             }
             success = false;

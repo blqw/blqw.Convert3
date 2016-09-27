@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CChar : SystemTypeConvertor<char>
+    internal sealed class CChar : SystemTypeConvertor<char>
     {
         protected override char ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -41,7 +37,7 @@ namespace blqw.Converts
                     case TypeCode.Int16:
                         {
                             var a = conv.ToInt16(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
@@ -51,7 +47,7 @@ namespace blqw.Converts
                     case TypeCode.Int32:
                         {
                             var a = conv.ToInt32(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
@@ -61,7 +57,7 @@ namespace blqw.Converts
                     case TypeCode.Int64:
                         {
                             var a = conv.ToInt64(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
@@ -81,7 +77,7 @@ namespace blqw.Converts
                     case TypeCode.Double:
                         {
                             var a = conv.ToDouble(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
@@ -91,7 +87,7 @@ namespace blqw.Converts
                     case TypeCode.Single:
                         {
                             var a = conv.ToSingle(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
@@ -131,13 +127,17 @@ namespace blqw.Converts
                     case TypeCode.Decimal:
                         {
                             var a = conv.ToDecimal(null);
-                            if (a < 0 || a > 255)
+                            if ((a < 0) || (a > 255))
                             {
                                 success = false;
                                 return default(char);
                             }
                             return (char)a;
                         }
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }
@@ -162,6 +162,5 @@ namespace blqw.Converts
             success = false;
             return default(char);
         }
-
     }
 }

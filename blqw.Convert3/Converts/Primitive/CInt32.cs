@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CInt32 : SystemTypeConvertor<int>
+    internal sealed class CInt32 : SystemTypeConvertor<int>
     {
         protected override int ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -39,109 +35,117 @@ namespace blqw.Converts
                     case TypeCode.DateTime:
                         success = false;
                         return 0;
-                    case TypeCode.Boolean: return conv.ToBoolean(null) ? (int)1 : (int)0;
-                    case TypeCode.Byte: return conv.ToByte(null);
-                    case TypeCode.Char: return conv.ToChar(null);
-                    case TypeCode.Int16: return conv.ToInt16(null);
-                    case TypeCode.Int32: return conv.ToInt32(null);
+                    case TypeCode.Boolean:
+                        return conv.ToBoolean(null) ? 1 : 0;
+                    case TypeCode.Byte:
+                        return conv.ToByte(null);
+                    case TypeCode.Char:
+                        return conv.ToChar(null);
+                    case TypeCode.Int16:
+                        return conv.ToInt16(null);
+                    case TypeCode.Int32:
+                        return conv.ToInt32(null);
                     case TypeCode.Int64:
+                    {
+                        var a = conv.ToInt64(null);
+                        if ((a < -2147483648) || (a > 2147483647))
                         {
-                            var a = conv.ToInt64(null);
-                            if (a < -2147483648 || a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
-                    case TypeCode.SByte: return conv.ToSByte(null);
+                        return (int) a;
+                    }
+                    case TypeCode.SByte:
+                        return conv.ToSByte(null);
                     case TypeCode.Double:
+                    {
+                        var a = conv.ToDouble(null);
+                        if ((a < -2147483648) || (a > 2147483647))
                         {
-                            var a = conv.ToDouble(null);
-                            if (a < -2147483648 || a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
+                        return (int) a;
+                    }
                     case TypeCode.Single:
+                    {
+                        var a = conv.ToSingle(null);
+                        if ((a < -2147483648) || (a > 2147483647))
                         {
-                            var a = conv.ToSingle(null);
-                            if (a < -2147483648 || a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
-                    case TypeCode.UInt16: return conv.ToUInt16(null); 
+                        return (int) a;
+                    }
+                    case TypeCode.UInt16:
+                        return conv.ToUInt16(null);
                     case TypeCode.UInt32:
+                    {
+                        var a = conv.ToUInt32(null);
+                        if (a > 2147483647)
                         {
-                            var a = conv.ToUInt32(null);
-                            if (a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
+                        return (int) a;
+                    }
                     case TypeCode.UInt64:
+                    {
+                        var a = conv.ToUInt64(null);
+                        if (a > 2147483647)
                         {
-                            var a = conv.ToUInt64(null);
-                            if (a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
+                        return (int) a;
+                    }
                     case TypeCode.Decimal:
+                    {
+                        var a = conv.ToDecimal(null);
+                        if ((a < -2147483648) || (a > 2147483647))
                         {
-                            var a = conv.ToDecimal(null);
-                            if (a < -2147483648 || a > 2147483647)
-                            {
-                                success = false;
-                                return 0;
-                            }
-                            return (int)a;
+                            success = false;
+                            return 0;
                         }
+                        return (int) a;
+                    }
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }
             }
             else if (input is IntPtr)
             {
-                var a = ((IntPtr)input).ToInt64();
-                if (a < -2147483648 || a > 2147483647)
+                var a = ((IntPtr) input).ToInt64();
+                if ((a < -2147483648) || (a > 2147483647))
                 {
                     success = false;
                     return 0;
                 }
                 success = true;
-                return (int)a;
+                return (int) a;
             }
             else if (input is UIntPtr)
             {
-                var a = ((UIntPtr)input).ToUInt64();
+                var a = ((UIntPtr) input).ToUInt64();
                 if (a > 2147483647)
                 {
                     success = false;
                     return 0;
                 }
                 success = true;
-                return (int)a;
+                return (int) a;
             }
             else
             {
                 var bs = input as byte[];
-                if (bs != null)
+                if (bs?.Length == 4)
                 {
-                    if (bs.Length == 4)
-                    {
-                        success = true;
-                        return BitConverter.ToInt32(bs, 0);
-                    }
+                    success = true;
+                    return BitConverter.ToInt32(bs, 0);
                 }
             }
             success = false;

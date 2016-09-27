@@ -16,7 +16,6 @@ namespace blqw
     {
         /// <summary> 
         /// 转换器的输出类型
-        /// (有可能是泛型定义类型)
         /// </summary>
         Type OutputType { get; }
 

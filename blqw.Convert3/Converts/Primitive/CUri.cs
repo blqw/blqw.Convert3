@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CUri : SystemTypeConvertor<Uri>
+    internal sealed class CUri : SystemTypeConvertor<Uri>
     {
         protected override Uri ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
+            if (input == null)
+            {
+                success = true;
+                return null;
+            }
             Uri result;
             input = input.TrimStart();
-            if (input.Length > 10 && input[6] != '/')
+            if ((input.Length > 10) && (input[6] != '/'))
             {
                 if (Uri.TryCreate("http://" + input, UriKind.Absolute, out result))
                 {
@@ -37,6 +38,5 @@ namespace blqw.Converts
             success = false;
             return null;
         }
-
     }
 }

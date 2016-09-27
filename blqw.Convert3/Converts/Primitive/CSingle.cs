@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    public class CSingle : SystemTypeConvertor<float>
+    internal sealed class CSingle : SystemTypeConvertor<float>
     {
         protected override float ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
@@ -35,7 +31,7 @@ namespace blqw.Converts
                 switch (conv.GetTypeCode())
                 {
                     case TypeCode.Boolean:
-                        return conv.ToBoolean(null) ? (Single)1 : (Single)0;
+                        return conv.ToBoolean(null) ? 1 : 0;
 
                     case TypeCode.Empty:
                     case TypeCode.DBNull:
@@ -45,27 +41,39 @@ namespace blqw.Converts
                     case TypeCode.Byte:
                         return conv.ToByte(null);
                     case TypeCode.Char:
-                        return (Single)conv.ToChar(null);
-                    case TypeCode.Int16: return (Single)conv.ToInt16(null);
-                    case TypeCode.Int32: return (Single)conv.ToInt32(null);
-                    case TypeCode.Int64: return (Single)conv.ToInt64(null);
-                    case TypeCode.SByte: return (Single)conv.ToSByte(null);
+                        return conv.ToChar(null);
+                    case TypeCode.Int16:
+                        return conv.ToInt16(null);
+                    case TypeCode.Int32:
+                        return conv.ToInt32(null);
+                    case TypeCode.Int64:
+                        return conv.ToInt64(null);
+                    case TypeCode.SByte:
+                        return conv.ToSByte(null);
                     case TypeCode.Double:
+                    {
+                        var a = conv.ToDouble(null);
+                        if ((a < float.MinValue) || (a > float.MaxValue))
                         {
-                            var a = conv.ToDouble(null);
-                            if (a < Single.MinValue || a > Single.MaxValue)
-                            {
-                                success = false;
-                                return default(float);
-                            }
-                            return (Single)a;
-
+                            success = false;
+                            return default(float);
                         }
-                    case TypeCode.Single: return (Single)conv.ToSingle(null);
-                    case TypeCode.UInt16: return (Single)conv.ToUInt16(null);
-                    case TypeCode.UInt32: return (Single)conv.ToUInt32(null);
-                    case TypeCode.UInt64: return (Single)conv.ToUInt64(null);
-                    case TypeCode.Decimal: return (Single)conv.ToDecimal(null);
+                        return (float) a;
+                    }
+                    case TypeCode.Single:
+                        return conv.ToSingle(null);
+                    case TypeCode.UInt16:
+                        return conv.ToUInt16(null);
+                    case TypeCode.UInt32:
+                        return conv.ToUInt32(null);
+                    case TypeCode.UInt64:
+                        return conv.ToUInt64(null);
+                    case TypeCode.Decimal:
+                        return (float) conv.ToDecimal(null);
+                    case TypeCode.Object:
+                        break;
+                    case TypeCode.String:
+                        return ChangeType(context, conv.ToString(null), outputType, out success);
                     default:
                         break;
                 }
@@ -73,18 +81,14 @@ namespace blqw.Converts
             else
             {
                 var bs = input as byte[];
-                if (bs != null)
+                if (bs?.Length == 4)
                 {
-                    if (bs.Length == 4)
-                    {
-                        success = true;
-                        return BitConverter.ToSingle(bs, 0);
-                    }
+                    success = true;
+                    return BitConverter.ToSingle(bs, 0);
                 }
             }
             success = false;
             return default(float);
         }
-
     }
 }

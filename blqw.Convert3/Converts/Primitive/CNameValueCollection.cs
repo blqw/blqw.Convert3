@@ -1,20 +1,18 @@
-﻿using blqw.IOC;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using blqw.IOC;
 
 namespace blqw.Converts
 {
-    public class CNameValueCollection : BaseTypeConvertor<NameValueCollection>
+    internal sealed class CNameValueCollection : BaseTypeConvertor<NameValueCollection>
     {
-        protected override NameValueCollection ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        protected override NameValueCollection ChangeTypeImpl(ConvertContext context, object input, Type outputType,
+            out bool success)
         {
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 success = true;
                 return null;
@@ -40,8 +38,8 @@ namespace blqw.Converts
                 return helper.Collection;
             }
 
-            var row = (input as DataRowView)?.Row ?? (input as DataRow);
-            if (row != null && row.Table != null)
+            var row = ((input as DataRowView)?.Row ?? input as DataRow);
+            if (row?.Table != null)
             {
                 var cols = row.Table.Columns;
                 foreach (DataColumn col in cols)
@@ -65,7 +63,7 @@ namespace blqw.Converts
                     return null;
                 }
                 var cols = Enumerable.Range(0, reader.FieldCount).Select(i => new { name = reader.GetName(i), i });
-                for (int i = 0; i < reader.FieldCount; i++)
+                for (var i = 0; i < reader.FieldCount; i++)
                 {
                     if (helper.Add(reader.GetName(i), reader.GetValue, i) == false)
                     {
@@ -95,7 +93,7 @@ namespace blqw.Converts
             {
                 foreach (var p in ps)
                 {
-                    if (p.Get != null && helper.Add(p.Name, p.Get, input) == false)
+                    if ((p.Get != null) && (helper.Add(p.Name, p.Get, input) == false))
                     {
                         success = false;
                         return null;
@@ -107,9 +105,11 @@ namespace blqw.Converts
             return null;
         }
 
-        protected override NameValueCollection ChangeType(ConvertContext context, string input, Type outputType, out bool success)
+        protected override NameValueCollection ChangeType(ConvertContext context, string input, Type outputType,
+            out bool success)
         {
-            if (input[0] == '{' && input[input.Length - 1] == '}')
+            input = input?.Trim();
+            if (input?.Length > 1 && (input[0] == '{') && (input[input.Length - 1] == '}'))
             {
                 try
                 {
@@ -127,11 +127,12 @@ namespace blqw.Converts
         }
 
 
-        struct NVCollectiontHelper
+        private struct NVCollectiontHelper
         {
             public NameValueCollection Collection;
             private readonly ConvertContext _context;
             private readonly Type _type;
+
             public NVCollectiontHelper(ConvertContext context, Type type)
             {
                 _context = context;
@@ -152,9 +153,10 @@ namespace blqw.Converts
                     return false;
                 }
             }
+
             public bool Add(object key, object value)
             {
-                var conv = ConvertorServices.Container.GetConvertor<string>();
+                var conv = _context.Get<string>();
                 bool b;
                 var skey = conv.ChangeType(_context, key, typeof(string), out b);
                 if (b == false)
@@ -180,7 +182,7 @@ namespace blqw.Converts
 
             public bool Add<P>(object key, Func<P, object> getValue, P param)
             {
-                var conv = ConvertorServices.Container.GetConvertor<string>();
+                var conv = _context.Get<string>();
                 bool b;
                 var skey = conv.ChangeType(_context, key, typeof(string), out b);
                 if (b == false)
@@ -205,7 +207,5 @@ namespace blqw.Converts
                 }
             }
         }
-
-
     }
 }
