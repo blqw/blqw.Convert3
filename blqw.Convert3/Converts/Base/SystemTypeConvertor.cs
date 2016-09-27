@@ -66,7 +66,7 @@ namespace blqw.Converts
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator() ?? input as IEnumerator;
-            if (ee.MoveNext())
+            if (ee?.MoveNext() == true)
             {
                 var value = ee.Current;
                 if (ee.MoveNext())

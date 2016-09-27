@@ -39,7 +39,10 @@ Dictionary<Guid, Dictionary<int, User>>
     .To<Dictionary<string, Dictionary<DateTime, NameValueCollection>>>(); //不能理解就算了
 ```
 
-## 更新说明  
+## 更新说明 
+#### [3.0.0-beta]2016.09.27
+* 重构代码
+ 
 #### 2016.08.04
 * 修复`DataReader`转`String`错误的问题
 

@@ -4,13 +4,13 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CArray<T> : BaseTypeConvertor<Array>
+    internal sealed class CArray<T> : BaseTypeConvertor<T[]>
     {
         private static readonly string[] _Separator = { ", ", "," };
 
-        public override Type OutputType => typeof(T[]);
+        public override Type OutputType => typeof(T);
 
-        protected override Array ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
+        protected override T[] ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             if ((input == null) || input is DBNull)
             {
@@ -41,16 +41,16 @@ namespace blqw.Converts
                 array.Add(value);
             }
             success = true;
-            return array.ToArray(elementType);
+            return (T[])array.ToArray(elementType);
         }
 
-        protected override Array ChangeType(ConvertContext context, string input, Type outputType, out bool success)
+        protected override T[] ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             input = input.Trim();
             if (input.Length == 0)
             {
                 success = true;
-                return Array.CreateInstance(outputType.GetElementType(), 0);
+                return (T[])Array.CreateInstance(outputType.GetElementType(), 0);
             }
             if ((input[0] == '[') && (input[input.Length - 1] == ']'))
             {
@@ -58,7 +58,7 @@ namespace blqw.Converts
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (Array) result;
+                    return (T[])result;
                 }
                 catch (Exception ex)
                 {
@@ -89,7 +89,7 @@ namespace blqw.Converts
                 array.SetValue(value, i);
             }
             success = true;
-            return array;
+            return (T[])array;
         }
     }
 }

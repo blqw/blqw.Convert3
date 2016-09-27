@@ -39,7 +39,8 @@ namespace blqw.Converts
             Type[] genericTypes;
             if (IsCompatible(OutputType, outputType, out genericTypes))
             {
-                return GetConvertor(outputType, genericTypes);
+                var conv =  GetConvertor(outputType, genericTypes);
+                return (IConvertor)conv.GetService(outputType);
             }
             throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}无法兼容类型{OutputType}");
         }

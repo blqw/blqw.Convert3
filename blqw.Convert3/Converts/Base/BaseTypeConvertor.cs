@@ -16,11 +16,16 @@ namespace blqw.Converts
         /// <summary>
         /// 获取子转换器
         /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="outputType"/> is <see langword="null" />.</exception>
         protected override IConvertor GetConvertor(Type outputType)
         {
             if (outputType == null)
             {
                 throw new ArgumentNullException(nameof(outputType));
+            }
+            if (typeof(T) == outputType)
+            {
+                return this;
             }
             if ((OutputType.IsGenericTypeDefinition == false)
                 && (OutputType.IsAssignableFrom(outputType) == false))
