@@ -1,12 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Runtime.Hosting;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Remoting.Activation;
+using System.Runtime.Serialization;
+using System.Security.Cryptography;
 
 namespace blqw.Converts
 {
-    public sealed class CArrayFactory : ConvertorFactory
+    internal sealed class CArrayFactory : ConvertorFactory
     {
         public override Type OutputType => typeof(Array);
 
@@ -16,8 +19,7 @@ namespace blqw.Converts
         protected override IConvertor GetConvertor(Type outputType)
         {
             var type = typeof(CArray<>).MakeGenericType(outputType.GetElementType());
-            var conv = (IConvertor)Activator.CreateInstance(type);
-            return conv;
+            return (IConvertor) Activator.CreateInstance(type);
         }
     }
 }

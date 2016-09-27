@@ -58,6 +58,7 @@
     <Compile Include="Convert3.cs" />
     <Compile Include="Convert3_NumberToUpper.cs" />
     <Compile Include="Converts\Base\ConvertorFactory.cs" />
+    <Compile Include="Converts\Generic\CNullable.cs" />
     <Compile Include="Converts\Generic\CArray.cs" />
     <Compile Include="Converts\Factory\CArrayFactory.cs" />
     <Compile Include="Converts\Generic\CIDictionary.cs" />
@@ -83,7 +84,7 @@
     <Compile Include="Converts\Primitive\CInt64.cs" />
     <Compile Include="Converts\Primitive\CIntPtr.cs" />
     <Compile Include="Converts\Primitive\CNameValueCollection.cs" />
-    <Compile Include="Converts\Factory\CNullable.cs" />
+    <Compile Include="Converts\Factory\CNullableFactory.cs" />
     <Compile Include="Converts\Primitive\CObject.cs" />
     <Compile Include="Converts\Primitive\CSByte.cs" />
     <Compile Include="Converts\Primitive\CSingle.cs" />
