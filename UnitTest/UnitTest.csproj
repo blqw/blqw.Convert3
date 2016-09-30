@@ -39,6 +39,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\blqw.IOC\blqw.IOC\bin\Debug\blqw.IOC.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -64,6 +65,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BUG测试.cs" />
+    <Compile Include="Dynamic\DynamicPrimitiveTests.cs" />
     <Compile Include="获取转换器.cs" />
     <Compile Include="测试导出功能.cs" />
     <Compile Include="测试数组.cs" />

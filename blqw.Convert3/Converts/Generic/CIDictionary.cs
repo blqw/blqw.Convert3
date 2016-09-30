@@ -138,7 +138,7 @@ namespace blqw.Converts
                     }
                     catch (Exception ex)
                     {
-                        Error.Add(ex);
+                        context.AddException(ex);
                     }
                 }
             }
@@ -171,14 +171,14 @@ namespace blqw.Converts
                 var k = _keyConvertor.ChangeType(_context, key, _keyConvertor.OutputType, out b);
                 if (b == false)
                 {
-                    Error.Add(new NotSupportedException($"添加到字典{CType.GetFriendlyName(_type)}失败"));
+                    _context.AddException($"添加到字典{CType.GetFriendlyName(_type)}失败");
                     return false;
                 }
 
                 var v = _valueConvertor.ChangeType(_context, value, _valueConvertor.OutputType, out b);
                 if (b == false)
                 {
-                    Error.Add(new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败"));
+                    _context.AddException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败");
                     return false;
                 }
                 try
@@ -188,8 +188,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(
-                        new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex));
+                    _context.AddException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex);
                     return false;
                 }
             }
@@ -208,7 +207,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    _context.AddException(ex);
                     return false;
                 }
             }

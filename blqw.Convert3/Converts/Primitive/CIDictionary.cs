@@ -17,7 +17,7 @@ namespace blqw.Converts
                 return null;
             }
 
-            var helper = new DictionaryHelper(outputType);
+            var helper = new DictionaryHelper(outputType, context);
             if (helper.CreateInstance() == false)
             {
                 success = false;
@@ -29,7 +29,7 @@ namespace blqw.Converts
             {
                 if (reader.IsClosed)
                 {
-                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
@@ -122,11 +122,11 @@ namespace blqw.Converts
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (IDictionary) result;
+                    return (IDictionary)result;
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    context.AddException(ex);
                 }
             }
             success = false;
@@ -138,10 +138,12 @@ namespace blqw.Converts
         {
             public IDictionary Dictionary;
             private readonly Type _type;
+            private readonly ConvertContext _context;
 
-            public DictionaryHelper(Type type)
+            public DictionaryHelper(Type type, ConvertContext context)
             {
                 _type = type;
+                _context = context;
                 Dictionary = null;
             }
 
@@ -154,7 +156,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(new NotSupportedException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex));
+                    _context.AddException($"向字典{CType.GetFriendlyName(_type)}中添加元素 {key} 失败,原因:{ex.Message}", ex);
                     return false;
                 }
             }
@@ -168,12 +170,12 @@ namespace blqw.Converts
                 }
                 try
                 {
-                    Dictionary = (IDictionary) Activator.CreateInstance(_type);
+                    Dictionary = (IDictionary)Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    _context.AddException(ex);
                     return false;
                 }
             }

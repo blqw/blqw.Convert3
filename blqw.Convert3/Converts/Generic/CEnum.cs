@@ -21,7 +21,7 @@ namespace blqw.Converts
             }
             catch (Exception ex)
             {
-                Error.Add(ex);
+                context.AddException(ex);
                 success = false;
                 return default(T);
             }
@@ -44,7 +44,7 @@ namespace blqw.Converts
                     return result;
                 }
             }
-            Error.CastFail($"{result} 不是有效的枚举值");
+            context.AddException($"{result} 不是有效的枚举值");
             success = false;
             return default(T);
         }
@@ -104,7 +104,7 @@ namespace blqw.Converts
                         return result;
                     }
                 }
-                Error.CastFail($"{result} 不是有效的枚举值");
+                context.AddException($"{result} 不是有效的枚举值");
             }
             success = false;
             return default(T);

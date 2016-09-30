@@ -3,22 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace blqw.Dynamic
 {
-    public class DynamicDictionary : DynamicObject, IDictionary, IFormatProvider
+    public class DynamicDictionary : DynamicObject, IDictionary, IObjectHandle, IObjectReference
     {
-
-        object IFormatProvider.GetFormat(Type formatType)
-        {
-            if (formatType != null && string.Equals("Json", formatType.Name, StringComparison.Ordinal))
-            {
-                return _dict;
-            }
-            return null;
-        }
 
         public override IEnumerable<string> GetDynamicMemberNames()
         {
@@ -59,7 +52,7 @@ namespace blqw.Dynamic
                     return true;
                 }
             }
-            result = DynamicSystemObject.Null;
+            result = DynamicPrimitive.Null;
             return true;
         }
 
@@ -88,7 +81,7 @@ namespace blqw.Dynamic
             var key = GetIndexer0(indexes);
             if (key == null)
             {
-                result = DynamicSystemObject.Null;
+                result = DynamicPrimitive.Null;
                 return true;
             }
             result = _dict[key];
@@ -100,7 +93,7 @@ namespace blqw.Dynamic
                     return true;
                 }
             }
-            result = DynamicSystemObject.Null;
+            result = DynamicPrimitive.Null;
             return true;
         }
 
@@ -202,7 +195,7 @@ namespace blqw.Dynamic
             {
                 if (obj == null)
                 {
-                    return DynamicSystemObject.Null;
+                    return DynamicPrimitive.Null;
                 }
                 return Convert3.ToDynamic(obj);
             }
@@ -292,5 +285,13 @@ namespace blqw.Dynamic
         }
         #endregion
 
+        /// <summary>打开该对象。</summary>
+        /// <returns>已打开的对象。</returns>
+        public object Unwrap() => _dict;
+
+        /// <summary>返回应进行反序列化的真实对象（而不是序列化流指定的对象）。</summary>
+        /// <returns>返回放入图形中的实际对象。</returns>
+        /// <param name="context">当前对象从其中进行反序列化的 <see cref="T:System.Runtime.Serialization.StreamingContext" />。</param>
+        public object GetRealObject(StreamingContext context) => _dict;
     }
 }

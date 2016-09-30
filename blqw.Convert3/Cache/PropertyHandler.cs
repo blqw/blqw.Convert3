@@ -34,14 +34,14 @@ namespace blqw
         {
             if (Set == null)
             {
-                Error.Add(new NotSupportedException($"{Property.ReflectedType}.{Property.Name}属性没有set"));
+                context.AddException($"{Property.ReflectedType}.{Property.Name}属性没有set");
                 return false;
             }
             bool b;
             var v = context.Get(PropertyType).ChangeType(context, value, PropertyType, out b);
             if (b == false)
             {
-                Error.Add(new NotSupportedException($"{Property.ReflectedType}属性{Property.Name}赋值失败"));
+                context.AddException($"{Property.ReflectedType}属性{Property.Name}赋值失败");
                 return false;
             }
             try
@@ -51,7 +51,7 @@ namespace blqw
             }
             catch (Exception ex)
             {
-                Error.Add(ex);
+                context.AddException(ex);
                 return false;
             }
         }

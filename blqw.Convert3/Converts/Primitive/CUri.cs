@@ -28,7 +28,7 @@ namespace blqw.Converts
                 return result;
             }
 
-            Error.CastFail(input + "不是一个有效的url");
+            context.AddException(input + "不是一个有效的url");
             success = false;
             return null;
         }

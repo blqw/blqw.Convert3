@@ -6,7 +6,7 @@ namespace blqw.Converts
     {
         protected override ValueType ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
-            Error.CastFail("无法为值类型(struct)提供转换");
+            context.AddException("无法为值类型(struct)提供转换");
             success = false;
             return null;
         }
@@ -14,7 +14,7 @@ namespace blqw.Converts
         protected override ValueType ChangeTypeImpl(ConvertContext context, object input, Type outputType,
             out bool success)
         {
-            Error.CastFail("无法为值类型(struct)提供转换");
+            context.AddException("无法为值类型(struct)提供转换");
             success = false;
             return null;
         }

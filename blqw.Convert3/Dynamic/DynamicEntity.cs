@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace blqw.Dynamic
 {
-    class DynamicEntity : DynamicObject, IObjectReference
+    class DynamicEntity : DynamicObject, IObjectHandle, IObjectReference
     {
         /// <summary>
         /// 返回应进行反序列化的真实对象（而不是序列化流指定的对象）。
@@ -40,10 +41,7 @@ namespace blqw.Dynamic
             }
         }
 
-        public override bool TryConvert(ConvertBinder binder, out object result)
-        {
-            return Convert3.TryChangedType(_entity, binder.ReturnType, out result);
-        }
+        public override bool TryConvert(ConvertBinder binder, out object result) => Convert3.TryChangedType(_entity, binder.ReturnType, out result);
 
         private PropertyHandler this[string name]
         {
@@ -64,16 +62,14 @@ namespace blqw.Dynamic
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             var p = this[binder.Name];
-            if (p != null && p.Get != null)
+            if (p?.Get != null)
             {
                 result = p.Get(_entity);
-                if (Convert3.TryChangedType(result, binder.ReturnType, out result))
-                {
-                    result = Convert3.ToDynamic(result);
-                    return true;
-                }
+                bool b;
+                result = result.ChangeType(binder.ReturnType, out b);
+                return b ? result.ToDynamic() : DynamicPrimitive.Null;
             }
-            result = DynamicSystemObject.Null;
+            result = DynamicPrimitive.Null;
             return true;
         }
 
@@ -84,9 +80,12 @@ namespace blqw.Dynamic
             {
                 return false;
             }
-            return p.SetValue(new ConvertContext(), _entity, value);
+            return p.SetValue(ConvertContext.None, _entity, value);
         }
 
 
+        /// <summary>打开该对象。</summary>
+        /// <returns>已打开的对象。</returns>
+        public object Unwrap() => _entity;
     }
 }

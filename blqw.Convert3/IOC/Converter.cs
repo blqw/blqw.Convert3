@@ -171,13 +171,7 @@ namespace blqw.IOC
         Type _OutputType;
         bool _ThrowError;
         IConvertor _Convertor;
-        IConvertor Convertor
-        {
-            get
-            {
-                return _Convertor ?? (_Convertor = ConvertorServices.Container.GetConvertor(_OutputType));
-            }
-        }
+        IConvertor Convertor => _Convertor ?? (_Convertor = ConvertorServices.Container.GetConvertor(_OutputType));
 
         public DirectConverter(Type outputType, bool throwError)
         {
@@ -187,13 +181,13 @@ namespace blqw.IOC
 
         public override object Convert(object input, Type type)
         {
-            using (Error.Contract())
+            using (var context = new ConvertContext())
             {
                 bool b;
-                var output = Convertor.ChangeType(new ConvertContext(), input, type, out b);
+                var output = Convertor.ChangeType(context, input, type, out b);
                 if (_ThrowError && b == false)
                 {
-                    Error.ThrowIfHaveError();
+                    context.ThrowIfHaveError();
                 }
                 return output;
             }
@@ -201,13 +195,13 @@ namespace blqw.IOC
 
         public override T Convert<T>(object input)
         {
-            using (Error.Contract())
+            using (var context = new ConvertContext())
             {
                 bool b;
-                var output = Convertor.ChangeType(new ConvertContext(), input, typeof(T), out b);
+                var output = Convertor.ChangeType(context, input, typeof(T), out b);
                 if (_ThrowError && b == false)
                 {
-                    Error.ThrowIfHaveError();
+                    context.ThrowIfHaveError();
                 }
                 return (T)output;
             }

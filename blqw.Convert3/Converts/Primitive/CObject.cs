@@ -62,7 +62,7 @@ namespace blqw.Converts
             {
                 if (reader.IsClosed)
                 {
-                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
@@ -142,7 +142,7 @@ namespace blqw.Converts
             }
             catch (Exception ex)
             {
-                Error.Add(ex);
+                context.AddException(ex);
             }
             success = false;
             return null;
@@ -188,7 +188,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    _context.AddException(ex);
                     return false;
                 }
             }

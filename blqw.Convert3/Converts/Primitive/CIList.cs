@@ -20,7 +20,7 @@ namespace blqw.Converts
                 return null;
             }
 
-            var helper = new ListHelper(outputType);
+            var helper = new ListHelper(outputType, context);
             if (helper.CreateInstance() == false)
             {
                 success = false;
@@ -31,7 +31,7 @@ namespace blqw.Converts
             {
                 if (reader.IsClosed)
                 {
-                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
@@ -57,7 +57,7 @@ namespace blqw.Converts
 
             if (ee == null)
             {
-                Error.CastFail("仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对IList的转换");
+                context.AddException("仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对IList的转换");
                 success = false;
                 return null;
             }
@@ -91,7 +91,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    context.AddException(ex);
                     success = false;
                     return null;
                 }
@@ -104,10 +104,12 @@ namespace blqw.Converts
         {
             public IList List;
             private readonly Type _type;
+            private readonly ConvertContext _context;
 
-            public ListHelper(Type type)
+            public ListHelper(Type type, ConvertContext context)
             {
                 _type = type;
+                _context = context;
                 List = null;
             }
 
@@ -120,9 +122,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(
-                        new NotSupportedException(
-                            $"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex));
+                    _context.AddException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex);
                     return false;
                 }
             }
@@ -141,7 +141,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    _context.AddException(ex);
                     return false;
                 }
             }

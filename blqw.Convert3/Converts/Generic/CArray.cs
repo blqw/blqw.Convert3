@@ -34,7 +34,7 @@ namespace blqw.Converts
                 var value = convertor.ChangeType(context, ee.Current, elementType, out success);
                 if (success == false)
                 {
-                    Error.Add(new ArrayTypeMismatchException($"{value?.ToString() ?? "<null>"} 写入数组失败!"));
+                    context.AddException($"{value?.ToString() ?? "<null>"} 写入数组失败!");
                     success = false;
                     return null;
                 }
@@ -62,19 +62,13 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    context.AddException(ex);
                     success = false;
                     return null;
                 }
             }
 
             var convertor = context.Get<T>();
-            if (convertor == null)
-            {
-                Error.ConvertorNotFound(typeof(T));
-                success = false;
-                return null;
-            }
             var items = input.Split(_Separator, StringSplitOptions.None);
             var array = Array.CreateInstance(convertor.OutputType, items.Length);
             for (var i = 0; i < items.Length; i++)
@@ -82,7 +76,7 @@ namespace blqw.Converts
                 var value = convertor.ChangeType(context, items[i], convertor.OutputType, out success);
                 if (success == false)
                 {
-                    Error.Add(new ArrayTypeMismatchException($"{value?.ToString() ?? "<null>"} 写入数组失败!"));
+                    context.AddException($"{value?.ToString() ?? "<null>"} 写入数组失败!");
                     success = false;
                     return null;
                 }

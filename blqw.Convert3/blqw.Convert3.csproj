@@ -58,6 +58,7 @@
     <Compile Include="Convert3.cs" />
     <Compile Include="Convert3_NumberToUpper.cs" />
     <Compile Include="Converts\Base\ConvertorFactory.cs" />
+    <Compile Include="Converts\Base\FailConvertor.cs" />
     <Compile Include="Converts\Generic\CNullable.cs" />
     <Compile Include="Converts\Generic\CArray.cs" />
     <Compile Include="Converts\Factory\CArrayFactory.cs" />
@@ -97,13 +98,13 @@
     <Compile Include="Converts\Primitive\CUIntPtr.cs" />
     <Compile Include="Converts\Primitive\CUri.cs" />
     <Compile Include="Converts\Base\GenericConvertor.cs" />
+    <Compile Include="Define\ExceptionSnapshot.cs" />
     <Compile Include="Dynamic\DynamicDataRow.cs" />
     <Compile Include="Dynamic\DynamicDictionary.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
     <Compile Include="Dynamic\DynamicList.cs" />
     <Compile Include="Dynamic\DynamicNameValueCollection.cs" />
-    <Compile Include="Dynamic\DynamicSystemObject.cs" />
-    <Compile Include="Error.cs" />
+    <Compile Include="Dynamic\DynamicPrimitive.cs" />
     <Compile Include="Define\ConvertContext.cs" />
     <Compile Include="Define\IConvertor.cs" />
     <Compile Include="IOC\Converter.cs" />

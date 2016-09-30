@@ -44,7 +44,7 @@ namespace blqw.Converts
                          Type.GetType("System." + input, false, true);
             if (result == null)
             {
-                Error.Add(new TypeLoadException(input + " 并不是一个类型"));
+                context.AddException(new TypeLoadException(input + " 并不是一个类型"));
                 success = false;
             }
             else

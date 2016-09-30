@@ -92,7 +92,7 @@ namespace blqw
         //操作小数部分
         private static unsafe string ParseDecimal(char* p, char* end, char* upnum)
         {
-            var sb = new StringBuilder((int)(end - p));
+            var sb = new StringBuilder((int) (end - p));
             sb.Append(upnum[10]);
             while (p <= end)
             {
@@ -105,8 +105,8 @@ namespace blqw
         //操作整数部分,为了效率不写递归.....
         private static unsafe string ParseInteger(char* p, char* end, char* upnum, char* numut)
         {
-            var length = (int)(end - p) + 1;
-            var sb = new StringBuilder(length * 3);
+            var length = (int) (end - p) + 1;
+            var sb = new StringBuilder(length*3);
 
             if (*p == '-')
             {
@@ -138,10 +138,10 @@ namespace blqw
                     ling = false; //重置 参数
                 }
 
-                if (length % 8 == 1) //判断是否在"亿"位
+                if (length%8 == 1) //判断是否在"亿"位
                 {
                     //如果是
-                    var n = length / 8; //计算应该有几个"亿"
+                    var n = length/8; //计算应该有几个"亿"
 
                     if ((num != 0) || yi) //判断是否需要加 单位
                     {
@@ -166,7 +166,7 @@ namespace blqw
                 }
                 else //十千百万
                 {
-                    var uIndex = length % 4; //单位索引
+                    var uIndex = length%4; //单位索引
                     if (uIndex == 1) //判断是否在"万"位
                     {
                         if ((num != 0) || wan) //判断是否需要加 单位
@@ -229,19 +229,23 @@ namespace blqw
         #endregion
 
         #region 固定参数
-        
+
         /// <summary>
         /// 验证数字格式的正则表达式
         /// </summary>
-        private static readonly Regex _CheckNumber =new Regex(@"^[\s\t]*(?<integer>[-+]?\d*)[.]?(?<decimal>\d*[1-9])?[0]*[\s\t]*$", RegexOptions.Compiled);
+        private static readonly Regex _CheckNumber =
+            new Regex(@"^[\s\t]*(?<integer>[-+]?\d*)[.]?(?<decimal>\d*[1-9])?[0]*[\s\t]*$", RegexOptions.Compiled);
+
         /// <summary>
         /// 大写数字
         /// </summary>
         private static readonly string[] _UpperNumbers = { "零壹貳叁肆伍陸柒捌玖點", "零一二三四五六七八九点" };
+
         /// <summary>
         /// 数字单位
         /// </summary>
         private static readonly string[] _NumberUnits = { "仟萬拾佰億負", "千万十百亿负" };
+
         /// <summary>
         /// 金钱单位
         /// </summary>

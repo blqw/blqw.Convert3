@@ -10,7 +10,7 @@ namespace blqw.IOC
 
     static class ExportComponent
     {
-        public const int PRIORITY = 106;
+        public const int PRIORITY = 107;
 
 
         /// <summary> 用于数据转换的输出插件
@@ -46,14 +46,14 @@ namespace blqw.IOC
 
         static object Convert1(this IConvertor conv, object obj)
         {
-            using (Error.Contract())
+            using (var context = new ConvertContext())
             {
                 bool b;
-                var result = conv.ChangeType(new ConvertContext(), obj, conv.OutputType, out b);
+                var result = conv.ChangeType(context, obj, conv.OutputType, out b);
                 if (b == false)
                 {
-                    Error.CastFail(obj, conv.OutputType);
-                    Error.ThrowIfHaveError();
+                    context.AddCastFailException(obj, conv.OutputType);
+                    context.ThrowIfHaveError();
                 }
                 return result;
             }
@@ -62,10 +62,10 @@ namespace blqw.IOC
         static object Convert2(this IConvertor conv, object obj)
         {
             bool b;
-            var result = conv.ChangeType(new ConvertContext(), obj, conv.OutputType, out b);
+            var result = conv.ChangeType(ConvertContext.None, obj, conv.OutputType, out b);
             if (b == false)
             {
-                return Convert3.GetDefaultValue(conv.OutputType);
+                return conv.OutputType.GetDefaultValue();
             }
             return result;
         }

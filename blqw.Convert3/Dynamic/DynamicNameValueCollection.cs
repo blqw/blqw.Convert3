@@ -3,22 +3,15 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace blqw.Dynamic
 {
-    public class DynamicNameValueCollection : DynamicObject,IFormatProvider
+    public class DynamicNameValueCollection : DynamicObject, IObjectHandle, IObjectReference
     {
-        object IFormatProvider.GetFormat(Type formatType)
-        {
-            if (formatType != null && string.Equals("Json", formatType.Name, StringComparison.Ordinal))
-            {
-                return _items;
-            }
-            return null;
-        }
-
         NameValueCollection _items;
         public DynamicNameValueCollection()
         {
@@ -64,7 +57,7 @@ namespace blqw.Dynamic
                 }
             }
 
-            result = DynamicSystemObject.Null;
+            result = DynamicPrimitive.Null;
             return true;
         }
 
@@ -111,7 +104,7 @@ namespace blqw.Dynamic
                 }
             }
 
-            result = DynamicSystemObject.Null;
+            result = DynamicPrimitive.Null;
             return true;
         }
 
@@ -145,5 +138,13 @@ namespace blqw.Dynamic
 
         public bool IsReadOnly { get; set; }
 
+        /// <summary>打开该对象。</summary>
+        /// <returns>已打开的对象。</returns>
+        public object Unwrap() => _items;
+
+        /// <summary>返回应进行反序列化的真实对象（而不是序列化流指定的对象）。</summary>
+        /// <returns>返回放入图形中的实际对象。</returns>
+        /// <param name="context">当前对象从其中进行反序列化的 <see cref="T:System.Runtime.Serialization.StreamingContext" />。</param>
+        public object GetRealObject(StreamingContext context) => _items;
     }
 }

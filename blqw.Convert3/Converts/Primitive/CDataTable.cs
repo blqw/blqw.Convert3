@@ -24,7 +24,7 @@ namespace blqw.Converts
             {
                 if (reader.IsClosed)
                 {
-                    Error.Add(new NotImplementedException("DataReader已经关闭"));
+                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
@@ -42,12 +42,12 @@ namespace blqw.Converts
 
             if (ee == null)
             {
-                Error.CastFail("仅支持DataView,DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对DataTable的转换");
+                context.AddException("仅支持DataView,DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对DataTable的转换");
                 success = false;
                 return null;
             }
             var table = new DataTable();
-            var helper = new DataRowHelper(table);
+            var helper = new DataRowHelper(table,context);
             while (ee.MoveNext())
             {
                 if (helper.CreateRow(ee.Current) == false)
@@ -73,7 +73,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    context.AddException(ex);
                     success = false;
                     return null;
                 }
@@ -86,11 +86,13 @@ namespace blqw.Converts
         private struct DataRowHelper
         {
             private readonly DataTable _table;
+            private readonly ConvertContext _context;
             private readonly DataColumnCollection _columns;
 
-            public DataRowHelper(DataTable table)
+            public DataRowHelper(DataTable table, ConvertContext context)
             {
                 _table = table;
+                _context = context;
                 _columns = _table.Columns;
                 _currentRow = null;
             }
@@ -135,7 +137,7 @@ namespace blqw.Converts
                         var getValue = type.GetProperty("Value", flags).GetPropertyHandler()?.Get;
                         if ((getKey == null) || (getValue == null))
                         {
-                            Error.Add(new NotSupportedException("值添加到单元格失败:无法获取Key/Name和Value"));
+                            _context.AddException("值添加到单元格失败:无法获取Key/Name和Value");
                             return false;
                         }
                         do
@@ -144,7 +146,7 @@ namespace blqw.Converts
                             var name = getKey(entry) as string;
                             if (name == null)
                             {
-                                Error.Add(new NotSupportedException("标题必须为字符串"));
+                                _context.AddException("标题必须为字符串");
                                 return false;
                             }
                             if (AddCell(name, typeof(object), getValue(entry)) == false)
@@ -186,7 +188,7 @@ namespace blqw.Converts
                     value = value.ChangeType(col.DataType, out success);
                     if (success == false)
                     {
-                        Error.Add(new NotSupportedException($"第{_table?.Rows.Count}行{col.ColumnName}列添加到行失败"));
+                        _context.AddException($"第{_table?.Rows.Count}行{col.ColumnName}列添加到行失败");
                         return false;
                     }
                 }

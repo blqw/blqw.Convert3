@@ -48,7 +48,6 @@ namespace blqw.Converts
             {
                 return BaseChangeType(context, str, outputType, out success);
             }
-            var contract = Error.Contract();
             success = false;
             try
             {
@@ -67,18 +66,14 @@ namespace blqw.Converts
                 }
                 if (ShouldConvertString)
                 {
-                    Error.BeginTransaction();
+                    var snapshot = context.Snapshot();
                     //尝试转string后转换
                     str = input.ToString();
-                    Error.Add(new Exception($"尝试将{input.GetType()}转为字符串 = \"{str}\""));
+                    context.AddException($"尝试将{input.GetType()}转为字符串 = \"{str}\"");
                     result = ((IConvertor<T>) this).ChangeType(context, str, outputType, out success);
                     if (success)
                     {
-                        Error.Rollback();
-                    }
-                    else
-                    {
-                        Error.EndTransaction();
+                        snapshot.Recovery();
                     }
                     return result;
                 }
@@ -91,19 +86,15 @@ namespace blqw.Converts
             {
                 if (success == false)
                 {
-                    Error.CastFail(input, outputType);
-                }
-                if (contract.Enabled)
-                {
-                    contract.Dispose();
+                    context.AddCastFailException(input, outputType);
                 }
             }
         }
 
         protected T BaseChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
-            var contract = Error.Contract();
             T result;
+            var snapshot = context.Snapshot();
             if (input == null)
             {
                 //是否可以为null
@@ -115,15 +106,11 @@ namespace blqw.Converts
             }
             if (success)
             {
-                Error.Rollback();
+                snapshot.Recovery();
             }
             else
             {
-                Error.CastFail(input, outputType);
-            }
-            if (contract.Enabled)
-            {
-                contract.Dispose();
+                context.AddCastFailException(input, outputType);
             }
             return result;
         }

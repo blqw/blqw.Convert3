@@ -43,7 +43,7 @@ namespace blqw.Converts
                 }
                 catch (Exception ex)
                 {
-                    Error.Add(ex);
+                    context.AddException(ex);
                 }
             }
             return base.ChangeType(context, input, outputType, out success);
