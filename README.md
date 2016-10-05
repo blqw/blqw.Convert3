@@ -43,14 +43,14 @@ Dictionary<Guid, Dictionary<int, User>>
 > 或者直接继承基类 `BaseConvertor<MyClass>`,并保留默认无参构造函数  
 > IOC组件会移动装载继承`IConvertor`的全部类型
 
-### `MyClass`定义
+#### 1. `MyClass`定义
 ```csharp
 class MyClass
 {
     public int Number { get; set; }
 }
 ```
-### 转换器代码
+#### 2. 转换器代码
 ```csharp
 class MyClassConvertor : BaseConvertor<MyClass>
 {
@@ -67,7 +67,7 @@ class MyClassConvertor : BaseConvertor<MyClass>
     }
 }
 ```
-### 测试代码
+#### 3. 测试代码
 ```csharp
 var x = "1234".To<MyClass>(null);
 Console.WriteLine(x?.Number); //1234
