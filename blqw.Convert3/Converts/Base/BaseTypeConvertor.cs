@@ -34,7 +34,7 @@ namespace blqw.Converts
             }
 
             var type = typeof(InnerConvertor<>).MakeGenericType(typeof(T), outputType);
-            return (IConvertor)Activator.CreateInstance(type);
+            return (IConvertor)Activator.CreateInstance(type,this);
         }
 
         protected sealed override T ChangeType(ConvertContext context, object input, Type outputType, out bool success)
@@ -61,6 +61,13 @@ namespace blqw.Converts
         private class InnerConvertor<TOutput> : IConvertor<TOutput>
             where TOutput : T
         {
+            private readonly IServiceProvider _provider;
+
+            public InnerConvertor(IServiceProvider provider)
+            {
+                _provider = provider;
+            }
+
             /// <summary> 
             /// 转换器的输出类型
             /// </summary>
@@ -105,15 +112,12 @@ namespace blqw.Converts
             /// <param name="success">是否成功</param>
             object IConvertor.ChangeType(ConvertContext context, object input, Type outputType, out bool success)
                 => (TOutput)context.Get<T>().ChangeType(context, input, outputType, out success);
-            
+
             /// <summary>获取指定类型的服务对象。</summary>
             /// <returns>
             /// <paramref name="serviceType" /> 类型的服务对象。- 或 -如果没有 <paramref name="serviceType" /> 类型的服务对象，则为 null。</returns>
             /// <param name="serviceType">一个对象，它指定要获取的服务对象的类型。</param>
-            public object GetService(Type serviceType)
-            {
-                throw new NotImplementedException();
-            }
+            public object GetService(Type serviceType) => _provider.GetService(serviceType);
         }
     }
 }

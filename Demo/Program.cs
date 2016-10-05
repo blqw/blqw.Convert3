@@ -6,13 +6,43 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using blqw.Converts;
 
 namespace blqw
 {
+
+    class MyClass
+    {
+        public int Number { get; set; }
+    }
+
+    class MyClassConvertor : BaseConvertor<MyClass>
+    {
+        protected override MyClass ChangeType(ConvertContext context, object input, Type outputType, out bool success)
+        {
+            var i = context.Get<int>().ChangeType(context, input, typeof(int), out success);
+            return success ? new MyClass() { Number = i } : null;
+        }
+
+        protected override MyClass ChangeType(ConvertContext context, string input, Type outputType, out bool success)
+        {
+            var i = context.Get<int>().ChangeType(context, input, typeof(int), out success);
+            return success ? new MyClass() { Number = i } : null;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
+            var x = "1234".To<MyClass>(null);
+            Console.WriteLine(x?.Number); //1234
+            x = "abcd".To<MyClass>(null);
+            Console.WriteLine(x?.Number); //null
+
+
+
+
             Console.WriteLine(1.To<StringComparison>());
 
 
@@ -20,10 +50,12 @@ namespace blqw
             "1,2,3,4,5,6".To<int[]>();
             Console.WriteLine("www.baidu.com".To<Uri>().AbsoluteUri);
             //"1,2,3,4,5,6".To<int[]>();
-            CodeTimer.Time("a", 100000, () => {
+            CodeTimer.Time("a", 100000, () =>
+            {
                 "1,2,3,4,5,6".To<int[]>();
             });
-            CodeTimer.Time("a", 100000, () => {
+            CodeTimer.Time("a", 100000, () =>
+            {
                 "1,2,3,4,5,6".Split(',').Select(int.Parse).ToArray();
             });
             var user = new { id = "1", name = 123 }.To<User>();
@@ -50,7 +82,8 @@ namespace blqw
             table.Rows.Add(2, "blqw2", false);
             table.Rows.Add(3, "blqw3", true);
             table.Rows.Add(4, "blqw4", false);
-            CodeTimer.Time("x", 10000, () => {
+            CodeTimer.Time("x", 10000, () =>
+            {
 
                 var list1 = table.To<List<NameValueCollection>>();
                 var list2 = table.To<List<User>>();
@@ -75,11 +108,6 @@ namespace blqw
             public DateTime Birthday { get; set; }
             public bool Sex { get; set; }
         }
-
-        class MyClass
-        {
-            public int ID { get; set; }
-            public string Name { get; set; }
-        }
+        
     }
 }

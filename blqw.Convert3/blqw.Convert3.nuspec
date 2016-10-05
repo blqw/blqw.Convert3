@@ -13,6 +13,15 @@
     <description>$description$</description>
     <releaseNotes>
       实现任意类型之间的转换
+      
+      #### [3.0.0-beta]2016.09.30
+      * 重构代码,优化代码逻辑
+      * 完善注释
+      * 优化异常栈
+
+      #### [3.0.1-beta]2016.10.05
+      * 修复bug
+
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Convert blqw Parse</tags>
