@@ -13,13 +13,14 @@
     <description>$description$</description>
     <releaseNotes>
       实现任意类型之间的转换
-      
+
       #### [3.0.0-beta]2016.09.30
       * 重构代码,优化代码逻辑
       * 完善注释
       * 优化异常栈
 
-      #### [3.0.1-beta]2016.10.05
+      #### [3.0.2-beta]2016.10.05
+      * 修复汉字转拼音时二级汉字转换错误的问题
       * 修复bug
 
     </releaseNotes>

@@ -74,12 +74,59 @@ Console.WriteLine(x?.Number); //1234
 x = "abcd".To<MyClass>(null);
 Console.WriteLine(x?.Number); //null
 ```
+## 其他功能
+```csharp
+//数字转大写
+//参数说明:1.需要转换的数字,2:是否是简体中文,3:是否需要加上圆角分(只保留两位),4:是否需要支持15位以上的数字
+Console.WriteLine(Convert3.NumberToUpper("123456456.789", true, true, false)); //一亿二千三百四十五万六千四百五十六元七角八分
 
+//汉字转拼音
+Console.WriteLine(Convert3.ToPinyin("冰麟轻武", PinyinMode.AllFirst));      //BLQW
+Console.WriteLine(Convert3.ToPinyin("冰麟轻武", PinyinMode.First));         //B
+Console.WriteLine(Convert3.ToPinyin("冰麟轻武", PinyinMode.Full));          //BingLinQingWu
+Console.WriteLine(Convert3.ToPinyin("冰麟轻武", PinyinMode.FullWithSplit)); //Bing Lin Qing Wu
+
+//全半角转换
+Console.WriteLine(Convert3.ToDBC("，１２３４５６７ａｋｓ"));//,1234567aks
+Console.WriteLine(Convert3.ToSBC("!1f23d.?@"));         //！１ｆ２３ｄ．？＠
+
+Console.WriteLine(Convert3.ToMD5("123456"));    //e10adc3949ba59abbe56e057f20f883e
+Console.WriteLine(Convert3.ToSHA1("123456"));   //7c4a8d09ca3762af61e59520943dc26494f8941b
+
+//转为动态类型
+var a = new Dictionary<string, object>() { ["id"] = 1, ["name"] = "blqw" };
+Console.WriteLine(Convert3.ToDynamic(a).name);   //blqw
+Console.WriteLine(Convert3.ToDynamic(a).id == 1);//True
+
+//随机加密
+var arr = new[]
+{
+    Convert3.ToRandomMD5("123456"),
+    Convert3.ToRandomMD5("123456"),
+    Convert3.ToRandomMD5("123456"),
+    Convert3.ToRandomMD5("123456"),
+    Convert3.ToRandomMD5("123456"),
+};
+
+foreach (var g in arr)
+{
+    Console.WriteLine($"{g} : {Convert3.EqualsRandomMD5("123456", g)}");
+}
+/*
+fa91eefc-e903-dbcf-394b-0b757987357b : True
+27abd3e0-fe0e-2eeb-1ff7-a60b03876465 : True
+6d911bf2-0c59-0e01-5e87-7527dd1ee699 : True
+0af7905a-0b3b-4eb4-b82b-0340f3438924 : True
+1e024253-6bb9-fb25-4b67-3e42c265af02 : True
+*/
+```
 
 
 ## 更新说明 
-#### [3.0.1-beta]2016.10.05
-* 修复bug
+#### [3.0.2-beta]2016.10.05
+* 修复汉字转拼音时二级汉字转换错误的问题
+* 修复其他bug
+
 
 #### [3.0.0-beta]2016.09.30
 * 重构代码,优化代码逻辑
