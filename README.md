@@ -38,10 +38,10 @@ Dictionary<Guid, Dictionary<int, User>>
     .To<Dictionary<string, Dictionary<DateTime, NameValueCollection>>>(); //不能理解就算了
 ```
 ## 扩展自定义转换器
-> 扩展转换行为是以目标类型为参照的  
-> 例如要转换为自定义类型`MyClass`就需要实现`IConvertor<MyClass>`接口  
-> 或者直接继承基类 `BaseConvertor<MyClass>`,并保留默认无参构造函数  
-> IOC组件会移动装载继承`IConvertor`的全部类型
+> 扩展转换行为是以**目标类型**为参照的  
+> 例如要转换为自定义类型`MyClass`就需要**实现`IConvertor<MyClass>`**接口  
+> 或者直接**继承基类 `BaseConvertor<MyClass>`**,并保留默认**无参构造函数**  
+> IOC组件会自动装载实现`IConvertor`的全部类型
 
 #### 1. `MyClass`定义
 ```csharp
