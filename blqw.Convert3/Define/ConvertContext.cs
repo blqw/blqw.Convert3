@@ -120,15 +120,12 @@ namespace blqw
         /// <summary>
         /// 如果有异常则抛出异常
         /// </summary>
+        /// <exception cref="AggregateException"> 发生一个或多个转换错误问题 </exception>
         public void ThrowIfHaveError()
         {
             if (_exceptions == null || _exceptions.Count == 0)
             {
                 return;
-            }
-            if (_exceptions.Count == 1)
-            {
-                throw _exceptions[0];
             }
             throw new AggregateException(_exceptions[0].Message, _exceptions);
         }

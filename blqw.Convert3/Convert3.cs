@@ -29,7 +29,7 @@ namespace blqw
             using (var context = new ConvertContext())
             {
                 var conv = context.Get(outputType);
-                return conv.ChangeType(ConvertContext.None, input, outputType, out success);
+                return conv.ChangeType(context, input, outputType, out success);
             }
         }
 
@@ -65,7 +65,7 @@ namespace blqw
             {
                 var conv = context.Get(outputType);
                 bool success;
-                var result = conv.ChangeType(ConvertContext.None, input, outputType, out success);
+                var result = conv.ChangeType(context, input, outputType, out success);
                 return success ? result : defaultValue;
             }
         }
@@ -82,7 +82,7 @@ namespace blqw
             using (var context = new ConvertContext())
             {
                 var conv = context.Get<T>();
-                return conv.ChangeType(ConvertContext.None, input, typeof(T), out success);
+                return conv.ChangeType(context, input, typeof(T), out success);
             }
         }
 
@@ -118,7 +118,7 @@ namespace blqw
             {
                 var conv = context.Get<T>();
                 bool success;
-                var result = conv.ChangeType(ConvertContext.None, input, typeof(T), out success);
+                var result = conv.ChangeType(context, input, typeof(T), out success);
                 return success ? result : defaultValue;
             }
         }
@@ -136,7 +136,7 @@ namespace blqw
             {
                 bool b;
                 var conv = context.Get(outputType);
-                result = conv.ChangeType(ConvertContext.None, input, outputType, out b);
+                result = conv.ChangeType(context, input, outputType, out b);
                 return b;
             }
         }
