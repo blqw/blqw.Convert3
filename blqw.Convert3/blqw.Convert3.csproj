@@ -34,8 +34,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="blqw.IOC, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\blqw.IOC.1.3.5\lib\net45\blqw.IOC.dll</HintPath>
+    <Reference Include="blqw.IOC, Version=1.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\blqw.IOC.1.3.6\lib\net45\blqw.IOC.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -100,6 +100,7 @@
     <Compile Include="Converts\Primitive\CUri.cs" />
     <Compile Include="Converts\Base\GenericConvertor.cs" />
     <Compile Include="Define\ExceptionSnapshot.cs" />
+    <Compile Include="Define\IBuilder.cs" />
     <Compile Include="Dynamic\DynamicDataRow.cs" />
     <Compile Include="Dynamic\DynamicDictionary.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Converts\Base\BaseTypeConvertor.cs" />
     <Compile Include="Converts\Base\BaseConvertor.cs" />
     <Compile Include="Converts\Base\SystemTypeConvertor.cs" />
+    <Compile Include="LoggerServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeConverterWrapper.cs" />
   </ItemGroup>

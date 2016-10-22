@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using blqw.Converts;
+using blqw.IOC;
 
 namespace blqw
 {
@@ -16,9 +14,24 @@ namespace blqw
         /// <summary>
         /// 无行为的上下文
         /// </summary>
-        public static readonly ConvertContext None = new ConvertContext() { _isNone = true };
+        public static readonly ConvertContext None = new ConvertContext(true);
 
-        private bool _isNone;
+        /// <summary>
+        /// 初始化转换上下文
+        /// </summary>
+        public ConvertContext()
+            : this(false)
+        {
+
+        }
+
+        private ConvertContext(bool isNone)
+        {
+            _isNone = isNone;
+            Logger = new LoggerSource("blqw.Convert3", SourceLevels.Error);
+        }
+
+        private readonly bool _isNone;
 
         /// <summary>
         /// 异常栈
@@ -29,6 +42,11 @@ namespace blqw
         /// 转换器的额外提供程序
         /// </summary>
         public IServiceProvider ConvertorProvider { get; set; }
+
+        /// <summary>
+        /// 日志(默认记录等级 Error)
+        /// </summary>
+        public TraceSource Logger { get; set; }
 
         /// <summary>
         /// 获取转换器
@@ -93,7 +111,7 @@ namespace blqw
             }
             else
             {
-                text = $"{CType.GetFriendlyName(value.GetType())} 值:`{text}`";
+                text = $"{CType.GetFriendlyName(value?.GetType())} 值:`{text}`";
             }
             var name = CType.GetFriendlyName(toType);
             AddException(new InvalidCastException($"{text} 无法转为 {name}"));
@@ -111,11 +129,10 @@ namespace blqw
             AddException(new InvalidCastException(text));
         }
 
-        /// <summary>执行与释放或重置非托管资源关联的应用程序定义的任务。</summary>
-        public void Dispose()
-        {
-            _exceptions?.Clear();
-        }
+        /// <summary>
+        /// 执行与释放或重置非托管资源关联的应用程序定义的任务。
+        /// </summary>
+        public void Dispose() => _exceptions?.Clear();
 
         /// <summary>
         /// 如果有异常则抛出异常
@@ -127,7 +144,9 @@ namespace blqw
             {
                 return;
             }
-            throw new AggregateException(_exceptions[0].Message, _exceptions);
+            var ex = new AggregateException(_exceptions[0].Message, _exceptions);
+            Logger.Write(TraceEventType.Error, "转换失败", ex);
+            throw ex;
         }
 
         /// <summary>

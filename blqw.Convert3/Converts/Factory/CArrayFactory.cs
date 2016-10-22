@@ -1,16 +1,15 @@
 ﻿using System;
-using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Runtime.Hosting;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.Remoting.Activation;
-using System.Runtime.Serialization;
-using System.Security.Cryptography;
 
 namespace blqw.Converts
 {
-    internal sealed class CArrayFactory : ConvertorFactory
+    /// <summary>
+    /// 数组转换器工厂
+    /// </summary>
+    public class CArrayFactory : ConvertorFactory
     {
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
         public override Type OutputType => typeof(Array);
 
         /// <summary>

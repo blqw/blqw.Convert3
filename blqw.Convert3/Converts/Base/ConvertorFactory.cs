@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
     /// <summary>
-    /// 用于定义转换器工厂
+    /// 用于定义转换器工厂基类
     /// </summary>
     public abstract class ConvertorFactory : BaseConvertor<object>
     {

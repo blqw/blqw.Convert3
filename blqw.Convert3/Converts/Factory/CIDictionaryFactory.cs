@@ -4,10 +4,13 @@ using System.Collections.Generic;
 namespace blqw.Converts
 {
     /// <summary>
-    /// 自定定义类型
+    /// 泛型 <see cref="IDictionary{TKey,TValue}"/> 转换器工厂
     /// </summary>
-    internal sealed class CIDictionaryFactory : GenericConvertor
+    public class CIDictionaryFactory : GenericConvertor
     {
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
         public override Type OutputType => typeof(IDictionary<,>);
 
         /// <summary>

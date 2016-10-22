@@ -3,8 +3,14 @@ using System.Collections.Generic;
 
 namespace blqw.Converts
 {
-    internal sealed class CIListFactory : GenericConvertor
+    /// <summary>
+    /// 泛型 <see cref="ICollection{T}"/> 转换器工厂
+    /// </summary>
+    public class CIListFactory : GenericConvertor
     {
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
         public override Type OutputType => typeof(ICollection<>);
 
         /// <summary>

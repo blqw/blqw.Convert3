@@ -34,7 +34,7 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion(VersionString.VERSION + ".0")]
 [assembly: AssemblyFileVersion(VersionString.VERSION + ".0")]
-[assembly: AssemblyInformationalVersion(VersionString.VERSION + "-beta")]
+//[assembly: AssemblyInformationalVersion(VersionString.VERSION + "-beta")]
 
 internal static class VersionString
 {

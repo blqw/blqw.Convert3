@@ -16,7 +16,7 @@ namespace blqw.Converts
         /// <summary>
         /// 获取子转换器
         /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="outputType"/> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="outputType" /> is <see langword="null" />. </exception>
         protected override IConvertor GetConvertor(Type outputType)
         {
             if (outputType == null)
@@ -34,9 +34,16 @@ namespace blqw.Converts
             }
 
             var type = typeof(InnerConvertor<>).MakeGenericType(typeof(T), outputType);
-            return (IConvertor)Activator.CreateInstance(type,this);
+            return (IConvertor) Activator.CreateInstance(type, this);
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected sealed override T ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
             if (outputType.IsGenericTypeDefinition)
@@ -49,74 +56,88 @@ namespace blqw.Converts
         }
 
         /// <summary>
-        /// 
+        /// 返回指定类型的对象，其值等效于指定对象。
         /// </summary>
         /// <param name="context"> </param>
-        /// <param name="input"> </param>
-        /// <param name="outputType"> </param>
-        /// <param name="success"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         /// <returns> </returns>
         protected abstract T ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success);
 
+        /// <summary>
+        /// 子转换器
+        /// </summary>
+        /// <typeparam name="TOutput"> 输出类型 </typeparam>
         private class InnerConvertor<TOutput> : IConvertor<TOutput>
             where TOutput : T
         {
+            /// <summary>
+            /// 转换器服务提供程序，一般为父转换器
+            /// </summary>
             private readonly IServiceProvider _provider;
 
+            /// <summary>
+            /// 初始化
+            /// </summary>
+            /// <param name="provider"> 转换器服务提供程序，一般为父转换器 </param>
             public InnerConvertor(IServiceProvider provider)
             {
                 _provider = provider;
             }
 
-            /// <summary> 
+            /// <summary>
             /// 转换器的输出类型
             /// </summary>
             public Type OutputType => typeof(TOutput);
-            
-            /// <summary> 
+
+            /// <summary>
             /// 返回指定类型的对象，其值等效于指定字符串。
             /// </summary>
             /// <param name="context"> 上下文 </param>
             /// <param name="input"> 需要转换类型的字符串对象 </param>
             /// <param name="outputType"> 换转后的类型 </param>
-            /// <param name="success">是否成功</param>
+            /// <param name="success"> 是否成功 </param>
             TOutput IConvertor<TOutput>.ChangeType(ConvertContext context, string input, Type outputType, out bool success)
-                => (TOutput)context.Get<T>().ChangeType(context, input, outputType, out success);
+                => (TOutput) context.Get<T>().ChangeType(context, input, outputType, out success);
 
-            /// <summary> 
+            /// <summary>
             /// 返回指定类型的对象，其值等效于指定对象。
             /// </summary>
             /// <param name="context"> 上下文 </param>
             /// <param name="input"> 需要转换类型的对象 </param>
             /// <param name="outputType"> 换转后的类型 </param>
-            /// <param name="success">是否成功</param>
+            /// <param name="success"> 是否成功 </param>
             TOutput IConvertor<TOutput>.ChangeType(ConvertContext context, object input, Type outputType, out bool success)
-                => (TOutput)context.Get<T>().ChangeType(context, input, outputType, out success);
+                => (TOutput) context.Get<T>().ChangeType(context, input, outputType, out success);
 
-            /// <summary> 
+            /// <summary>
             /// 返回指定类型的对象，其值等效于指定字符串对象。
             /// </summary>
             /// <param name="context"> 上下文 </param>
             /// <param name="input"> 需要转换类型的字符串对象 </param>
             /// <param name="outputType"> 换转后的类型 </param>
-            /// <param name="success">是否成功</param>
+            /// <param name="success"> 是否成功 </param>
             object IConvertor.ChangeType(ConvertContext context, string input, Type outputType, out bool success)
-                => (TOutput)context.Get<T>().ChangeType(context, input, outputType, out success);
+                => (TOutput) context.Get<T>().ChangeType(context, input, outputType, out success);
 
-            /// <summary> 
+            /// <summary>
             /// 返回指定类型的对象，其值等效于指定对象。
             /// </summary>
             /// <param name="context"> 上下文 </param>
             /// <param name="input"> 需要转换类型的对象 </param>
             /// <param name="outputType"> 换转后的类型 </param>
-            /// <param name="success">是否成功</param>
+            /// <param name="success"> 是否成功 </param>
             object IConvertor.ChangeType(ConvertContext context, object input, Type outputType, out bool success)
-                => (TOutput)context.Get<T>().ChangeType(context, input, outputType, out success);
+                => (TOutput) context.Get<T>().ChangeType(context, input, outputType, out success);
 
-            /// <summary>获取指定类型的服务对象。</summary>
+            /// <summary>
+            /// 获取指定类型的服务对象。 
+            /// </summary>
             /// <returns>
-            /// <paramref name="serviceType" /> 类型的服务对象。- 或 -如果没有 <paramref name="serviceType" /> 类型的服务对象，则为 null。</returns>
-            /// <param name="serviceType">一个对象，它指定要获取的服务对象的类型。</param>
+            /// <paramref name="serviceType" /> 类型的服务对象。- 或 -如果没有 <paramref name="serviceType" /> 类型的服务对象，则为 null。
+            /// </returns>
+            /// <param name="serviceType"> 一个对象，它指定要获取的服务对象的类型。 </param>
             public object GetService(Type serviceType) => _provider.GetService(serviceType);
         }
     }

@@ -15,8 +15,19 @@ namespace blqw.Converts
         /// </summary>
         protected override bool ShouldConvertString => true;
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected sealed override T ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
+            if (input == null)
+            {
+                return ChangeTypeImpl(context, null, outputType, out success);
+            }
             var row = input as DataRow;
             if (row != null)
             {
@@ -81,6 +92,13 @@ namespace blqw.Converts
             return ChangeTypeImpl(context, input, outputType, out success);
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected abstract T ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success);
     }
 }

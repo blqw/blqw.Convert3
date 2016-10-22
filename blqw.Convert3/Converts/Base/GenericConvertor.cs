@@ -6,15 +6,14 @@ namespace blqw.Converts
     /// <summary>
     /// 泛型转换器
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
     public abstract class GenericConvertor : ConvertorFactory
     {
         /// <summary>
         /// 根据返回类型的泛型参数类型返回新的转换器
         /// </summary>
-        /// <param name="outputType"></param>
-        /// <param name="genericTypes"></param>
-        /// <returns></returns>
+        /// <param name="outputType"> </param>
+        /// <param name="genericTypes"> </param>
+        /// <returns> </returns>
         protected abstract IConvertor GetConvertor(Type outputType, Type[] genericTypes);
 
         /// <summary>
@@ -39,8 +38,8 @@ namespace blqw.Converts
             Type[] genericTypes;
             if (IsCompatible(OutputType, outputType, out genericTypes))
             {
-                var conv =  GetConvertor(outputType, genericTypes);
-                return (IConvertor)conv.GetService(outputType);
+                var conv = GetConvertor(outputType, genericTypes);
+                return (IConvertor) conv.GetService(outputType);
             }
             throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}无法兼容类型{OutputType}");
         }

@@ -2,8 +2,14 @@
 
 namespace blqw.Converts
 {
-    internal sealed class CEnumFactory : ConvertorFactory
+    /// <summary>
+    /// 枚举转换器工厂
+    /// </summary>
+    public class CEnumFactory : ConvertorFactory
     {
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
         public override Type OutputType => typeof(Enum);
 
         /// <summary>

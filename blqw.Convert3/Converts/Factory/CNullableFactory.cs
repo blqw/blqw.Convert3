@@ -2,8 +2,14 @@
 
 namespace blqw.Converts
 {
-    internal sealed class CNullableFactory : GenericConvertor
+    /// <summary>
+    /// 可空值类型转换器工厂
+    /// </summary>
+    public class CNullableFactory : GenericConvertor
     {
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
         public override Type OutputType => typeof(Nullable<>);
 
         /// <summary>
