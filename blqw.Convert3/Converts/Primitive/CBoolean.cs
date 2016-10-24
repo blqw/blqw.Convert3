@@ -2,8 +2,18 @@
 
 namespace blqw.Converts
 {
-    internal sealed class CBoolean : SystemTypeConvertor<bool>
+    /// <summary>
+    /// 布尔值转换器
+    /// </summary>
+    public class CBoolean : SystemTypeConvertor<bool>
     {
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override bool ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             success = true;
@@ -61,6 +71,13 @@ namespace blqw.Converts
             return default(bool);
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override bool ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
@@ -89,9 +106,9 @@ namespace blqw.Converts
                     case TypeCode.SByte:
                         return conv.ToSByte(null) != 0;
                     case TypeCode.Double:
-                        return conv.ToDouble(null) != 0;
+                        return Math.Abs(conv.ToDouble(null)) > 0d;
                     case TypeCode.Single:
-                        return conv.ToSingle(null) != 0;
+                        return Math.Abs(conv.ToSingle(null)) > 0f;
                     case TypeCode.UInt16:
                         return conv.ToUInt16(null) != 0;
                     case TypeCode.UInt32:

@@ -101,6 +101,10 @@
     <Compile Include="Converts\Base\GenericConvertor.cs" />
     <Compile Include="Define\ExceptionSnapshot.cs" />
     <Compile Include="Define\IBuilder.cs" />
+    <Compile Include="Mapping\DataReaderEnumerator.cs" />
+    <Compile Include="Mapping\DataRowEnumerator.cs" />
+    <Compile Include="Mapping\DataSetEnumerator.cs" />
+    <Compile Include="Mapping\Mapper.cs" />
     <Compile Include="Dynamic\DynamicDataRow.cs" />
     <Compile Include="Dynamic\DynamicDictionary.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
@@ -116,6 +120,10 @@
     <Compile Include="Converts\Base\BaseConvertor.cs" />
     <Compile Include="Converts\Base\SystemTypeConvertor.cs" />
     <Compile Include="LoggerServices.cs" />
+    <Compile Include="Mapping\IKeyValueEnumerator.cs" />
+    <Compile Include="Mapping\NameValueEnumerator.cs" />
+    <Compile Include="Mapping\PairEnumerator.cs" />
+    <Compile Include="Mapping\PropertyEnumerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeConverterWrapper.cs" />
   </ItemGroup>

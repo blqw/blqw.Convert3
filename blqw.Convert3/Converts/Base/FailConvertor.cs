@@ -109,7 +109,7 @@ namespace blqw.Converts
         /// <summary>
         /// 未找到转换错误
         /// </summary>
-        public static readonly FailConvertor NotFound = new FailConvertor("无法获取指定类型的转换器");
+        public static readonly FailConvertor<T> NotFound = new FailConvertor<T>("无法获取指定类型的转换器");
 
         /// <summary>
         /// 失败消息

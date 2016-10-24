@@ -8,8 +8,19 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CDataTable : BaseTypeConvertor<DataTable>
+    /// <summary>
+    /// <seealso cref="DataTable" /> 转换器
+    /// </summary>
+    public class CDataTable : BaseTypeConvertor<DataTable>
     {
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        /// <returns> </returns>
         protected override DataTable ChangeTypeImpl(ConvertContext context, object input, Type outputType,
             out bool success)
         {
@@ -46,20 +57,26 @@ namespace blqw.Converts
                 success = false;
                 return null;
             }
-            var table = new DataTable();
-            var helper = new DataRowHelper(table,context);
+            var builder = new DataTableBuilder(context);
+            builder.TryCreateInstance();
             while (ee.MoveNext())
             {
-                if (helper.CreateRow(ee.Current) == false)
+                if (builder.Set(ee.Current) == false)
                 {
                     success = false;
                     return null;
                 }
-                helper.AddRow();
             }
-            return table;
+            return builder.Instance;
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override DataTable ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             input = input.Trim();
@@ -82,100 +99,73 @@ namespace blqw.Converts
             return null;
         }
 
-
-        private struct DataRowHelper
+        /// <summary>
+        /// <seealso cref="DataTable" /> 构造器
+        /// </summary>
+        private struct DataTableBuilder : IBuilder<DataTable, object>
         {
-            private readonly DataTable _table;
+            /// <summary>
+            /// 转换上下文
+            /// </summary>
             private readonly ConvertContext _context;
-            private readonly DataColumnCollection _columns;
 
-            public DataRowHelper(DataTable table, ConvertContext context)
+            /// <summary>
+            ///     <seealso cref="DataTable.Columns" />
+            /// </summary>
+            private DataColumnCollection _columns;
+
+            /// <summary>
+            /// 初始化构造器
+            /// </summary>
+            /// <param name="context"> 转换上下文 </param>
+            public DataTableBuilder(ConvertContext context)
             {
-                _table = table;
                 _context = context;
-                _columns = _table.Columns;
-                _currentRow = null;
+                _columns = null;
+                Instance = null;
             }
 
-            private DataRow _currentRow;
-
-            public void AddRow()
+            /// <summary>
+            /// 设置对象值
+            /// </summary>
+            /// <param name="value"> 待设置的值 </param>
+            /// <returns> </returns>
+            public bool Set(object value)
             {
-                _table.Rows.Add(_currentRow);
+                var mapper = new Mapper(value);
+                if (mapper.Error!=null)
+                {
+                    _context.AddException(mapper.Error);
+                    return false;
+                }
+                var row = Instance.NewRow();
+
+                while (mapper.MoveNext())
+                {
+                    var name = mapper.Key as string;
+                    if (name == null)
+                    {
+                        _context.AddException("标题必须为字符串");
+                        return false;
+                    }
+                    if (AddCell(row, name, typeof(object), mapper.Value) == false)
+                    {
+                        return false;
+                    }
+                }
+                Instance.Rows.Add(row);
+                return true;
             }
 
-            public bool CreateRow(object value)
-            {
-                _currentRow = _table.NewRow();
-                var nv = value as NameValueCollection;
-                if (nv != null)
-                {
-                    foreach (string name in nv)
-                    {
-                        if (AddCell(name, typeof(string), nv[name]) == false)
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-
-                var ee = (value as IEnumerable)?.GetEnumerator() ?? value as IEnumerator;
-                if (ee != null)
-                {
-                    const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public;
-                    while (ee.MoveNext())
-                    {
-                        var entry = ee.Current;
-                        if (entry == null)
-                        {
-                            continue;
-                        }
-                        var type = entry.GetType();
-                        var getKey = type.GetProperty("Key", flags).GetPropertyHandler()?.Get ??
-                                     type.GetProperty("Name", flags).GetPropertyHandler()?.Get;
-                        var getValue = type.GetProperty("Value", flags).GetPropertyHandler()?.Get;
-                        if ((getKey == null) || (getValue == null))
-                        {
-                            _context.AddException("值添加到单元格失败:无法获取Key/Name和Value");
-                            return false;
-                        }
-                        do
-                        {
-                            entry = ee.Current;
-                            var name = getKey(entry) as string;
-                            if (name == null)
-                            {
-                                _context.AddException("标题必须为字符串");
-                                return false;
-                            }
-                            if (AddCell(name, typeof(object), getValue(entry)) == false)
-                            {
-                                return false;
-                            }
-                        } while (ee.MoveNext());
-                        return true;
-                    }
-                    return true;
-                }
-
-                {
-                    //实体对象
-                    var props = PublicPropertyCache.GetByType(value.GetType());
-                    for (int i = 0, length = props.Length; i < length; i++)
-                    {
-                        var p = props[i];
-                        if (AddCell(p.Name, p.Property.PropertyType, p.Get(value)) == false)
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            }
-
-
-            private bool AddCell(string name, Type type, object value)
+            /// <summary>
+            /// 添加单元格中的值
+            /// </summary>
+            /// <param name="row"> 需要添加单元格的行 </param>
+            /// <param name="name"> 单元格列名 </param>
+            /// <param name="type"> 值类型 </param>
+            /// <param name="value"> 需要添加的值 </param>
+            /// <returns> </returns>
+            private bool AddCell(DataRow row, string name, Type type, object value)
             {
                 var col = _columns[name];
                 if (col == null)
@@ -188,11 +178,27 @@ namespace blqw.Converts
                     value = value.ChangeType(col.DataType, out success);
                     if (success == false)
                     {
-                        _context.AddException($"第{_table?.Rows.Count}行{col.ColumnName}列添加到行失败");
+                        _context.AddException($"第{Instance?.Rows.Count}行{col.ColumnName}列添加到行失败");
                         return false;
                     }
                 }
-                _currentRow[col] = value;
+                row[col] = value;
+                return true;
+            }
+
+            /// <summary>
+            /// 被构造的实例
+            /// </summary>
+            public DataTable Instance { get; private set; }
+
+            /// <summary>
+            /// 尝试构造实例,返回是否成功
+            /// </summary>
+            /// <returns> </returns>
+            public bool TryCreateInstance()
+            {
+                Instance = new DataTable();
+                _columns = Instance.Columns;
                 return true;
             }
         }

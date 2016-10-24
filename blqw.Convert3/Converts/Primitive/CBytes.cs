@@ -3,16 +3,36 @@ using System.Text;
 
 namespace blqw.Converts
 {
-    internal sealed class CBytes : SystemTypeConvertor<byte[]>
+    /// <summary>
+    /// <seealso cref="byte" /> 数组转换器
+    /// </summary>
+    public class CBytes : SystemTypeConvertor<byte[]>
     {
+        /// <summary>
+        /// 空的 <seealso cref="byte"/> 数组
+        /// </summary>
         private static readonly byte[] _Empty = new byte[0];
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override byte[] ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             success = true;
             return input.Length == 0 ? _Empty : Encoding.UTF8.GetBytes(input);
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override byte[] ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             var conv = input as IConvertible;
