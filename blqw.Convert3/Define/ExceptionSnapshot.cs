@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw
 {
@@ -15,6 +12,7 @@ namespace blqw
         /// 异常栈
         /// </summary>
         private readonly List<Exception> _exceptions;
+
         /// <summary>
         /// 快照点
         /// </summary>
@@ -23,7 +21,7 @@ namespace blqw
         /// <summary>
         /// 初始化异常快照
         /// </summary>
-        /// <param name="exceptions">异常栈</param>
+        /// <param name="exceptions"> 异常栈 </param>
         public ExceptionSnapshot(List<Exception> exceptions)
         {
             _exceptions = exceptions;
@@ -35,7 +33,10 @@ namespace blqw
         /// </summary>
         public void Recovery()
         {
-            if (_exceptions == null) return;
+            if (_exceptions == null)
+            {
+                return;
+            }
             var count = _exceptions.Count - _snapshot;
             if (count <= 0)
             {

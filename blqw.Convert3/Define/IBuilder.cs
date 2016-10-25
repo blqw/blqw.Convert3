@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace blqw
+﻿namespace blqw
 {
     /// <summary>
     /// 对象构造器接口
@@ -19,14 +13,14 @@ namespace blqw
         /// <summary>
         /// 设置对象值
         /// </summary>
-        /// <param name="obj">待设置的值</param>
-        /// <returns></returns>
+        /// <param name="obj"> 待设置的值 </param>
+        /// <returns> </returns>
         bool Set(TValue obj);
 
         /// <summary>
         /// 尝试构造实例,返回是否成功
         /// </summary>
-        /// <returns></returns>
+        /// <returns> </returns>
         bool TryCreateInstance();
     }
 }
