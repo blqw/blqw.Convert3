@@ -25,14 +25,15 @@ namespace blqw.Converts
         protected override IDictionary<K, V> ChangeTypeImpl(ConvertContext context, object input, Type outputType,
             out bool success)
         {
-            success = true;
             if ((input == null) || input is DBNull)
             {
+                success = true;
                 return null;
             }
 
             var keyConvertor = context.Get<K>();
             var valueConvertor = context.Get<V>();
+
 
             var builder = new DictionaryBuilder(context, outputType, keyConvertor, valueConvertor);
             if (builder.TryCreateInstance() == false)
@@ -40,102 +41,26 @@ namespace blqw.Converts
                 success = false;
                 return null;
             }
+            var mapper = new Mapper(input);
 
-            var reader = input as IDataReader;
-            if (reader != null)
+            if (mapper.Error != null)
             {
-                for (var i = 0; i < reader.FieldCount; i++)
+                context.AddException(mapper.Error);
+                success = false;
+                return null;
+            }
+
+            while (mapper.MoveNext())
+            {
+                if (builder.Add(mapper.Key, mapper.Value) == false)
                 {
-                    if (builder.Add(reader.GetName(i), reader.GetValue(i)))
-                    {
-                        continue;
-                    }
                     success = false;
                     return null;
                 }
-                return builder.Instance;
             }
 
-            var nv = input as NameValueCollection;
-            if (nv != null)
-            {
-                foreach (string name in nv)
-                {
-                    if (builder.Add(name, nv[name]))
-                    {
-                        continue;
-                    }
-                    success = false;
-                    return null;
-                }
-                return builder.Instance;
-            }
-
-            var row = (input as DataRowView)?.Row ?? input as DataRow;
-            if (row?.Table != null)
-            {
-                var cols = row.Table.Columns;
-                foreach (DataColumn col in cols)
-                {
-                    if (builder.Add(col.ColumnName, row[col]))
-                    {
-                        continue;
-                    }
-                    success = false;
-                    return null;
-                }
-                return builder.Instance;
-            }
-
-            var dataset = input as DataSet;
-            if (dataset != null)
-            {
-                for (int i = 0, length = dataset.Tables.Count; i < length; i++)
-                {
-                    var table = dataset.Tables[i];
-                    if (builder.Add(table.TableName ?? $"table_{i}", table))
-                    {
-                        continue;
-                    }
-                    success = false;
-                    return null;
-                }
-                return builder.Instance;
-            }
-
-            var dict = input as IDictionary;
-            if (dict != null)
-            {
-                var ee = dict.GetEnumerator();
-                while (ee.MoveNext())
-                {
-                    if (builder.Add(ee.Key, ee.Value))
-                    {
-                        continue;
-                    }
-                    success = false;
-                    return null;
-                }
-                return builder.Instance;
-            }
-
-            var ps = PublicPropertyCache.GetByType(input.GetType());
-            if (ps.Length > 0)
-            {
-                foreach (var p in ps)
-                {
-                    if ((p.Get == null) || builder.Add(p.Name, p.Get(input)))
-                    {
-                        continue;
-                    }
-                    success = false;
-                    return null;
-                }
-                return builder.Instance;
-            }
-
-            success = false;
-            return null;
+            success = true;
+            return builder.Instance;
         }
 
         /// <summary>
@@ -181,7 +106,7 @@ namespace blqw.Converts
         /// <summary>
         /// <see cref="IDictionary{TKey,TValue}" /> 构造器
         /// </summary>
-        private struct DictionaryBuilder : IBuilder<IDictionary<K, V>, KeyValuePair<object, object>>
+        private struct DictionaryBuilder : IBuilder<IDictionary<K, V>, DictionaryEntry>
         {
             /// <summary>
             /// 键转换器
@@ -230,7 +155,7 @@ namespace blqw.Converts
             /// </summary>
             /// <param name="obj">待设置的值</param>
             /// <returns></returns>
-            public bool Set(KeyValuePair<object, object> obj) => Add(obj.Key, obj.Value);
+            public bool Set(DictionaryEntry obj) => Add(obj.Key, obj.Value);
 
             /// <summary>
             /// 尝试构造实例,返回是否成功

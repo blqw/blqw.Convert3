@@ -8,10 +8,24 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CIList : BaseTypeConvertor<IList>
+    /// <summary>
+    /// <seealso cref="IList" /> 构造器
+    /// </summary>
+    public class CIList : BaseTypeConvertor<IList>
     {
+        /// <summary>
+        /// 字符串分隔符
+        /// </summary>
         private static readonly string[] _Separator = { ", ", "," };
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        /// <returns> </returns>
         protected override IList ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
@@ -20,8 +34,8 @@ namespace blqw.Converts
                 return null;
             }
 
-            var helper = new ListHelper(outputType, context);
-            if (helper.CreateInstance() == false)
+            var helper = new ListBuilder(outputType, context);
+            if (helper.TryCreateInstance() == false)
             {
                 success = false;
                 return null;
@@ -37,15 +51,15 @@ namespace blqw.Converts
                 }
                 while (reader.Read())
                 {
-                    var dict = (IDictionary<string, object>)new ExpandoObject();
+                    var dict = (IDictionary<string, object>) new ExpandoObject();
                     for (var i = 0; i < reader.FieldCount; i++)
                     {
                         dict[reader.GetName(i)] = reader.GetValue(i);
                     }
-                    helper.Add(dict);
+                    helper.Set(dict);
                 }
 
-                return helper.List;
+                return helper.Instance;
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator()
@@ -64,19 +78,26 @@ namespace blqw.Converts
 
             while (ee.MoveNext())
             {
-                if (helper.Add(ee.Current) == false)
+                if (helper.Set(ee.Current) == false)
                 {
                     success = false;
                     return null;
                 }
             }
-            return helper.List;
+            return helper.Instance;
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override IList ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             input = input?.Trim();
-            if (input == null || input.Length <= 1)
+            if ((input == null) || (input.Length <= 1))
             {
                 success = false;
                 return null;
@@ -87,7 +108,7 @@ namespace blqw.Converts
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (IList)result;
+                    return (IList) result;
                 }
                 catch (Exception ex)
                 {
@@ -100,43 +121,59 @@ namespace blqw.Converts
             return ChangeType(context, arr, outputType, out success);
         }
 
-        private struct ListHelper
+        /// <summary>
+        /// <seealso cref="IList" /> 构造器
+        /// </summary>
+        private struct ListBuilder : IBuilder<IList, object>
         {
-            public IList List;
             private readonly Type _type;
             private readonly ConvertContext _context;
 
-            public ListHelper(Type type, ConvertContext context)
+            public ListBuilder(Type type, ConvertContext context)
             {
                 _type = type;
                 _context = context;
-                List = null;
+                Instance = null;
             }
 
-            public bool Add(object value)
+            /// <summary>
+            /// 被构造的实例
+            /// </summary>
+            public IList Instance { get; private set; }
+
+            /// <summary>
+            /// 设置对象值
+            /// </summary>
+            /// <param name="value"> 待设置的值 </param>
+            /// <returns> </returns>
+            public bool Set(object value)
             {
                 try
                 {
-                    List.Add(value);
+                    Instance.Add(value);
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    _context.AddException($"向集合{CType.GetFriendlyName(_type)}中添加第[{List?.Count}]个元素失败,原因:{ex.Message}", ex);
+                    _context.AddException($"向集合{CType.GetFriendlyName(_type)}中添加第[{Instance?.Count}]个元素失败,原因:{ex.Message}", ex);
                     return false;
                 }
             }
 
-            internal bool CreateInstance()
+            /// <summary>
+            /// 尝试构造实例,返回是否成功
+            /// </summary>
+            /// <returns> </returns>
+            public bool TryCreateInstance()
             {
                 if (_type.IsInterface)
                 {
-                    List = new ArrayList();
+                    Instance = new ArrayList();
                     return true;
                 }
                 try
                 {
-                    List = (IList)Activator.CreateInstance(_type);
+                    Instance = (IList) Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)

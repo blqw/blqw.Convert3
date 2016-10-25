@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Data;
-using System.Linq;
 using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CNameValueCollection : BaseTypeConvertor<NameValueCollection>
+    /// <summary>
+    /// <seealso cref="NameValueCollection" /> 转换器
+    /// </summary>
+    public class CNameValueCollection : BaseTypeConvertor<NameValueCollection>
     {
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        /// <returns> </returns>
         protected override NameValueCollection ChangeTypeImpl(ConvertContext context, object input, Type outputType,
             out bool success)
         {
@@ -17,105 +26,53 @@ namespace blqw.Converts
                 success = true;
                 return null;
             }
-            var helper = new NVCollectiontHelper(context, outputType);
-            if (helper.CreateInstance() == false)
+            var builder = new NVCollectiontBuilder(context, outputType);
+            if (builder.TryCreateInstance() == false)
             {
                 success = false;
                 return null;
             }
-            success = true;
-            var nv = input as NameValueCollection;
-            if (nv != null)
+
+            var mapper = new Mapper(input);
+
+            if (mapper.Error != null)
             {
-                foreach (string name in nv)
-                {
-                    if (helper.Add(name, nv[name]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Collection;
+                context.AddException(mapper.Error);
+                success = false;
+                return null;
             }
 
-            var row = ((input as DataRowView)?.Row ?? input as DataRow);
-            if (row?.Table != null)
+            while (mapper.MoveNext())
             {
-                var cols = row.Table.Columns;
-                foreach (DataColumn col in cols)
+                if (builder.Add(mapper.Key, mapper.Value) == false)
                 {
-                    if (helper.Add(col.ColumnName, row[col]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Collection;
-            }
-
-            var reader = input as IDataReader;
-            if (reader != null)
-            {
-                if (reader.IsClosed)
-                {
-                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
-                var cols = Enumerable.Range(0, reader.FieldCount).Select(i => new { name = reader.GetName(i), i });
-                for (var i = 0; i < reader.FieldCount; i++)
-                {
-                    if (helper.Add(reader.GetName(i), reader.GetValue, i) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Collection;
             }
 
-            var dict = input as IDictionary;
-            if (dict != null)
-            {
-                foreach (DictionaryEntry item in dict)
-                {
-                    if (helper.Add(item.Key, item.Value) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Collection;
-            }
-
-            var ps = PublicPropertyCache.GetByType(input.GetType());
-            if (ps.Length > 0)
-            {
-                foreach (var p in ps)
-                {
-                    if ((p.Get != null) && (helper.Add(p.Name, p.Get, input) == false))
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Collection;
-            }
-            success = false;
-            return null;
+            success = true;
+            return builder.Instance;
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override NameValueCollection ChangeType(ConvertContext context, string input, Type outputType,
             out bool success)
         {
             input = input?.Trim();
-            if (input?.Length > 1 && (input[0] == '{') && (input[input.Length - 1] == '}'))
+            if ((input?.Length > 1) && (input[0] == '{') && (input[input.Length - 1] == '}'))
             {
                 try
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (NameValueCollection)result;
+                    return (NameValueCollection) result;
                 }
                 catch (Exception ex)
                 {
@@ -127,24 +84,42 @@ namespace blqw.Converts
         }
 
 
-        private struct NVCollectiontHelper
+        /// <summary>
+        /// <seealso cref="NameValueCollection" /> 转换器
+        /// </summary>
+        private struct NVCollectiontBuilder : IBuilder<NameValueCollection, DictionaryEntry>
         {
-            public NameValueCollection Collection;
             private readonly ConvertContext _context;
             private readonly Type _type;
 
-            public NVCollectiontHelper(ConvertContext context, Type type)
+            public NVCollectiontBuilder(ConvertContext context, Type type)
             {
                 _context = context;
                 _type = type;
-                Collection = null;
+                Instance = null;
             }
 
-            internal bool CreateInstance()
+            /// <summary>
+            /// 被构造的实例
+            /// </summary>
+            public NameValueCollection Instance { get; private set; }
+
+            /// <summary>
+            /// 设置对象值
+            /// </summary>
+            /// <param name="obj"> 待设置的值 </param>
+            /// <returns> </returns>
+            public bool Set(DictionaryEntry obj) => Add(obj.Key, obj.Value);
+
+            /// <summary>
+            /// 尝试构造实例,返回是否成功
+            /// </summary>
+            /// <returns> </returns>
+            public bool TryCreateInstance()
             {
                 try
                 {
-                    Collection = (NameValueCollection)Activator.CreateInstance(_type);
+                    Instance = (NameValueCollection) Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)
@@ -170,34 +145,7 @@ namespace blqw.Converts
                 }
                 try
                 {
-                    Collection.Add(skey, svalue);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    _context.AddException(ex);
-                    return false;
-                }
-            }
-
-            public bool Add<P>(object key, Func<P, object> getValue, P param)
-            {
-                var conv = _context.Get<string>();
-                bool b;
-                var skey = conv.ChangeType(_context, key, typeof(string), out b);
-                if (b == false)
-                {
-                    return false;
-                }
-                try
-                {
-                    var value = getValue(param);
-                    var svalue = conv.ChangeType(_context, value, typeof(string), out b);
-                    if (b == false)
-                    {
-                        return false;
-                    }
-                    Collection.Add(skey, svalue);
+                    Instance.Add(skey, svalue);
                     return true;
                 }
                 catch (Exception ex)

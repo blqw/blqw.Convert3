@@ -1,112 +1,67 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Specialized;
-using System.Data;
 using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CIDictionary : BaseTypeConvertor<IDictionary>
+    /// <summary>
+    /// <seealso cref="IDictionary" /> 转换器
+    /// </summary>
+    public class CIDictionary : BaseTypeConvertor<IDictionary>
     {
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        /// <returns> </returns>
         protected override IDictionary ChangeTypeImpl(ConvertContext context, object input, Type outputType,
             out bool success)
         {
-            success = true;
             if ((input == null) || input is DBNull)
             {
+                success = true;
                 return null;
             }
 
-            var helper = new DictionaryHelper(outputType, context);
-            if (helper.CreateInstance() == false)
+            var builder = new DictionaryBuilder(outputType, context);
+            if (builder.TryCreateInstance() == false)
             {
                 success = false;
                 return null;
             }
 
-            var reader = input as IDataReader;
-            if (reader != null)
+            var mapper = new Mapper(input);
+
+            if (mapper.Error != null)
             {
-                if (reader.IsClosed)
+                context.AddException(mapper.Error);
+                success = false;
+                return null;
+            }
+
+            while (mapper.MoveNext())
+            {
+                if (builder.Add(mapper.Key, mapper.Value) == false)
                 {
-                    context.AddException("DataReader已经关闭");
                     success = false;
                     return null;
                 }
-                for (var i = 0; i < reader.FieldCount; i++)
-                {
-                    if (helper.Add(reader.GetName(i), reader.GetValue(i)) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Dictionary;
             }
 
-
-            var nv = input as NameValueCollection;
-            if (nv != null)
-            {
-                foreach (string name in nv)
-                {
-                    if (helper.Add(name, nv[name]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Dictionary;
-            }
-
-
-            var row = (input as DataRowView)?.Row ?? input as DataRow;
-            if (row?.Table != null)
-            {
-                var cols = row.Table.Columns;
-                foreach (DataColumn col in cols)
-                {
-                    if (helper.Add(col.ColumnName, row[col]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Dictionary;
-            }
-
-            var ee = (input as IDictionary)?.GetEnumerator();
-            if (ee != null)
-            {
-                while (ee.MoveNext())
-                {
-                    if (helper.Add(ee.Key, ee.Value) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Dictionary;
-            }
-
-            var ps = PublicPropertyCache.GetByType(input.GetType());
-            if (ps.Length > 0)
-            {
-                foreach (var p in ps)
-                {
-                    if ((p.Get != null) && (helper.Add(p.Name, p.Get(input)) == false))
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return helper.Dictionary;
-            }
-
-            success = false;
-            return null;
+            success = true;
+            return builder.Instance;
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override IDictionary ChangeType(ConvertContext context, string input, Type outputType,
             out bool success)
         {
@@ -122,7 +77,7 @@ namespace blqw.Converts
                 {
                     var result = ComponentServices.ToJsonObject(outputType, input);
                     success = true;
-                    return (IDictionary)result;
+                    return (IDictionary) result;
                 }
                 catch (Exception ex)
                 {
@@ -133,25 +88,31 @@ namespace blqw.Converts
             return null;
         }
 
-
-        private struct DictionaryHelper
+        /// <summary>
+        /// <seealso cref="IDictionary" /> 构造器
+        /// </summary>
+        private struct DictionaryBuilder : IBuilder<IDictionary, DictionaryEntry>
         {
-            public IDictionary Dictionary;
             private readonly Type _type;
             private readonly ConvertContext _context;
 
-            public DictionaryHelper(Type type, ConvertContext context)
+            public DictionaryBuilder(Type type, ConvertContext context)
             {
                 _type = type;
                 _context = context;
-                Dictionary = null;
+                Instance = null;
             }
+
+            /// <summary>
+            /// 被构造的实例
+            /// </summary>
+            public IDictionary Instance { get; private set; }
 
             public bool Add(object key, object value)
             {
                 try
                 {
-                    Dictionary.Add(key, value);
+                    Instance.Add(key, value);
                     return true;
                 }
                 catch (Exception ex)
@@ -161,16 +122,20 @@ namespace blqw.Converts
                 }
             }
 
-            internal bool CreateInstance()
+            /// <summary>
+            /// 尝试构造实例,返回是否成功
+            /// </summary>
+            /// <returns> </returns>
+            public bool TryCreateInstance()
             {
                 if (_type.IsInterface)
                 {
-                    Dictionary = new Hashtable();
+                    Instance = new Hashtable();
                     return true;
                 }
                 try
                 {
-                    Dictionary = (IDictionary)Activator.CreateInstance(_type);
+                    Instance = (IDictionary) Activator.CreateInstance(_type);
                     return true;
                 }
                 catch (Exception ex)
@@ -179,6 +144,13 @@ namespace blqw.Converts
                     return false;
                 }
             }
+
+            /// <summary>
+            /// 设置对象值
+            /// </summary>
+            /// <param name="obj"> 待设置的值 </param>
+            /// <returns> </returns>
+            public bool Set(DictionaryEntry obj) => Add(obj.Key, obj.Value);
         }
     }
 }

@@ -1,110 +1,57 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Dynamic;
 
 namespace blqw.Converts
 {
-    internal class CObject : BaseTypeConvertor<object>
+    /// <summary>
+    /// <seealso cref="object" /> 转换器
+    /// </summary>
+    public class CObject : BaseTypeConvertor<object>
     {
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        /// <returns> </returns>
         protected override object ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if (input == null || input is DBNull)
+            if ((input == null) || input is DBNull)
             {
                 success = true;
                 return null;
             }
-            var obj = new SetObjectProperty(context, outputType);
-            if (obj.CreateInstance() == false)
+            var builder = new ObjectBuilder(context, outputType);
+            if (builder.TryCreateInstance() == false)
             {
-                success = false;
-                return null;
+                return ReturnIfObject(input, outputType, out success);
             }
+
+            var mapper = new Mapper(input);
+
+            if (mapper.Error != null)
+            {
+                return ReturnIfObject(input, outputType, out success);
+            }
+
+            while (mapper.MoveNext())
+            {
+                var name = mapper.Key as string;
+                if ((name != null) && (builder.Set(name, mapper.Value) == false))
+                {
+                    return ReturnIfObject(input, outputType, out success);
+                }
+            }
+
             success = true;
-            var nv = input as NameValueCollection;
-            if (nv != null)
-            {
-                foreach (string name in nv)
-                {
-                    if (obj.Set(name, nv[name]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return obj.Instance;
-            }
+            return builder.Instance;
+        }
 
-            var row = (input as DataRowView)?.Row ?? (input as DataRow);
-            if (row?.Table != null)
-            {
-                var cols = row.Table.Columns;
-                foreach (DataColumn col in cols)
-                {
-                    if (obj.Set(col.ColumnName, row[col]) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return obj.Instance;
-            }
-
-            var reader = input as IDataReader;
-            if (reader != null)
-            {
-                if (reader.IsClosed)
-                {
-                    context.AddException("DataReader已经关闭");
-                    success = false;
-                    return null;
-                }
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    if (obj.Set(reader.GetName(i), reader.GetValue, i) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return obj.Instance;
-            }
-
-            var dict = input as IDictionary;
-            if (dict != null)
-            {
-                foreach (DictionaryEntry item in dict)
-                {
-                    var name = item.Key as string;
-                    if (name != null && obj.Set(name, item.Value) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return obj.Instance;
-            }
-
-            var ps = PublicPropertyCache.GetByType(input.GetType());
-            if (ps.Length > 0)
-            {
-                foreach (var p in ps)
-                {
-                    if (p.Get != null && obj.Set(p.Name, p.Get, input) == false)
-                    {
-                        success = false;
-                        return null;
-                    }
-                }
-                return obj.Instance;
-            }
+        private object ReturnIfObject(object input, Type outputType, out bool success)
+        {
             if (outputType == typeof(object))
             {
                 success = true;
@@ -112,9 +59,15 @@ namespace blqw.Converts
             }
             success = false;
             return null;
-
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override object ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             try
@@ -130,13 +83,12 @@ namespace blqw.Converts
                     success = false;
                     return null;
                 }
-                else if (outputType.IsAssignableFrom(type) == false)
+                if (outputType.IsAssignableFrom(type) == false)
                 {
                     success = false;
                     return null;
                 }
 
-                outputType = type;
                 success = true;
                 return Activator.CreateInstance(type, true);
             }
@@ -149,36 +101,56 @@ namespace blqw.Converts
         }
 
 
-        private struct SetObjectProperty
+        private struct ObjectBuilder : IBuilder<object, KeyValuePair<string, object>>
         {
             private readonly ConvertContext _context;
             private readonly PropertyHandler[] _properties;
             private readonly int _propertyCount;
-            public object Instance;
-            private readonly IDictionary<string, object> _dynamic;
+
+            private IDictionary<string, object> _dynamic;
             private readonly Type _type;
-            public SetObjectProperty(ConvertContext context, Type type)
+
+            public ObjectBuilder(ConvertContext context, Type type)
             {
                 _context = context;
-                _properties = PublicPropertyCache.GetByType(type);
-                _propertyCount = _properties.Length;
-                if (type == typeof(object))
+                if ((type == typeof(object)) || (type == null))
                 {
                     _type = null;
-                    _dynamic = new System.Dynamic.ExpandoObject();
+                    _properties = null;
+                    _propertyCount = 0;
                 }
                 else
                 {
+                    _properties = PublicPropertyCache.GetByType(type);
+                    _propertyCount = _properties.Length;
                     _type = type;
-                    _dynamic = null;
                 }
-                Instance = _dynamic;
+                _dynamic = null;
+                Instance = null;
             }
 
-            public bool CreateInstance()
+            /// <summary>
+            /// 被构造的实例
+            /// </summary>
+            public object Instance { get; private set; }
+
+            /// <summary>
+            /// 设置对象值
+            /// </summary>
+            /// <param name="obj"> 待设置的值 </param>
+            /// <returns> </returns>
+            public bool Set(KeyValuePair<string, object> obj)
+                => Set(obj.Key, obj.Value);
+
+            /// <summary>
+            /// 尝试构造实例,返回是否成功
+            /// </summary>
+            /// <returns> </returns>
+            public bool TryCreateInstance()
             {
-                if (_dynamic != null)
+                if (_type == null)
                 {
+                    Instance = _dynamic = new ExpandoObject();
                     return true;
                 }
                 try
@@ -195,7 +167,7 @@ namespace blqw.Converts
 
             private PropertyHandler GetProperty(string name)
             {
-                for (int i = 0; i < _propertyCount; i++)
+                for (var i = 0; i < _propertyCount; i++)
                 {
                     var p = _properties[i];
                     if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))
@@ -216,22 +188,6 @@ namespace blqw.Converts
                 var p = GetProperty(name);
                 if (p?.Set != null)
                 {
-                    return p.SetValue(_context, Instance, value);
-                }
-                return true;
-            }
-
-            public bool Set<P>(string name, Func<P, object> getValue, P param)
-            {
-                if (_dynamic != null)
-                {
-                    _dynamic[name] = getValue(param);
-                    return true;
-                }
-                var p = GetProperty(name);
-                if (p?.Set != null)
-                {
-                    var value = getValue(param);
                     return p.SetValue(_context, Instance, value);
                 }
                 return true;

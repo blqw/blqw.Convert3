@@ -15,10 +15,10 @@ namespace blqw
         private NameValueEnumerator _nv;
         private DataRowEnumerator _row;
         private DataSetEnumerator _dataSet;
-        private IDictionaryEnumerator _enumerator;
+        private readonly IDictionaryEnumerator _enumerator;
         private PairEnumerator _pair;
         private PropertyEnumerator _property;
-        private int _index;
+        private readonly int _index;
         /// <summary>
         /// 初始化
         /// </summary>

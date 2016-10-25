@@ -5,7 +5,10 @@ using blqw.IOC;
 
 namespace blqw.Converts
 {
-    internal sealed class CString : BaseConvertor<string>
+    /// <summary>
+    /// <seealso cref="string" /> 转换器
+    /// </summary>
+    public class CString : BaseConvertor<string>
     {
         /// <summary>
         /// 返回是否应该尝试转换String后再转换
@@ -13,7 +16,7 @@ namespace blqw.Converts
         protected override bool ShouldConvertString => false;
 
         /// <summary>
-        /// 判断是否为16进制格式的字符串,如果为true,将参数s的前缀(0x/&h)去除
+        /// 判断是否为16进制格式的字符串,如果为true,将参数s的前缀(0x/&amp;h)去除
         /// </summary>
         /// <param name="s"> 需要判断的字符串 </param>
         /// <returns> </returns>
@@ -59,6 +62,13 @@ namespace blqw.Converts
             return false;
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override string ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
@@ -83,8 +93,7 @@ namespace blqw.Converts
                     case 1:
                         return BaseChangeType(context, reader.GetValue(0), outputType, out success);
                     default:
-                        return ComponentServices.ToJsonString(input); 
-
+                        return ComponentServices.ToJsonString(input);
                 }
             }
 
@@ -131,6 +140,13 @@ namespace blqw.Converts
             return input.ToString();
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
         protected override string ChangeType(ConvertContext context, string input, Type outputType, out bool success)
         {
             success = true;
