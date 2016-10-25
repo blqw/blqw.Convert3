@@ -19,7 +19,7 @@ namespace blqw.Mapping
         private readonly NameObjectCollectionBase _collection;
         private int _index;
         private readonly int _count;
-
+        private readonly NameValueCollection _nv;
         /// <summary>
         /// 初始化 
         /// </summary>
@@ -27,6 +27,7 @@ namespace blqw.Mapping
         public NameValueEnumerator(NameObjectCollectionBase collection)
         {
             _collection = collection;
+            _nv = collection as NameValueCollection;
             _index = -1;
             _count = collection.Count;
             Error = null;
@@ -41,8 +42,11 @@ namespace blqw.Mapping
         /// 将枚举数推进到集合的下一个元素。
         /// </summary>
         /// <returns> 如果枚举数成功地推进到下一个元素，则为 true；如果枚举数越过集合的结尾，则为 false。 </returns>
-        /// <exception cref="T:System.InvalidOperationException"> 在创建了枚举数后集合被修改了。 </exception>
-        public bool MoveNext() => ++_index < _count;
+        public bool MoveNext()
+        {
+            _index += 1;
+            return _index < _count;
+        }
 
         /// <summary>
         /// 将枚举数设置为其初始位置，该位置位于集合中第一个元素之前。
@@ -60,6 +64,6 @@ namespace blqw.Mapping
         /// 获取集合中的当前元素的Value
         /// </summary>
         /// <returns> </returns>
-        public object GetValue() => BaseGet(_collection, _index);
+        public object GetValue() => _nv != null ? _nv.Get(_index) : BaseGet(_collection, _index);
     }
 }

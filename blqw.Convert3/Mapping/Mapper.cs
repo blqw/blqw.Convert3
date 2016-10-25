@@ -11,21 +11,14 @@ namespace blqw
     /// </summary>
     public struct Mapper : IDictionaryEnumerator
     {
-        /// <summary>
-        /// 将枚举数推进到集合的下一个元素。
-        /// </summary>
-        /// <returns> 如果枚举数成功地推进到下一个元素，则为 true；如果枚举数越过集合的结尾，则为 false。 </returns>
-        public readonly Func<bool> MoveNext;
-
-        /// <summary>
-        /// 将枚举数设置为其初始位置，该位置位于集合中第一个元素之前。
-        /// </summary>
-        public readonly Action Reset;
-
-        private readonly Func<object> _getValue;
-        private readonly Func<object> _getKey;
-        private readonly IDictionaryEnumerator _enumerator;
-
+        private DataReaderEnumerator _reader;
+        private NameValueEnumerator _nv;
+        private DataRowEnumerator _row;
+        private DataSetEnumerator _dataSet;
+        private IDictionaryEnumerator _enumerator;
+        private PairEnumerator _pair;
+        private PropertyEnumerator _property;
+        private int _index;
         /// <summary>
         /// 初始化
         /// </summary>
@@ -36,48 +29,36 @@ namespace blqw
             var reader = input as IDataReader;
             if (reader != null)
             {
-                var e = new DataReaderEnumerator(reader);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _reader = new DataReaderEnumerator(reader);
+                Error = _reader.Error;
+                _index = 1;
                 return;
             }
 
             var nv = input as NameValueCollection;
             if (nv != null)
             {
-                var e = new NameValueEnumerator(nv);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _nv = new NameValueEnumerator(nv);
+                Error = _nv.Error;
+                _index = 2;
                 return;
             }
 
             var row = (input as DataRowView)?.Row ?? input as DataRow;
             if (row?.Table != null)
             {
-                var e = new DataRowEnumerator(row);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _row = new DataRowEnumerator(row);
+                Error = _row.Error;
+                _index = 3;
                 return;
             }
 
             var dataset = input as DataSet;
             if (dataset != null)
             {
-                var e = new DataSetEnumerator(dataset);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _dataSet = new DataSetEnumerator(dataset);
+                Error = _dataSet.Error;
+                _index = 4;
                 return;
             }
 
@@ -85,32 +66,25 @@ namespace blqw
             if (dict != null)
             {
                 _enumerator = dict.GetEnumerator();
-                MoveNext = _enumerator.MoveNext;
-                Reset = _enumerator.Reset;
+                _index = 5;
                 return;
             }
 
             var ee = (input as IEnumerable)?.GetEnumerator() ?? input as IEnumerator;
             if (ee != null)
             {
-                var e = new PairEnumerator(ee);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _pair = new PairEnumerator(ee);
+                Error = _pair.Error;
+                _index = 6;
                 return;
             }
 
             var ps = PublicPropertyCache.GetByType(input.GetType());
             if (ps.Length > 0)
             {
-                var e = new PropertyEnumerator(input, ps);
-                Error = e.Error;
-                MoveNext = e.MoveNext;
-                Reset = e.Reset;
-                _getValue = e.GetValue;
-                _getKey = e.GetKey;
+                _property = new PropertyEnumerator(input, ps);
+                Error = _property.Error;
+                _index = 7;
             }
         }
 
@@ -122,20 +96,117 @@ namespace blqw
         /// <summary>
         /// 键
         /// </summary>
-        public object Key => _getKey();
+        public object Key
+        {
+            get
+            {
+                switch (_index)
+                {
+                    case 1:
+                        return _reader.GetKey();
+                    case 2:
+                        return _nv.GetKey();
+                    case 3:
+                        return _row.GetKey();
+                    case 4:
+                        return _dataSet.GetKey();
+                    case 5:
+                        return _enumerator.Key;
+                    case 6:
+                        return _pair.GetKey();
+                    case 7:
+                        return _property.GetKey();
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
 
         /// <summary>
         /// 值
         /// </summary>
-        public object Value => _getValue();
+        public object Value
+        {
+            get
+            {
+                switch (_index)
+                {
+                    case 1:
+                        return _reader.GetValue();
+                    case 2:
+                        return _nv.GetValue();
+                    case 3:
+                        return _row.GetValue();
+                    case 4:
+                        return _dataSet.GetValue();
+                    case 5:
+                        return _enumerator.Value;
+                    case 6:
+                        return _pair.GetValue();
+                    case 7:
+                        return _property.GetValue();
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
 
         public DictionaryEntry Entry =>
-            _enumerator?.Entry ?? new DictionaryEntry(_getKey(), _getValue());
+            _enumerator?.Entry ?? new DictionaryEntry(Key, Value);
 
         object IEnumerator.Current => Entry;
 
-        bool IEnumerator.MoveNext() => MoveNext();
+        public bool MoveNext()
+        {
+            switch (_index)
+            {
+                case 1:
+                    return _reader.MoveNext();
+                case 2:
+                    return _nv.MoveNext();
+                case 3:
+                    return _row.MoveNext();
+                case 4:
+                    return _dataSet.MoveNext();
+                case 5:
+                    return _enumerator.MoveNext();
+                case 6:
+                    return _pair.MoveNext();
+                case 7:
+                    return _property.MoveNext();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
 
-        void IEnumerator.Reset() => Reset();
+        public void Reset()
+        {
+            switch (_index)
+            {
+                case 1:
+                     _reader.Reset();
+                    break;
+                case 2:
+                     _nv.Reset();
+                    break;
+                case 3:
+                     _row.Reset();
+                    break;
+                case 4:
+                     _dataSet.Reset();
+                    break;
+                case 5:
+                     _enumerator.Reset();
+                    break;
+                case 6:
+                     _pair.Reset();
+                    break;
+                case 7:
+                     _property.Reset();
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
     }
 }

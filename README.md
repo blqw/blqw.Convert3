@@ -90,6 +90,7 @@ Console.WriteLine(Convert3.ToPinyin("冰麟轻武", PinyinMode.FullWithSplit)); 
 Console.WriteLine(Convert3.ToDBC("，１２３４５６７ａｋｓ"));//,1234567aks
 Console.WriteLine(Convert3.ToSBC("!1f23d.?@"));         //！１ｆ２３ｄ．？＠
 
+//摘要/加密
 Console.WriteLine(Convert3.ToMD5("123456"));    //e10adc3949ba59abbe56e057f20f883e
 Console.WriteLine(Convert3.ToSHA1("123456"));   //7c4a8d09ca3762af61e59520943dc26494f8941b
 

@@ -422,7 +422,7 @@ namespace blqw
                 var bytes = Encoding.UTF8.GetBytes(input);
                 var hash = md5Provider.ComputeHash(bytes);
                 var saltBytes = BitConverter.GetBytes(salt);
-                var index = hash[0] % 12 + 1;
+                var index = hash[0]%12 + 1;
                 hash[index] = saltBytes[0];
                 hash[index + 1] = saltBytes[1];
                 hash[index + 2] = saltBytes[2];
@@ -445,7 +445,7 @@ namespace blqw
                 input = "";
             }
             var arr = rmd5.ToByteArray();
-            var index = arr[0] % 12 + 1;
+            var index = arr[0]%12 + 1;
             //将盐取出来
             var salt = BitConverter.ToInt32(arr, index);
             using (var md5Provider = new MD5CryptoServiceProvider())
