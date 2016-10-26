@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 namespace blqw.Dynamic
 {
     /// <summary>
-    /// 原始类型的动态类型包装类
+    /// 基于系统原始类型的动态类型
     /// </summary>
     public class DynamicPrimitive : DynamicObject, IEquatable<object>, IComparable,
         IComparable<object>, IObjectHandle, IObjectReference
@@ -20,7 +20,10 @@ namespace blqw.Dynamic
         /// </summary>
         public static readonly DynamicPrimitive Null = new DynamicPrimitive(null);
 
-        private static readonly string[] EmptyStrings = new string[0];
+        /// <summary>
+        /// 表示一个空的字符串数组
+        /// </summary>
+        private static readonly string[] _EmptyStrings = new string[0];
 
         /// <summary>
         /// 被包装的原始值
@@ -28,7 +31,7 @@ namespace blqw.Dynamic
         private readonly object _value;
 
         /// <summary>
-        /// 构造函数
+        /// 使用指定对象初始化实例
         /// </summary>
         /// <param name="value"> </param>
         public DynamicPrimitive(object value)
@@ -54,6 +57,10 @@ namespace blqw.Dynamic
         /// <filterpriority> 2 </filterpriority>
         public override bool Equals(object obj)
         {
+            if (obj == null)
+            {
+                return _value == null;
+            }
             if (ReferenceEquals(this, obj)) //相同实例
             {
                 return true;
@@ -85,7 +92,7 @@ namespace blqw.Dynamic
         /// 返回所有动态成员名称的枚举。
         /// </summary>
         /// <returns> 一个包含动态成员名称的序列。 </returns>
-        public override IEnumerable<string> GetDynamicMemberNames() => EmptyStrings;
+        public override IEnumerable<string> GetDynamicMemberNames() => _EmptyStrings;
 
         /// <summary>
         /// 尝试转换类型
@@ -230,31 +237,19 @@ namespace blqw.Dynamic
 
         #region 运算符重载
 
-        public static bool operator >(DynamicPrimitive a, object b)
-        {
-            return Compare(a, b) > 0;
-        }
+#pragma warning disable 1591
+        public static bool operator >(DynamicPrimitive a, object b) => Compare(a, b) > 0;
 
-        public static bool operator <(DynamicPrimitive a, object b)
-        {
-            return Compare(a, b) < 0;
-        }
+        public static bool operator <(DynamicPrimitive a, object b) => Compare(a, b) < 0;
 
-        public static bool operator ==(DynamicPrimitive a, object b) => a?.Equals(b) ?? ReferenceEquals(a, b);
+        public static bool operator ==(DynamicPrimitive a, object b) => a?.Equals(b) ?? ReferenceEquals(null, b);
 
-        public static bool operator !=(DynamicPrimitive a, object b) => !(a?.Equals(b) ?? ReferenceEquals(a, b));
+        public static bool operator !=(DynamicPrimitive a, object b) => !(a?.Equals(b) ?? ReferenceEquals(null, b));
 
+        public static bool operator >=(DynamicPrimitive a, object b) => Compare(a, b) >= 0;
 
-        public static bool operator >=(DynamicPrimitive a, object b)
-        {
-            return Compare(a, b) >= 0;
-        }
-
-        public static bool operator <=(DynamicPrimitive a, object b)
-        {
-            return Compare(a, b) <= 0;
-        }
-
+        public static bool operator <=(DynamicPrimitive a, object b) => Compare(a, b) <= 0;
+#pragma warning restore 1591
         #endregion
     }
 }

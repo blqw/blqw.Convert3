@@ -18,15 +18,21 @@ namespace blqw.Dynamic
         /// </summary>
         public bool IsReadOnly { get; set; }
 
-        /// <summary> 获取由此对象提供的自定义类型。 </summary>
+        /// <summary>
+        /// 获取由此对象提供的自定义类型。
+        /// </summary>
         /// <returns> 自定义类型。 </returns>
         public Type GetCustomType() => _dict?.GetType() ?? typeof(IDictionary);
 
-        /// <summary> 打开该对象。 </summary>
+        /// <summary>
+        /// 打开该对象。
+        /// </summary>
         /// <returns> 已打开的对象。 </returns>
         public object Unwrap() => _dict;
 
-        /// <summary> 返回应进行反序列化的真实对象（而不是序列化流指定的对象）。 </summary>
+        /// <summary>
+        /// 返回应进行反序列化的真实对象（而不是序列化流指定的对象）。
+        /// </summary>
         /// <returns> 返回放入图形中的实际对象。 </returns>
         /// <param name="context"> 当前对象从其中进行反序列化的 <see cref="T:System.Runtime.Serialization.StreamingContext" />。 </param>
         public object GetRealObject(StreamingContext context) => _dict;
@@ -234,11 +240,13 @@ namespace blqw.Dynamic
         ICollection IDictionary.Keys => _dict.Keys;
         void IDictionary.Remove(object key) => _dict.Remove(key);
         ICollection IDictionary.Values => _dict.Values;
+
         object IDictionary.this[object key]
         {
             get { return _dict[key]; }
             set { _dict[key] = value; }
         }
+
         void ICollection.CopyTo(Array array, int index) => _dict.CopyTo(array, index);
         int ICollection.Count => _dict.Count;
         bool ICollection.IsSynchronized { get; } = false;
