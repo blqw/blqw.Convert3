@@ -1,11 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace blqw
 {
-    partial class Convert3
+    //数字转大写功能
+    public partial class Convert3
     {
         /// <summary>
         /// 将数字文本转换成大写
@@ -33,58 +33,52 @@ namespace blqw
             unsafe
             {
                 fixed (char* p = number)
+                fixed (char* upnum = _UpperNumbers[isSimplified.GetHashCode()])
+                fixed (char* numut = _NumberUnits[isSimplified.GetHashCode()])
+                fixed (char* monut = _MoneyUnits[isSimplified.GetHashCode()])
                 {
-                    fixed (char* upnum = _UpperNumbers[isSimplified.GetHashCode()])
+                    var mdec = m.Groups["decimal"];
+                    var mInt = m.Groups["integer"];
+                    if ((mInt.Length > 15) && (veryBig == false))
                     {
-                        fixed (char* numut = _NumberUnits[isSimplified.GetHashCode()])
-                        {
-                            fixed (char* monut = _MoneyUnits[isSimplified.GetHashCode()])
-                            {
-                                var mdec = m.Groups["decimal"];
-                                var mInt = m.Groups["integer"];
-                                if ((mInt.Length > 15) && (veryBig == false))
-                                {
-                                    throw new ArgumentException("不建议转换超过15位的整数,除非将veryBig参数设置为true", "number");
-                                }
-                                if ((mdec.Length > 10) && (veryBig == false))
-                                {
-                                    throw new ArgumentException("不建议转换超过10位的小,除非将veryBig参数设置为true", "number");
-                                }
-                                var integer = ParseInteger(p + mInt.Index, p + mInt.Index + mInt.Length - 1, upnum,
-                                    numut);
-
-                                if (mdec.Success == false)
-                                {
-                                    string unit = null;
-                                    if (isMoney)
-                                    {
-                                        unit = monut[0] + "整";
-                                    }
-                                    return integer + unit;
-                                }
-
-                                if (isMoney)
-                                {
-                                    var jiao = upnum[p[mdec.Index] - '0'].ToString();
-                                    var fen = mdec.Length == 1 ? "0" : upnum[p[mdec.Index + 1] - '0'].ToString();
-
-                                    if (jiao != "0")
-                                    {
-                                        jiao += monut[1];
-                                    }
-
-                                    if (fen != "0")
-                                    {
-                                        jiao += fen + monut[2];
-                                    }
-
-                                    return integer + monut[0] + jiao;
-                                }
-
-                                return integer + ParseDecimal(p + mdec.Index, p + mdec.Index + mdec.Length - 1, upnum);
-                            }
-                        }
+                        throw new ArgumentException("不建议转换超过15位的整数,除非将veryBig参数设置为true", nameof(number));
                     }
+                    if ((mdec.Length > 10) && (veryBig == false))
+                    {
+                        throw new ArgumentException("不建议转换超过10位的小,除非将veryBig参数设置为true", nameof(number));
+                    }
+                    var integer = ParseInteger(p + mInt.Index, p + mInt.Index + mInt.Length - 1, upnum,
+                        numut);
+
+                    if (mdec.Success == false)
+                    {
+                        string unit = null;
+                        if (isMoney)
+                        {
+                            unit = monut[0] + "整";
+                        }
+                        return integer + unit;
+                    }
+
+                    if (isMoney)
+                    {
+                        var jiao = upnum[p[mdec.Index] - '0'].ToString();
+                        var fen = mdec.Length == 1 ? "0" : upnum[p[mdec.Index + 1] - '0'].ToString();
+
+                        if (jiao != "0")
+                        {
+                            jiao += monut[1];
+                        }
+
+                        if (fen != "0")
+                        {
+                            jiao += fen + monut[2];
+                        }
+
+                        return integer + monut[0] + jiao;
+                    }
+
+                    return integer + ParseDecimal(p + mdec.Index, p + mdec.Index + mdec.Length - 1, upnum);
                 }
             }
         }
@@ -92,7 +86,7 @@ namespace blqw
         //操作小数部分
         private static unsafe string ParseDecimal(char* p, char* end, char* upnum)
         {
-            var sb = new StringBuilder((int) (end - p));
+            var sb = new StringBuilder((int)(end - p));
             sb.Append(upnum[10]);
             while (p <= end)
             {
@@ -102,11 +96,11 @@ namespace blqw
             return sb.ToString();
         }
 
-        //操作整数部分,为了效率不写递归.....
+        //操作整数部分,为了效率不写递归
         private static unsafe string ParseInteger(char* p, char* end, char* upnum, char* numut)
         {
-            var length = (int) (end - p) + 1;
-            var sb = new StringBuilder(length*3);
+            var length = (int)(end - p) + 1;
+            var sb = new StringBuilder(length * 3);
 
             if (*p == '-')
             {
@@ -138,10 +132,10 @@ namespace blqw
                     ling = false; //重置 参数
                 }
 
-                if (length%8 == 1) //判断是否在"亿"位
+                if (length % 8 == 1) //判断是否在"亿"位
                 {
                     //如果是
-                    var n = length/8; //计算应该有几个"亿"
+                    var n = length / 8; //计算应该有几个"亿"
 
                     if ((num != 0) || yi) //判断是否需要加 单位
                     {
@@ -166,7 +160,7 @@ namespace blqw
                 }
                 else //十千百万
                 {
-                    var uIndex = length%4; //单位索引
+                    var uIndex = length % 4; //单位索引
                     if (uIndex == 1) //判断是否在"万"位
                     {
                         if ((num != 0) || wan) //判断是否需要加 单位
@@ -217,16 +211,6 @@ namespace blqw
             }
             return sb.ToString();
         }
-
-        #region HiddenMethod 不同解决方案中才有效
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public new static bool Equals(object objA, object objB) => object.Equals(objA, objB);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public new static bool ReferenceEquals(object objA, object objB) => object.ReferenceEquals(objA, objB);
-
-        #endregion
 
         #region 固定参数
 

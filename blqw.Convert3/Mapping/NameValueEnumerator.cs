@@ -51,7 +51,6 @@ namespace blqw.Mapping
         /// <summary>
         /// 将枚举数设置为其初始位置，该位置位于集合中第一个元素之前。
         /// </summary>
-        /// <exception cref="T:System.InvalidOperationException"> 在创建了枚举数后集合被修改了。 </exception>
         public void Reset() => _index = -1;
 
         /// <summary>

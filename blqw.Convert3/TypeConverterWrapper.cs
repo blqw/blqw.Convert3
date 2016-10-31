@@ -10,6 +10,7 @@ using blqw.Converts;
 
 namespace blqw
 {
+    [Obsolete()]
     sealed class TypeConverterWrapper: TypeConverter
     {
         private readonly IConvertor _convertor;

@@ -106,7 +106,6 @@ namespace blqw.Dynamic
         /// </summary>
         /// <returns> 返回放入图形中的实际对象。 </returns>
         /// <param name="context"> 当前对象从其中进行反序列化的 <see cref="T:System.Runtime.Serialization.StreamingContext" />。 </param>
-        /// <exception cref="T:System.Security.SecurityException"> 调用方没有所要求的权限。无法对中等信任的服务器进行调用。 </exception>
         public object GetRealObject(StreamingContext context) => _list;
 
         /// <summary>

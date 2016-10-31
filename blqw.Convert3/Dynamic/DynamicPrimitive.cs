@@ -236,8 +236,8 @@ namespace blqw.Dynamic
         }
 
         #region 运算符重载
-
 #pragma warning disable 1591
+        // ReSharper disable MissingXmlDoc
         public static bool operator >(DynamicPrimitive a, object b) => Compare(a, b) > 0;
 
         public static bool operator <(DynamicPrimitive a, object b) => Compare(a, b) < 0;
@@ -250,6 +250,7 @@ namespace blqw.Dynamic
 
         public static bool operator <=(DynamicPrimitive a, object b) => Compare(a, b) <= 0;
 #pragma warning restore 1591
+        // ReSharper restore MissingXmlDoc
         #endregion
     }
 }

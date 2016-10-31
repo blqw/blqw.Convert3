@@ -31,7 +31,7 @@ namespace blqw
         FullWithSplit = 4
     }
 
-    partial class Convert3
+    public partial class Convert3
     {
         // GB2312-80 标准规范中第一个汉字的机内码.即"啊"的机内码
         private const int FIRST_CH_CODE = -20319;
@@ -41,7 +41,7 @@ namespace blqw
         private const int LAST_OF_ONE_LEVEL_CH_CODE = -10247;
         //字符缓冲
         [ThreadStatic]
-        private static StringBuilder _Buffer = new StringBuilder(1023);
+        private static StringBuilder _Buffer;
 
         // 配置中文字符
         //static Regex regex = new Regex("[\u4e00-\u9fa5]$");
@@ -84,7 +84,7 @@ namespace blqw
             }
             if (_Buffer == null)
             {
-                _Buffer = new StringBuilder();
+                _Buffer = new StringBuilder(1023);
             }
             var chs = str.ToCharArray();
 

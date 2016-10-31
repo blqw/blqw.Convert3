@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using blqw;
 using blqw.Converts;
 
 namespace blqw.IOC
@@ -15,23 +11,20 @@ namespace blqw.IOC
     /// </summary>
     [Export("Convert3", typeof(IFormatterConverter))]
     [Export(typeof(IFormatterConverter))]
-    [ExportMetadata("Priority", IOC.ExportComponent.PRIORITY)]
-    class ObjectConverter : IFormatterConverter
+    [ExportMetadata("Priority", ExportComponent.PRIORITY)]
+    internal class ObjectConverter : IFormatterConverter
     {
         public virtual object Convert(object input, Type type)
         {
             if (type == null)
             {
-                throw new ArgumentOutOfRangeException("type");
+                throw new ArgumentOutOfRangeException(nameof(type));
             }
             return input.ChangeType(type);
         }
 
-        public virtual T Convert<T>(object input)
-        {
-            return input.To<T>();
-        }
-
+        public virtual T Convert<T>(object input) => input.To<T>();
+        
         #region IFormatterConverter 成员
 
         object IFormatterConverter.Convert(object value, TypeCode typeCode)
@@ -45,35 +38,35 @@ namespace blqw.IOC
                 case TypeCode.DBNull:
                     return DBNull.Value;
                 case TypeCode.Boolean:
-                    return Convert3.To<bool>(value);
+                    return value.To<bool>();
                 case TypeCode.Char:
-                    return Convert3.To<Char>(value);
+                    return value.To<char>();
                 case TypeCode.SByte:
-                    return Convert3.To<SByte>(value);
+                    return value.To<sbyte>();
                 case TypeCode.Byte:
-                    return Convert3.To<Byte>(value);
+                    return value.To<byte>();
                 case TypeCode.Int16:
-                    return Convert3.To<Int16>(value);
+                    return value.To<short>();
                 case TypeCode.UInt16:
-                    return Convert3.To<UInt16>(value);
+                    return value.To<ushort>();
                 case TypeCode.Int32:
-                    return Convert3.To<Int32>(value);
+                    return value.To<int>();
                 case TypeCode.UInt32:
-                    return Convert3.To<UInt32>(value);
+                    return value.To<uint>();
                 case TypeCode.Int64:
-                    return Convert3.To<Int64>(value);
+                    return value.To<long>();
                 case TypeCode.UInt64:
-                    return Convert3.To<UInt64>(value);
+                    return value.To<ulong>();
                 case TypeCode.Single:
-                    return Convert3.To<Single>(value);
+                    return value.To<float>();
                 case TypeCode.Double:
-                    return Convert3.To<Double>(value);
+                    return value.To<double>();
                 case TypeCode.Decimal:
-                    return Convert3.To<Decimal>(value);
+                    return value.To<decimal>();
                 case TypeCode.DateTime:
-                    return Convert3.To<DateTime>(value);
+                    return value.To<DateTime>();
                 case TypeCode.String:
-                    return Convert3.To<String>(value);
+                    return value.To<string>();
                 default:
                     break;
             }
@@ -87,125 +80,79 @@ namespace blqw.IOC
 
         bool IFormatterConverter.ToBoolean(object value)
         {
-            return Convert3.To<bool>(value);
+            return value.To<bool>();
         }
 
         byte IFormatterConverter.ToByte(object value)
         {
-            return Convert3.To<byte>(value);
+            return value.To<byte>();
         }
 
         char IFormatterConverter.ToChar(object value)
         {
-            return Convert3.To<char>(value);
+            return value.To<char>();
         }
 
         DateTime IFormatterConverter.ToDateTime(object value)
         {
-            return Convert3.To<DateTime>(value);
+            return value.To<DateTime>();
         }
 
         decimal IFormatterConverter.ToDecimal(object value)
         {
-            return Convert3.To<decimal>(value);
+            return value.To<decimal>();
         }
 
         double IFormatterConverter.ToDouble(object value)
         {
-            return Convert3.To<double>(value);
+            return value.To<double>();
         }
 
         short IFormatterConverter.ToInt16(object value)
         {
-            return Convert3.To<short>(value);
+            return value.To<short>();
         }
 
         int IFormatterConverter.ToInt32(object value)
         {
-            return Convert3.To<int>(value);
+            return value.To<int>();
         }
 
         long IFormatterConverter.ToInt64(object value)
         {
-            return Convert3.To<long>(value);
+            return value.To<long>();
         }
 
         sbyte IFormatterConverter.ToSByte(object value)
         {
-            return Convert3.To<sbyte>(value);
+            return value.To<sbyte>();
         }
 
         float IFormatterConverter.ToSingle(object value)
         {
-            return Convert3.To<float>(value);
+            return value.To<float>();
         }
 
         string IFormatterConverter.ToString(object value)
         {
-            return Convert3.To<string>(value);
+            return value.To<string>();
         }
 
         ushort IFormatterConverter.ToUInt16(object value)
         {
-            return Convert3.To<ushort>(value);
+            return value.To<ushort>();
         }
 
         uint IFormatterConverter.ToUInt32(object value)
         {
-            return Convert3.To<uint>(value);
+            return value.To<uint>();
         }
 
         ulong IFormatterConverter.ToUInt64(object value)
         {
-            return Convert3.To<ulong>(value);
+            return value.To<ulong>();
         }
 
         #endregion
     }
-
-    /// <summary>
-    /// 定向转换器
-    /// </summary>
-    class DirectConverter : ObjectConverter
-    {
-        Type _OutputType;
-        bool _ThrowError;
-        IConvertor _Convertor;
-        IConvertor Convertor => _Convertor ?? (_Convertor = ConvertorServices.Container.GetConvertor(_OutputType));
-
-        public DirectConverter(Type outputType, bool throwError)
-        {
-            _OutputType = outputType;
-            _ThrowError = throwError;
-        }
-
-        public override object Convert(object input, Type type)
-        {
-            using (var context = new ConvertContext())
-            {
-                bool b;
-                var output = Convertor.ChangeType(context, input, type, out b);
-                if (_ThrowError && b == false)
-                {
-                    context.ThrowIfHaveError();
-                }
-                return output;
-            }
-        }
-
-        public override T Convert<T>(object input)
-        {
-            using (var context = new ConvertContext())
-            {
-                bool b;
-                var output = Convertor.ChangeType(context, input, typeof(T), out b);
-                if (_ThrowError && b == false)
-                {
-                    context.ThrowIfHaveError();
-                }
-                return (T)output;
-            }
-        }
-    }
-
 }
