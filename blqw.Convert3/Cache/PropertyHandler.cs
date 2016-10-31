@@ -1,87 +1,73 @@
-﻿using blqw.IOC;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq.Expressions;
+﻿using System;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using blqw.IOC;
 
 namespace blqw
 {
     /// <summary>
     /// 用于操作属性的Get和Set
     /// </summary>
-    class PropertyHandler
+    internal class PropertyHandler
     {
-        public static bool IsInitialized { get; } = Initialize();
-
-        private static bool Initialize()
-        {
-            MEF.Import(typeof(PropertyHandler));
-            return true;
-        }
-
-        [Import("CreateGetter")]
-        public static Func<MemberInfo, Func<object, object>> GetGeter;
-
-        [Import("CreateSetter")]
-        public static Func<MemberInfo, Action<object, object>> GetSeter;
-
+        /// <summary>
+        /// 初始化 <see cref="PropertyHandler"/>
+        /// </summary>
+        /// <param name="property">属性</param>
         public PropertyHandler(PropertyInfo property)
         {
             Property = property;
-            Convertor = ConvertorContainer.Default.Get(Property.PropertyType);
+            PropertyType = property.PropertyType;
             Name = property.Name;
-            if (GetGeter != null && GetSeter != null)
-            {
-                Get = GetGeter(property);
-                Set = GetSeter(property);
-                return;
-            }
-            var o = Expression.Parameter(typeof(object), "o");
-            var cast = Expression.Convert(o, property.DeclaringType);
-            var p = Expression.Property(cast, property);
-            if (property.CanRead)
-            {
-                var ret = Expression.Convert(p, typeof(object));
-                var get = Expression.Lambda<Func<object, object>>(ret, o);
-                Get = get.Compile();
-            }
-
-            if (property.CanWrite)
-            {
-                var v = Expression.Parameter(typeof(object), "v");
-                var val = Expression.Convert(v, property.PropertyType);
-                var assign = Expression.MakeBinary(ExpressionType.Assign, p, val);
-                var ret = Expression.Convert(assign, typeof(object));
-                var set = Expression.Lambda<Action<object, object>>(ret, o, v);
-                Set = set.Compile();
-            }
+            Get = ComponentServices.GetGeter(property);
+            Set = ComponentServices.GetSeter(property);
         }
-        public Func<object, object> Get { get; }
-        public Action<object, object> Set { get; }
-        public PropertyInfo Property { get; }
-        public string Name { get; }
-        public IConvertor Convertor { get; }
 
-        public bool SetValue(object target, object value)
+        /// <summary>
+        /// 调用构造函数
+        /// </summary>
+        /// <param name="property">属性</param>
+        /// <returns></returns>
+        public static PropertyHandler Create(PropertyInfo property) => new PropertyHandler(property);
+
+        /// <summary>
+        /// 属性类型
+        /// </summary>
+        public Type PropertyType { get; }
+        /// <summary>
+        /// 属性的Get方法委托
+        /// </summary>
+        public Func<object, object> Get { get; }
+        /// <summary>
+        /// 属性的Set方法委托
+        /// </summary>
+        public Action<object, object> Set { get; }
+        /// <summary>
+        /// 属性
+        /// </summary>
+        public PropertyInfo Property { get; }
+        /// <summary>
+        /// 属性名称
+        /// </summary>
+        public string Name { get; }
+        /// <summary>
+        /// 设置属性值
+        /// </summary>
+        /// <param name="context">转换上下文</param>
+        /// <param name="target">属性实例对象</param>
+        /// <param name="value">属性值</param>
+        /// <returns></returns>
+        public bool SetValue(ConvertContext context, object target, object value)
         {
             if (Set == null)
             {
-                Error.Add(new NotSupportedException($"{Property.ReflectedType}.{Property.Name}属性没有set"));
-                return false;
-            }
-            if (Convertor == null)
-            {
-                Error.ConvertorNotFound(Property.PropertyType);
+                context.AddException($"{Property.ReflectedType}.{Property.Name}属性没有set");
                 return false;
             }
             bool b;
-            var v = Convertor.ChangeType(value, Property.PropertyType, out b);
+            var v = context.Get(PropertyType).ChangeType(context, value, PropertyType, out b);
             if (b == false)
             {
-                Error.Add(new NotSupportedException($"{Property.ReflectedType}属性{Property.Name}赋值失败"));
+                context.AddException($"{Property.ReflectedType}属性{Property.Name}值转换失败");
                 return false;
             }
             try
@@ -91,7 +77,7 @@ namespace blqw
             }
             catch (Exception ex)
             {
-                Error.Add(ex);
+                context.AddException(ex);
                 return false;
             }
         }

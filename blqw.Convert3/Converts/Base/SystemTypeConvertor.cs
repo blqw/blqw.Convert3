@@ -1,53 +1,104 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace blqw.Converts
 {
-    /// <summary> 
+    /// <summary>
     /// 系统类型转换器,额外处理 DataRow,DataRowView,DataReader
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T"> </typeparam>
     public abstract class SystemTypeConvertor<T> : BaseConvertor<T>
     {
-        protected override bool TryConvertString { get; } = true;
+        /// <summary>
+        /// 返回是否应该尝试转换String后再转换
+        /// </summary>
+        protected override bool ShouldConvertString => true;
 
-        protected override T ChangeTypeImpl(object input, Type outputType, out bool success)
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected sealed override T ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
+            if (input == null)
+            {
+                return ChangeTypeImpl(context, null, outputType, out success);
+            }
             var row = input as DataRow;
             if (row != null)
             {
-                var arr = row.ItemArray;
-                if (arr.Length > 0)
+                switch (row.Table.Columns.Count)
                 {
-                    return This.ChangeType(arr[0], outputType, out success);
+                    case 0:
+                        return ChangeTypeImpl(context, null, outputType, out success);
+                    case 1:
+                        return ChangeTypeImpl(context, row[0], outputType, out success);
+                    default:
+                        success = false;
+                        context.AddException("只有当 DataRow 有且只有一列时才能尝试转换");
+                        return default(T);
                 }
-                return This.ChangeType(null, outputType, out success);
             }
+
             var rv = input as DataRowView;
             if (rv != null)
             {
-                if (rv.DataView.Table.Columns.Count > 0)
+                switch (rv.DataView.Table.Columns.Count)
                 {
-                    return This.ChangeType(rv[0], outputType, out success);
+                    case 0:
+                        return ChangeTypeImpl(context, null, outputType, out success);
+                    case 1:
+                        return ChangeTypeImpl(context, rv[0], outputType, out success);
+                    default:
+                        success = false;
+                        context.AddException("只有当 DataRowView 有且只有一列时才能尝试转换");
+                        return default(T);
                 }
-                return This.ChangeType(null, outputType, out success);
             }
+
             var reader = input as IDataReader;
             if (reader != null)
             {
-                if (reader.FieldCount > 0)
+                switch (reader.FieldCount)
                 {
-                    return This.ChangeType(reader.GetValue(0), outputType, out success);
+                    case 0:
+                        return ChangeTypeImpl(context, null, outputType, out success);
+                    case 1:
+                        return ChangeTypeImpl(context, reader.GetValue(0), outputType, out success);
+                    default:
+                        success = false;
+                        context.AddException("只有当 IDataReader 有且只有一列时才能尝试转换");
+                        return default(T);
                 }
-                return This.ChangeType(null, outputType, out success);
             }
 
-            return ChangeType(input, outputType, out success);
+            var ee = (input as IEnumerable)?.GetEnumerator() ?? input as IEnumerator;
+            if (ee?.MoveNext() == true)
+            {
+                var value = ee.Current;
+                if (ee.MoveNext())
+                {
+                    success = false;
+                    context.AddException("只有当 集合 有且只有一行时才能尝试转换");
+                    return default(T);
+                }
+                return ChangeTypeImpl(context, value, outputType, out success);
+            }
+
+            return ChangeTypeImpl(context, input, outputType, out success);
         }
 
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected abstract T ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success);
     }
 }

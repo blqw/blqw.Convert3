@@ -9,9 +9,7 @@ namespace blqw
         [TestMethod]
         public void 测试获取转换器()
         {
-            var convert2 = ConvertorContainer.Default.Get<MyClass>();
-            Assert.IsNotNull(convert2);
-            var convert = ConvertorContainer.Default.Get(typeof(MyClass));
+            var convert = ConvertorServices.Container.GetConvertor(typeof(MyClass));
             Assert.IsNotNull(convert);
 
         }

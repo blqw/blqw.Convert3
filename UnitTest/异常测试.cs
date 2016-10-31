@@ -45,7 +45,7 @@ namespace blqw
             }
             catch (AggregateException ex)
             {
-                Trace.WriteLine(ex);
+                Trace.WriteLine(ex.ToString());
             }
         }
 
