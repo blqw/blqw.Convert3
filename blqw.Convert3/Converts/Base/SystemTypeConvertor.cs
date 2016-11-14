@@ -36,7 +36,7 @@ namespace blqw.Converts
                     case 0:
                         return ChangeTypeImpl(context, null, outputType, out success);
                     case 1:
-                        return ChangeTypeImpl(context, row[0], outputType, out success);
+                        return BaseChangeType(context, row[0], outputType, out success);
                     default:
                         success = false;
                         context.AddException("只有当 DataRow 有且只有一列时才能尝试转换");
@@ -52,7 +52,7 @@ namespace blqw.Converts
                     case 0:
                         return ChangeTypeImpl(context, null, outputType, out success);
                     case 1:
-                        return ChangeTypeImpl(context, rv[0], outputType, out success);
+                        return BaseChangeType(context, rv[0], outputType, out success);
                     default:
                         success = false;
                         context.AddException("只有当 DataRowView 有且只有一列时才能尝试转换");
@@ -68,7 +68,7 @@ namespace blqw.Converts
                     case 0:
                         return ChangeTypeImpl(context, null, outputType, out success);
                     case 1:
-                        return ChangeTypeImpl(context, reader.GetValue(0), outputType, out success);
+                        return BaseChangeType(context, reader.GetValue(0), outputType, out success);
                     default:
                         success = false;
                         context.AddException("只有当 IDataReader 有且只有一列时才能尝试转换");
@@ -86,7 +86,7 @@ namespace blqw.Converts
                     context.AddException("只有当 集合 有且只有一行时才能尝试转换");
                     return default(T);
                 }
-                return ChangeTypeImpl(context, value, outputType, out success);
+                return BaseChangeType(context, value, outputType, out success);
             }
 
             return ChangeTypeImpl(context, input, outputType, out success);
