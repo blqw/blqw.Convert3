@@ -187,11 +187,19 @@ namespace blqw
             {
                 return new DynamicDictionary(dict);
             }
+
             var list = obj as IList;
             if (list != null)
             {
                 return new DynamicList(list);
             }
+            
+            var ee = obj as IDictionaryEnumerator ?? obj as IEnumerator ?? (obj as IEnumerable)?.GetEnumerator();
+            if (ee != null)
+            {
+                return new DynamicEnumerator(ee);
+            }
+
             if ("System".Equals(obj.GetType().Namespace, StringComparison.Ordinal))
             {
                 return new DynamicPrimitive(obj);

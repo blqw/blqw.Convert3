@@ -101,6 +101,7 @@
     <Compile Include="Converts\Base\GenericConvertor.cs" />
     <Compile Include="Define\ExceptionSnapshot.cs" />
     <Compile Include="Define\IBuilder.cs" />
+    <Compile Include="Dynamic\DynamicEnumerator.cs" />
     <Compile Include="IOC\DirectConverter.cs" />
     <Compile Include="Mapping\DataReaderEnumerator.cs" />
     <Compile Include="Mapping\DataRowEnumerator.cs" />
