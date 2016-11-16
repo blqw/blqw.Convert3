@@ -102,8 +102,9 @@ namespace blqw.Dynamic
             {
                 result = p.Get(_entity);
                 bool b;
-                result = result.ChangeType(binder.ReturnType, out b);
-                return b ? result.ToDynamic() : DynamicPrimitive.Null;
+                var r = result.ChangeType(binder.ReturnType, out b);
+                result = b ? r.ToDynamic() : DynamicPrimitive.Null;
+                return b;
             }
             result = DynamicPrimitive.Null;
             return true;

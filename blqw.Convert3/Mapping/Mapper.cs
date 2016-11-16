@@ -35,10 +35,10 @@ namespace blqw
                 return;
             }
 
-            var nv = input as NameValueCollection;
-            if (nv != null)
+            var no = input as NameObjectCollectionBase;
+            if (no != null)
             {
-                _nv = new NameValueEnumerator(nv);
+                _nv = new NameValueEnumerator(no);
                 Error = _nv.Error;
                 _index = 2;
                 return;

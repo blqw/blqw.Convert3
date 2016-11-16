@@ -67,7 +67,7 @@ namespace blqw.Dynamic
             {
                 if ((index >= 0) && (index < _list.Count))
                 {
-                    return _list[index];
+                    return _list[index].ToDynamic();
                 }
                 return null;
             }

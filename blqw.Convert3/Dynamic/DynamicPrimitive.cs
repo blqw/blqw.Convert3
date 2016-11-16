@@ -200,6 +200,11 @@ namespace blqw.Dynamic
         /// <returns> </returns>
         public static implicit operator string(DynamicPrimitive value) => value._value.To<string>();
 
+        public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
+        {
+            result = Null;
+            return true;
+        }
 
         /// <summary>
         /// 返回表示当前对象的字符串。

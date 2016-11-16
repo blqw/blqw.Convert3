@@ -230,16 +230,16 @@ namespace blqw.Dynamic
 
         #region 显示实现接口
 
-        IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator().ToDynamic();
         void IDictionary.Add(object key, object value) => _dict.Add(key, value);
         void IDictionary.Clear() => _dict.Clear();
         bool IDictionary.Contains(object key) => _dict.Contains(key);
-        IDictionaryEnumerator IDictionary.GetEnumerator() => _dict.GetEnumerator();
+        IDictionaryEnumerator IDictionary.GetEnumerator() => _dict.GetEnumerator().ToDynamic();
         bool IDictionary.IsFixedSize => false;
         bool IDictionary.IsReadOnly => false;
-        ICollection IDictionary.Keys => _dict.Keys;
+        ICollection IDictionary.Keys => _dict.Keys.ToDynamic();
         void IDictionary.Remove(object key) => _dict.Remove(key);
-        ICollection IDictionary.Values => _dict.Values;
+        ICollection IDictionary.Values => _dict.Values.ToDynamic();
 
         object IDictionary.this[object key]
         {
