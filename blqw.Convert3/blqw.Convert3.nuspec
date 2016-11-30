@@ -27,6 +27,9 @@
       * 修复`Mapper`类的一个bug
       #### [3.0.4]2016.11.16
       * 优化动态类型的处理
+      #### [3.0.5] 2016.11.30
+      * 优化单值转数组的体验，如：`string s = "abc"; s.To&lt;string[]&gt;();` 将得到一个`new string[]{"abc"}`
+      * 优化接口、抽象类、静态类、泛型定义类的错误信息
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Convert blqw Parse</tags>

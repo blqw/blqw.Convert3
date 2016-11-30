@@ -34,7 +34,6 @@ namespace blqw.Converts
             {
                 throw new ArgumentOutOfRangeException(nameof(outputType), "必须是泛型");
             }
-
             Type[] genericTypes;
             if (IsCompatible(OutputType, outputType, out genericTypes))
             {

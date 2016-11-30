@@ -27,8 +27,7 @@ namespace blqw.Converts
             {
                 return this;
             }
-            if ((OutputType.IsGenericTypeDefinition == false)
-                && (OutputType.IsAssignableFrom(outputType) == false))
+            if (OutputType.IsAssignableFrom(outputType) == false)
             {
                 throw new ArgumentOutOfRangeException(nameof(outputType), $"类型{outputType}不是{OutputType}的子类或实现类");
             }
