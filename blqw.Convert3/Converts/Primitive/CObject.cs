@@ -153,6 +153,23 @@ namespace blqw.Converts
                     Instance = _dynamic = new ExpandoObject();
                     return true;
                 }
+                if (_type.IsInterface)
+                {
+                    _context.AddException($"无法创建该接口的实例({_type})");
+                    return false;
+                }
+                if (_type.IsAbstract)
+                {
+                    if (_type.IsSealed)
+                    {
+                        _context.AddException("无法创建静态类实例");
+                    }
+                    else
+                    {
+                        _context.AddException("无法创建抽象类实例");
+                    }
+                    return false;
+                }
                 try
                 {
                     Instance = Activator.CreateInstance(_type);

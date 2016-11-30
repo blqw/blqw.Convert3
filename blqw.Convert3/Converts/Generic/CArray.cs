@@ -37,18 +37,27 @@ namespace blqw.Converts
                 success = true;
                 return null;
             }
-            
+
+            var convertor = context.Get<T>();
+            var array = new ArrayList();
+            var elementType = convertor.OutputType;
+
             //获取对象的枚举器
             var ee = (input as IEnumerable)?.GetEnumerator()
                      ?? input as IEnumerator; 
             if (ee == null)
             {
-                success = false;
-                return null;
+                var value = convertor.ChangeType(context, input, elementType, out success);
+                if (success == false)
+                {
+                    success = false;
+                    return null;
+                }
+                array.Add(value);
+                success = true;
+                return (T[])array.ToArray(elementType); //输出数组
             }
-            var convertor = context.Get<T>();
-            var array = new ArrayList();
-            var elementType = convertor.OutputType;
+
             while (ee.MoveNext()) //循环转换枚举器中的对象,并构造数组
             {
                 var value = convertor.ChangeType(context, ee.Current, elementType, out success);

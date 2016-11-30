@@ -71,7 +71,10 @@ namespace blqw.Converts
 
             if (ee == null)
             {
-                context.AddException("仅支持DataRow,DataRowView,或实现IEnumerator,IEnumerable,IListSource,IDataReader接口的对象对IList的转换");
+                if (helper.Set(input))
+                {
+                    return helper.Instance;
+                }
                 success = false;
                 return null;
             }

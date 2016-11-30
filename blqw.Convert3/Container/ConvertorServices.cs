@@ -35,6 +35,22 @@ namespace blqw
         /// <returns> </returns>
         protected override Type GetServiceType(PlugIn plugIn, object value) => (value as IConvertor)?.OutputType;
 
+        public override ServiceItem GetServiceItem(Type serviceType)
+        {
+            if (serviceType != null)
+            {
+                if (serviceType.IsGenericTypeDefinition)
+                {
+                    throw new ArgumentOutOfRangeException($"无法为泛型定义类型`{serviceType}`提供转换器");
+                }
+                if (serviceType.IsAbstract && serviceType.IsSealed)
+                {
+                    throw new ArgumentOutOfRangeException($"无法为静态类型`{serviceType}`提供转换器");
+                }
+            }
+            return base.GetServiceItem(serviceType);
+        }
+
         /// <summary>
         /// 类型比较器
         /// </summary>
@@ -86,6 +102,8 @@ namespace blqw
                 }
                 return _Priorities.TryGetValue(type, out i) ? i : 100;
             }
+
+
         }
     }
 }
