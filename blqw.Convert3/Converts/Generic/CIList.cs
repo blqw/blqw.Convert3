@@ -130,7 +130,7 @@ namespace blqw.Converts
         /// <summary>
         /// 泛型 <see cref="IList{T}" /> 构造器
         /// </summary>
-        private struct ListBuilder : IBuilder<ICollection<T>, object>
+        protected struct ListBuilder : IBuilder<ICollection<T>, object>
         {
             /// <summary>
             /// 被构造的实例

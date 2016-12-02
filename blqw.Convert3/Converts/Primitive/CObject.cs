@@ -101,7 +101,7 @@ namespace blqw.Converts
         }
 
 
-        private struct ObjectBuilder : IBuilder<object, KeyValuePair<string, object>>
+        protected struct ObjectBuilder : IBuilder<object, KeyValuePair<string, object>>
         {
             private readonly ConvertContext _context;
             private readonly PropertyHandler[] _properties;

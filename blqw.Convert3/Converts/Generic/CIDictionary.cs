@@ -106,7 +106,7 @@ namespace blqw.Converts
         /// <summary>
         /// <see cref="IDictionary{TKey,TValue}" /> 构造器
         /// </summary>
-        private struct DictionaryBuilder : IBuilder<IDictionary<K, V>, DictionaryEntry>
+        protected struct DictionaryBuilder : IBuilder<IDictionary<K, V>, DictionaryEntry>
         {
             /// <summary>
             /// 键转换器

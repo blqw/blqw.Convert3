@@ -102,7 +102,7 @@ namespace blqw.Converts
         /// <summary>
         /// <seealso cref="DataTable" /> 构造器
         /// </summary>
-        private struct DataTableBuilder : IBuilder<DataTable, object>
+        protected struct DataTableBuilder : IBuilder<DataTable, object>
         {
             /// <summary>
             /// 转换上下文

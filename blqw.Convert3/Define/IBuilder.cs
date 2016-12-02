@@ -3,7 +3,7 @@
     /// <summary>
     /// 对象构造器接口
     /// </summary>
-    internal interface IBuilder<out TInstance, in TValue>
+    public interface IBuilder<out TInstance, in TValue>
     {
         /// <summary>
         /// 被构造的实例

@@ -9,7 +9,7 @@ namespace blqw.Converts
     /// <seealso cref="object" /> 转换器,尝试将json字符串转为object对象
     /// </summary>
     [ExportMetadata("Priority", 1)]
-    public sealed class CJsonObject : CObject
+    public class CJsonObject : CObject
     {
         /// <summary>
         /// 返回指定类型的对象，其值等效于指定字符串对象。

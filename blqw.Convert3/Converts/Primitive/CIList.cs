@@ -127,7 +127,7 @@ namespace blqw.Converts
         /// <summary>
         /// <seealso cref="IList" /> 构造器
         /// </summary>
-        private struct ListBuilder : IBuilder<IList, object>
+        protected struct ListBuilder : IBuilder<IList, object>
         {
             private readonly Type _type;
             private readonly ConvertContext _context;

@@ -91,7 +91,7 @@ namespace blqw.Converts
         /// <summary>
         /// <seealso cref="IDictionary" /> 构造器
         /// </summary>
-        private struct DictionaryBuilder : IBuilder<IDictionary, DictionaryEntry>
+        protected struct DictionaryBuilder : IBuilder<IDictionary, DictionaryEntry>
         {
             private readonly Type _type;
             private readonly ConvertContext _context;

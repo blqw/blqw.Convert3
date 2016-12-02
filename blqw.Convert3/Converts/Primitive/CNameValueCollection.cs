@@ -87,7 +87,7 @@ namespace blqw.Converts
         /// <summary>
         /// <seealso cref="NameValueCollection" /> 转换器
         /// </summary>
-        private struct NVCollectiontBuilder : IBuilder<NameValueCollection, DictionaryEntry>
+        protected struct NVCollectiontBuilder : IBuilder<NameValueCollection, DictionaryEntry>
         {
             private readonly ConvertContext _context;
             private readonly Type _type;

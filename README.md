@@ -124,6 +124,10 @@ fa91eefc-e903-dbcf-394b-0b757987357b : True
 
 
 ## 更新说明 
+#### [3.0.5.1] 2016.12.02
+* 取消对`CJsonObject`的密封类属性
+* 修改对`IBuilder<out TInstance, in TValue>`及其子类的私有属性,改为`public`
+
 #### [3.0.5] 2016.11.30
 * 优化单值转数组的体验，如：`string s = "abc"; s.To<string[]>();` 将得到一个`new string[]{"abc"}`
 * 优化接口、抽象类、静态类、泛型定义类的错误信息
