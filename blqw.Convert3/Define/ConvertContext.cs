@@ -56,7 +56,7 @@ namespace blqw
         public IConvertor Get(Type outputType)
             => (IConvertor)ConvertorProvider?.GetService(outputType)
             ?? ConvertorServices.Container?.GetConvertor(outputType)
-            ?? FailConvertor.NotFound;
+            ?? FailConvertor<object>.NotFound;
 
         /// <summary>
         /// 获取转换器

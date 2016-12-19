@@ -124,6 +124,10 @@ fa91eefc-e903-dbcf-394b-0b757987357b : True
 
 
 ## 更新说明 
+#### [3.0.5.2] 2016.12.19
+* 更新ioc
+* 修复ioc初始化日志中有一条错误的问题
+
 #### [3.0.5.1] 2016.12.02
 * 取消对`CJsonObject`的密封类属性
 * 修改对`IBuilder<out TInstance, in TValue>`及其子类的私有属性,改为`public`

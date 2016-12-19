@@ -35,12 +35,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="blqw.IOC, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\blqw.IOC.1.3.7\lib\net45\blqw.IOC.dll</HintPath>
+    <Reference Include="blqw.IOC, Version=1.3.8.32545, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\blqw.IOC.1.3.8.4\lib\net45\blqw.IOC.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="blqw.Json, Version=3.1.3.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\blqw.Json.3.1.3.1\lib\net45\blqw.Json.dll</HintPath>
+    <Reference Include="blqw.Json, Version=3.1.3.32701, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\blqw.Json.3.1.3.3\lib\net45\blqw.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -84,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\blqw.Convert3\blqw.Convert3.csproj">
-      <Project>{b8ef5156-6262-4d04-a17b-fa06253c4011}</Project>
+      <Project>{B8EF5156-6262-4D04-A17B-FA06253C4011}</Project>
       <Name>blqw.Convert3</Name>
     </ProjectReference>
   </ItemGroup>
