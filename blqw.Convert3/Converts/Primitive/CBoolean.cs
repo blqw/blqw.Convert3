@@ -31,6 +31,8 @@ namespace blqw.Converts
                         case '真':
                         case '是':
                         case '男':
+                        case 'Y':
+                        case 'y':
                             return true;
                         case '0':
                         case 'F':
@@ -40,6 +42,8 @@ namespace blqw.Converts
                         case '假':
                         case '否':
                         case '女':
+                        case 'N':
+                        case 'n':
                             return false;
                         default:
                             break;
