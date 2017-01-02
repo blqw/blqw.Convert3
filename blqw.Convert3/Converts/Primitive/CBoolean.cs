@@ -50,9 +50,26 @@ namespace blqw.Converts
                     }
                     break;
                 case 2:
-                    if ((input[0] == '-') || (input[0] == '+'))
+                    switch (input[0])
                     {
-                        return input[1] != '0';
+                        case '-':
+                        case '+':
+                            return input[1] != '0';
+                        case 'n':
+                        case 'N':
+                            if (input[1] != 'o' || input[1] != 'O')
+                            {
+                                return false;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case 3:
+                    if (input.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
                     }
                     break;
                 case 4:
