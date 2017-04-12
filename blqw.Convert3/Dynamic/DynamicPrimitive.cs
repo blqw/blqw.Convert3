@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,9 +13,12 @@ namespace blqw.Dynamic
     /// <summary>
     /// 基于系统原始类型的动态类型
     /// </summary>
+    [DebuggerDisplay("{" + nameof(_debug) + "}")]
     public class DynamicPrimitive : DynamicObject, IEquatable<object>, IComparable,
         IComparable<object>, IObjectHandle, IObjectReference
     {
+
+        private object _debug => _value ?? "<null>";
         /// <summary>
         /// 表示一个null的动态类型
         /// </summary>
@@ -211,7 +215,7 @@ namespace blqw.Dynamic
         /// </summary>
         /// <returns> 表示当前对象的字符串。 </returns>
         /// <filterpriority> 2 </filterpriority>
-        public override string ToString() => _value.To<string>();
+        public override string ToString() => _value.To<string>() ?? "<null>";
 
         /// <summary>
         /// 作为默认哈希函数。

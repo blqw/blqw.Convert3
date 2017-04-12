@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -11,6 +12,7 @@ namespace blqw.Dynamic
     /// <summary>
     /// 基于 <seealso cref="IList" /> 的动态类型
     /// </summary>
+    [DebuggerDisplay("{" + nameof(_list) + "}")]
     public class DynamicList : DynamicObject, IList, IObjectHandle, IObjectReference, ICustomTypeProvider
     {
         private static readonly IEnumerable<string> _DynamicMemberNames = new List<string> { "Count", "Length" }.AsReadOnly();

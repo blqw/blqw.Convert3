@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -10,6 +11,7 @@ namespace blqw.Dynamic
     /// <summary>
     /// 基于 <seealso cref="object"/> 的动态类型
     /// </summary>
+    [DebuggerDisplay("{" + nameof(_entity) + "}")]
     public class DynamicEntity : DynamicObject, IObjectHandle, IObjectReference, ICustomTypeProvider
     {
         private readonly object _entity;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -11,6 +12,7 @@ namespace blqw.Dynamic
     /// <summary>
     /// 基于 <seealso cref="DataRow" /> 的动态类型
     /// </summary>
+    [DebuggerDisplay("{" + nameof(_row) + "}")]
     public class DynamicDataRow : DynamicObject, IObjectHandle, IObjectReference, ICustomTypeProvider
     {
         private readonly DataRow _row;

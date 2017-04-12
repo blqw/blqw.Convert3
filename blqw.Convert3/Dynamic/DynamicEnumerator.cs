@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -7,6 +8,7 @@ using System.Runtime.Serialization;
 
 namespace blqw.Dynamic
 {
+    [DebuggerDisplay("{" + nameof(_enumerator) + "}")]
     internal class DynamicEnumerator : DynamicEntity, IObjectHandle, IObjectReference, ICustomTypeProvider, IEnumerator
     {
         private IEnumerator _enumerator;
