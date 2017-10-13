@@ -1,0 +1,155 @@
+﻿using System;
+
+namespace blqw.Converts
+{
+    /// <summary>
+    /// 基本转换器,提供基本类型的转换器基类
+    /// </summary>
+    /// <typeparam name="T"> 基本类型泛型 </typeparam>
+    /// <remarks>
+    /// 基本类型的定义: T 是密封类或结构体,不会有被继承的情况
+    /// </remarks>
+    public abstract class BaseConvertor<T> : IConvertor<T>
+    {
+        /// <summary>
+        /// 返回是否应该尝试转换String后再转换
+        /// </summary>
+        protected virtual bool ShouldConvertString => false;
+
+        /// <summary>
+        /// 转换器的输出类型
+        /// </summary>
+        public virtual Type OutputType => typeof(T);
+
+        T IConvertor<T>.ChangeType(IConvertContext context, object input, Type outputType, out bool success)
+            => BaseChangeType(context, input, outputType, out success);
+
+        T IConvertor<T>.ChangeType(IConvertContext context, string input, Type outputType, out bool success)
+            => BaseChangeType(context, input, outputType, out success);
+
+        object IConvertor.ChangeType(IConvertContext context, object input, Type outputType, out bool success)
+            => BaseChangeType(context, input, outputType, out success);
+
+        object IConvertor.ChangeType(IConvertContext context, string input, Type outputType, out bool success)
+            => BaseChangeType(context, input, outputType, out success);
+
+
+        object IServiceProvider.GetService(Type outputType) => GetConvertor(outputType);
+
+
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected T BaseChangeType(IConvertContext context, object input, Type outputType, out bool success)
+        {
+            if ((input == null) || input is DBNull)
+            {
+                return ChangeType(context, input, outputType, out success);
+            }
+            var str = input as string;
+            if (str != null)
+            {
+                return BaseChangeType(context, str, outputType, out success);
+            }
+            success = false;
+            try
+            {
+                //类型相同直接转换
+                if (outputType.IsInstanceOfType(input))
+                {
+                    success = true;
+                    return (T) input;
+                }
+
+                //子类转换逻辑
+                var result = ChangeType(context, input, outputType, out success);
+                if (success)
+                {
+                    return result;
+                }
+                if (ShouldConvertString)
+                {
+                    var snapshot = context.Snapshot();
+                    //尝试转string后转换
+                    str = input.ToString();
+                    context.AddException($"尝试将{input.GetType()}转为字符串 = \"{str}\"");
+                    result = ((IConvertor<T>) this).ChangeType(context, str, outputType, out success);
+                    if (success)
+                    {
+                        snapshot.Recovery();
+                    }
+                    return result;
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+            finally
+            {
+                if (success == false)
+                {
+                    context.AddCastFailException(input, outputType);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected T BaseChangeType(IConvertContext context, string input, Type outputType, out bool success)
+        {
+            T result;
+            var snapshot = context.Snapshot();
+            if (input == null)
+            {
+                //是否可以为null
+                result = ChangeType(context, (object) null, outputType, out success);
+            }
+            else
+            {
+                result = ChangeType(context, input, outputType, out success);
+            }
+            if (success)
+            {
+                snapshot.Recovery();
+            }
+            else
+            {
+                context.AddCastFailException(input, outputType);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 获取子转换器
+        /// </summary>
+        protected virtual IConvertor GetConvertor(Type outputType) => this;
+
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected abstract T ChangeType(IConvertContext context, object input, Type outputType, out bool success);
+
+        /// <summary>
+        /// 返回指定类型的对象，其值等效于指定字符串对象。
+        /// </summary>
+        /// <param name="context"> </param>
+        /// <param name="input"> 需要转换类型的字符串对象 </param>
+        /// <param name="outputType"> 换转后的类型 </param>
+        /// <param name="success"> 是否成功 </param>
+        protected abstract T ChangeType(IConvertContext context, string input, Type outputType, out bool success);
+    }
+}
