@@ -31,7 +31,7 @@ namespace blqw.Converts
             out bool success)
         {
             success = true;
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 return null;
             }

@@ -37,7 +37,7 @@ namespace blqw.Converts
         /// <returns> </returns>
         protected override T? ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 success = true;
                 return null;

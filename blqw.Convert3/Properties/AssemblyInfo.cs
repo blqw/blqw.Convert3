@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
 [assembly: Guid("b8ef5156-6262-4d04-a17b-fa06253c4011")]
 
-// 程序集的版本信息由下列四个值组成: 
+// 程序集的版本信息由下列四个值组成:
 //
 //      主版本
 //      次版本
@@ -39,5 +39,5 @@ using System.Runtime.InteropServices;
 internal static class VersionString
 {
     public const string VERSION = "3.0.5";
-    public const string BUG_FIX = ".4";
+    public const string BUG_FIX = ".5";
 }

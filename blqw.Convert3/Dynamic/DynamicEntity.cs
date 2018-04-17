@@ -24,7 +24,7 @@ namespace blqw.Dynamic
         /// <param name="entity"></param>
         public DynamicEntity(object entity)
         {
-            if (entity == null)
+            if (entity.IsNull())
             {
                 return;
             }

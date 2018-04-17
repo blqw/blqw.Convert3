@@ -97,7 +97,7 @@ namespace blqw.Converts
                 }
             }
 
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 return null;
             }

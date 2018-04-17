@@ -40,7 +40,7 @@ namespace blqw.Dynamic
         /// <param name="value"> </param>
         public DynamicPrimitive(object value)
         {
-            _value = value;
+            _value = value is IObjectReference r ? r.GetRealObject(new StreamingContext()) : value;
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace blqw.Dynamic
         /// <filterpriority> 2 </filterpriority>
         public override bool Equals(object obj)
         {
-            if (obj == null)
+            if (obj is null)
             {
                 return _value == null;
             }
@@ -69,7 +69,7 @@ namespace blqw.Dynamic
             {
                 return true;
             }
-            obj = (obj as IObjectReference)?.GetRealObject(new StreamingContext()) ?? obj; //获取被包装的类型
+            obj = (obj as IObjectReference)?.GetRealObject(default(StreamingContext)) ?? obj; //获取被包装的类型
             if (Equals(_value, obj))
             {
                 return true;
@@ -125,7 +125,7 @@ namespace blqw.Dynamic
         /// </summary>
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            if (_value == null)
+            if (_value is null)
             {
                 result = Null;
                 return false;
@@ -235,7 +235,7 @@ namespace blqw.Dynamic
             {
                 return ReferenceEquals(a, null) ? 0 : 1;
             }
-            if (a._value == null)
+            if (a._value.IsNull())
             {
                 return -1;
             }
