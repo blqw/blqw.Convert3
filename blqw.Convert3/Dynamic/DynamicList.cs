@@ -88,10 +88,6 @@ namespace blqw.Dynamic
         {
             foreach (var item in _list)
             {
-                if (item == null)
-                {
-                    yield return DynamicPrimitive.Null;
-                }
                 yield return item.ToDynamic();
             }
         }

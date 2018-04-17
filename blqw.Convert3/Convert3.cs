@@ -149,7 +149,7 @@ namespace blqw
         {
             if (obj.IsNull())
             {
-                return new DynamicPrimitive(null);
+                return DynamicPrimitive.Null;
             }
             if (obj is IDynamicMetaObjectProvider)
             {
@@ -215,7 +215,7 @@ namespace blqw
         [Export("GetDefaultValue")]
         [ExportMetadata("Priority", ExportComponent.PRIORITY)]
         public static object GetDefaultValue(this Type type)
-        { 
+        {
             if ((type == null)
                 || (type.IsValueType == false) //不是值类型
                 || type.IsGenericTypeDefinition //泛型定义类型
