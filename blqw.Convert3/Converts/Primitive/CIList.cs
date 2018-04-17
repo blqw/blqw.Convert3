@@ -29,7 +29,7 @@ namespace blqw.Converts
         protected override IList ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
             success = true;
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 return null;
             }

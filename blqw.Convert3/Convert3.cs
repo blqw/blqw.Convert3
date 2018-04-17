@@ -147,7 +147,7 @@ namespace blqw
         /// </summary>
         public static dynamic ToDynamic(this object obj)
         {
-            if (obj == null)
+            if (obj.IsNull())
             {
                 return new DynamicPrimitive(null);
             }
@@ -193,7 +193,7 @@ namespace blqw
             {
                 return new DynamicList(list);
             }
-            
+
             var ee = obj as IDictionaryEnumerator ?? obj as IEnumerator ?? (obj as IEnumerable)?.GetEnumerator();
             if (ee != null)
             {
@@ -303,7 +303,7 @@ namespace blqw
             return false;
         }
 
-        /// <summary> 
+        /// <summary>
         /// 全角转半角(DBC case)
         /// </summary>
         /// <param name="input"> 任意字符串 </param>
@@ -758,5 +758,12 @@ namespace blqw
         }
 
         #endregion
+
+        public static bool IsNull(this object value) =>
+            value is null ||
+            value is DBNull ||
+            value.Equals(null) ||
+            value.Equals(DBNull.Value) ||
+            (value is IConvertible c && (c.GetTypeCode() == TypeCode.DBNull || c.GetTypeCode() == TypeCode.Empty));
     }
 }

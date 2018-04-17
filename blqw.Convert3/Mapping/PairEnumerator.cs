@@ -30,7 +30,7 @@ namespace blqw.Mapping
             while (_enumerator.MoveNext())
             {
                 var entry = _enumerator.Current;
-                if (entry == null)
+                if (entry.IsNull())
                 {
                     continue;
                 }

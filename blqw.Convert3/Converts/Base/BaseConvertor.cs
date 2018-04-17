@@ -46,7 +46,7 @@ namespace blqw.Converts
         /// <param name="success"> 是否成功 </param>
         protected T BaseChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 return ChangeType(context, input, outputType, out success);
             }

@@ -32,7 +32,7 @@ namespace blqw.Converts
         /// <returns> </returns>
         protected override T[] ChangeTypeImpl(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if ((input == null) || input is DBNull)
+            if (input.IsNull())
             {
                 success = true;
                 return null;
@@ -44,7 +44,7 @@ namespace blqw.Converts
 
             //获取对象的枚举器
             var ee = (input as IEnumerable)?.GetEnumerator()
-                     ?? input as IEnumerator; 
+                     ?? input as IEnumerator;
             if (ee == null)
             {
                 var value = convertor.ChangeType(context, input, elementType, out success);

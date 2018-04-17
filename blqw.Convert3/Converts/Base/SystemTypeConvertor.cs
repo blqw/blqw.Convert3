@@ -24,7 +24,7 @@ namespace blqw.Converts
         /// <param name="success"> 是否成功 </param>
         protected sealed override T ChangeType(ConvertContext context, object input, Type outputType, out bool success)
         {
-            if (input == null)
+            if (input.IsNull())
             {
                 return ChangeTypeImpl(context, null, outputType, out success);
             }
